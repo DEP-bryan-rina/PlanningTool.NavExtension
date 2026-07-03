@@ -1,0 +1,246 @@
+﻿@page
+@model PlanningTool.NavExtension.Pages.Procurement.IndexModel
+@{
+	ViewData["Title"] = "Procurement Control Center";
+}
+<script>
+	$(document).ready(function () {
+
+		// Select All
+		$("#selectAll").on("change", function () {
+			$(".row-check").prop("checked", this.checked).trigger("change");
+		});
+
+		// Row Check / Uncheck
+		$(document).on("change", ".row-check", function () {
+
+			$("#selectAll").prop(
+				"checked",
+				$(".row-check").length === $(".row-check:checked").length
+			);
+
+			const row = $(this).closest("tr");
+			const outstanding = parseFloat($(this).data("outstanding")) || 0;
+
+			if ($(this).is(":checked")) {
+				row.find(".pd-input")
+					.val(outstanding)
+					.attr("max", outstanding)
+					.show();
+
+				row.find(".pd-text").hide();
+				row.addClass("table-warning");
+				row.find(".btn-tag").show();
+			} else {
+				row.find(".pd-input").hide();
+				row.find(".pd-text").show();
+
+				row.removeClass("table-warning table-danger");
+				row.find(".btn-tag").hide();
+			}
+		});
+
+		// Validate Partial Delivered
+		$(document).on("input", ".pd-input", function () {
+
+			const row = $(this).closest("tr");
+			const max = parseFloat($(this).attr("max")) || 0;
+			const value = parseFloat($(this).val()) || 0;
+
+			if (value > max) {
+				alert("Partial Delivered cannot exceed Outstanding Quantity!");
+				$(this).val(max);
+				row.addClass("table-danger");
+			} else {
+				row.removeClass("table-danger");
+			}
+		});
+
+		// Populate hidden fields from HBL dropdown
+		$("#impexDropdown").on("change", function () {
+
+			const selected = $(this).find(":selected");
+
+			$("#HBLNo").val(selected.data("hbl") || "");
+			$("#ContainerNo").val(selected.data("container") || "");
+			$("#ParamCETA").val(selected.data("eta") || "");
+		});
+
+		// Initialize Select2
+		$("#impexDropdown").select2();
+	});
+</script>
+
+<form method="post">
+	<div class="accordion" id="ImPexAccordion">
+
+		<div class="accordion-item">
+			<h3 class="accordion-header" id="headingProcurement">
+				<button class="accordion-button py-2 px-3 small"
+						type="button"
+						data-bs-toggle="collapse"
+						data-bs-target="#collapseProcurement"
+						aria-expanded="true"
+						aria-controls="collapseProcurement">
+					General
+				</button>
+			</h3>
+
+			<div id="collapseProcurement"
+				 class="accordion-collapse collapse show"
+				 aria-labelledby="headingProcurement"
+				 data-bs-parent="#ImPexAccordion">
+
+				<div class="accordion-body">
+					<div class="row">
+						<div class="col-md-4">
+							<div class="d-flex align-items-center gap-2">
+
+								<select id="impexDropdown"
+										name="ImpexID"
+										class="form-control form-control-sm"
+										style="max-width:300px;"
+										required>
+									<option value="">Search HBL No</option>
+									@foreach (var item in Model.ImpexList)
+									{
+										<option value="@item.PK_ptImpexID"
+												data-hbl="@item._ptHBLNo"
+												data-container="@item._ptContainerNo"
+												data-eta="@item._ptContainerETA?.ToString("yyyy-MM-dd")">
+											@item._ptHBLNo
+										</option>
+									}
+								</select>
+								<button type="submit"
+										asp-page-handler="Tag"
+										class="btn btn-primary btn-sm">
+									Tagged
+								</button>
+
+							</div>
+							<input type="hidden" id="HBLNo" name="HBLNo">
+							<input type="hidden" id="ContainerNo" name="ContainerNo">
+							<input type="hidden" id="ParamCETA" name="ParamCETA">
+						</div>
+					</div>
+				</div>
+
+			</div>
+		</div>
+	</div>
+	@* Table display *@
+	<div style="max-height: 700px; overflow-y:auto; font-size:0.75rem; line-height:1.2;">
+		<table class="table table-bordered table-hover table-sm mb-0">
+			<thead class="sticky-top bg-white" style="font-size:0.75rem;">
+
+				<tr class="data-row">
+					<th><input type="checkbox" id="selectAll" /></th>
+					<th>No</th>
+					<th>PO No</th>
+					<th>Vendor</th>
+					<th>Item Code</th>
+					<th>Description</th>
+					<th>NAV Outstanding Qty</th>
+					@* Display Information Header from Procurement Table *@
+					<th>Balance Qty</th>
+					<th>Partial Delivered</th>
+					<th>HBL No</th>
+					<th>Container No</th>
+					<th>Container ETA</th>
+					<th>Remarks</th>
+					<th>Action</th>
+				</tr>
+			</thead>
+			<tbody style="font-size:0.75rem;">
+				@{
+					int counter = 1;
+				}
+				@if (Model.ProcurementList != null && Model.ProcurementList.Any())
+				{
+					@foreach (var item in Model.ProcurementList)
+					{
+						<tr>
+							<td>
+								<input type="checkbox"
+									   class="row-check"
+									   name="SelectedRows"
+									   value="@($"{item.IDDocType}|{item.IDDocNo}|{item.IDLineNo}|{item.ItemCode}")"
+									   data-pd="@item.ptPartialDelivered"
+									   data-outstanding="@item.OutstandingQty"
+								@(!string.IsNullOrEmpty(item.ptHBLNo) && item.ptPartialDelivered == item.OutstandingQty ? "disabled" : "") />
+							</td>
+
+							<td>@counter</td> <!-- ✅ NEW COLUMN -->
+							<td>@item.IDDocNo</td>
+							<td>@item.VendorName</td>
+							<td>@item.ItemCode</td>
+							<td>@item.ItemDescription</td>
+							<td>@item.OutstandingQty</td>
+							@* Display Information from Procurement Table *@
+							<td>@item.ptBalanceQty</td>
+							<td>
+								<span class="pd-text">@item.ptPartialDelivered</span>
+
+								<input type="number"
+									   class="form-control form-control-sm pd-input"
+									   name="PartialDeliveredValues[@($"{item.IDDocType}|{item.IDDocNo}|{item.IDLineNo}|{item.ItemCode}")]"
+									   value="@item.ptPartialDelivered"
+									   max="@item.OutstandingQty"
+									   min="0"
+									   step="0.01"
+									   style="display:none; width:90px;" />
+
+							</td>
+							<td>@item.ptHBLNo</td>
+							<td>@item.ptContainerNo</td>
+							<td>@item.ptContainerETA?.ToString("yyyy-MM-dd")</td>
+							<td>@item.ptRemarks</td>
+							<td>
+								@if (!string.IsNullOrEmpty(item.ptHBLNo))
+								{
+									<button type="submit"
+											asp-page-handler="Untag"
+											name="action"
+											value="untag|@($"{item.IDDocType}|{item.IDDocNo}|{item.IDLineNo}|{item.ItemCode}|{item.ptHBLNo}|{item.ptContainerETA}")"
+											formnovalidate
+											style="border:none; background:none; cursor:pointer;"
+											title="Untag"
+											onclick="return confirm('Are you sure you want to untag this PO @item.IDDocNo?');">
+
+										<i class="fa-solid fa-link-slash text-danger"></i>
+
+									</button>
+								}
+							</td>
+						</tr>
+						counter++;
+					}
+				}
+				else
+				{
+
+				}
+
+			</tbody>
+		</table>
+	</div>
+	<div class="card-footer">
+		<div class="d-flex justify-content-between align-items-center">
+			<!-- LEFT -->
+			<span>
+				Total Records:
+				<strong>@Model.ProcurementList.Count</strong>
+			</span>
+
+		</div>
+	</div>
+</form>
+
+@section Scripts {
+	<script>
+		$(document).ready(function () {
+		$('#impexDropdown').select2();
+		});
+	</script>
+}

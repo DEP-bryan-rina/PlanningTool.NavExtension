@@ -1,0 +1,599 @@
+html {
+  font-size: 14px;
+}
+
+@media (min-width: 768px) {
+  html {
+    font-size: 16px;
+  }
+}
+
+.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
+  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+}
+
+html {
+  position: relative;
+  min-height: 100%;
+}
+
+body {
+  margin-bottom: 60px;
+}
+
+.form-floating > .form-control-plaintext::placeholder, .form-floating > .form-control::placeholder {
+  color: var(--bs-secondary-color);
+  text-align: end;
+}
+
+.form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
+  text-align: start;
+}
+
+/* Container */
+.erp-card {
+    background-color: #f3f3f3;
+    border: 1px solid #cfcfcf;
+    padding: 15px;
+    border-radius: 3px;
+}
+
+/* Section title */
+.erp-title {
+    font-weight: 600;
+    font-size: 14px;
+    margin-bottom: 10px;
+}
+
+/* Form layout */
+.erp-form {
+    display: grid;
+    grid-template-columns: 150px 250px 40px 150px 250px;
+    row-gap: 8px;
+    column-gap: 10px;
+    align-items: center;
+}
+
+/* Labels */
+.erp-label {
+    font-size: 13px;
+    color: #333;
+}
+
+/* Inputs */
+.erp-input {
+    height: 28px;
+    padding: 3px 6px;
+    font-size: 13px;
+    border: 1px solid #bfbfbf;
+    border-radius: 2px;
+    background-color: #fff;
+}
+
+/* Small indicator (blue numbers) */
+.erp-indicator {
+    font-size: 12px;
+    color: #0078d4;
+}
+
+/* Full width input */
+.erp-full {
+    grid-column: span 2;
+}
+
+/* Container */
+.erp-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    background-color: #f7f7f7;
+}
+
+    /* Header */
+    .erp-table th {
+        background-color: #e6e6e6;
+        color: #333;
+        font-weight: 600;
+        text-align: left;
+        padding: 6px 8px;
+        border: 1px solid #d0d0d0;
+        white-space: nowrap;
+    }
+
+    /* Body cells */
+    .erp-table td {
+        padding: 6px 8px;
+        border: 1px solid #e0e0e0;
+        background-color: #ffffff;
+    }
+
+    /* Alternate row color */
+    .erp-table tbody tr:nth-child(even) td {
+        background-color: #f2f2f2;
+    }
+
+    /* Hover effect (like NAV) */
+    .erp-table tbody tr:hover td {
+        background-color: #dbeafe;
+        cursor: pointer;
+    }
+
+    /* Compact look */
+    .erp-table td,
+    .erp-table th {
+        line-height: 1.2;
+    }
+
+/* Optional: truncate long text */
+.erp-truncate {
+    max-width: 180px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+/* NAV-style theme for NAVPlanningTool */
+:root {
+    --nav-blue: #0078d4;
+    --nav-dark: #005a9e;
+    --bg: #f4f6f8;
+    --panel-bg: #ffffff;
+    --muted: #fafafa;
+}
+
+/* Reset / base */
+* {
+    box-sizing: border-box
+}
+
+html, body {
+    height: 100%
+}
+
+body {
+    font-family: "Segoe UI", Tahoma, Arial, sans-serif;
+    font-size: 14px;
+    margin: 0;
+    background: var(--bg);
+    color: #222;
+}
+
+/* App shell */
+.app-container {
+    display: flex;
+    min-height: 100vh;
+}
+
+/* Sidebar */
+.side-panel {
+    width: 260px;
+    background: linear-gradient(180deg,var(--panel-bg),#fafafa);
+    border-right: 1px solid rgba(0,0,0,0.06);
+    display: flex;
+    flex-direction: column;
+    transition: width .2s ease;
+    z-index: 2;
+}
+
+/* Sidebar header (brand) */
+.sidebar-header {
+    background: var(--nav-blue);
+    color: #fff;
+    padding: 18px 16px;
+    font-weight: 600;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 1px 0 rgba(0,0,0,0.04) inset;
+}
+
+    /* Optional logo square */
+    .sidebar-header .logo {
+        width: 34px;
+        height: 30px;
+        background: rgba(255,255,255,0.12);
+        border-radius: 6px;
+        display: inline-block;
+    }
+
+/* Navigation list */
+.nav-menu {
+    margin: 0;
+    padding: 10px 0;
+    list-style: none;
+    flex: 1 1 auto;
+    overflow: auto;
+}
+
+    .nav-menu li {
+        margin: 0;
+    }
+
+    .nav-menu a {
+        display: block;
+        padding: 10px 16px;
+        color: #333;
+        text-decoration: none;
+        border-left: 4px solid transparent;
+        transition: background .12s, border-color .12s, color .12s;
+        font-size: 14px;
+    }
+
+        .nav-menu a:hover {
+            background: rgba(3, 169, 244, 0.06);
+            color: var(--nav-dark);
+        }
+
+        .nav-menu a.active,
+        .nav-menu a[aria-current="page"] {
+            background: linear-gradient(90deg, rgba(0,120,212,0.08), rgba(0,120,212,0.03));
+            color: var(--nav-blue);
+            border-left-color: var(--nav-blue);
+            font-weight: 600;
+        }
+
+/* Group headings in sidebar */
+.nav-section {
+    padding: 10px 16px;
+    font-size: 12px;
+    text-transform: uppercase;
+    color: var(--muted);
+    letter-spacing: 0.04em;
+    color: var(--nav-blue);
+}
+
+/* Main wrapper holds topbar, content, footer */
+.main-wrapper {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+/* Topbar */
+.topbar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 16px;
+    background: #fff;
+    border-bottom: 1px solid rgba(0,0,0,0.06);
+    box-shadow: 0 1px 0 rgba(0,0,0,0.02);
+    z-index: 1;
+}
+
+.topbar-title {
+    font-weight: 600;
+    color: #222;
+}
+
+/* Content area */
+.content {
+    padding: 5px;
+    background: transparent;
+    flex: 1 1 auto;
+}
+
+.nav-body {
+    background: var(--panel-bg);
+    border-radius: 6px;
+    padding: 18px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+}
+
+/* Sidebar footer inside side-panel (sticky bottom) */
+.side-footer {
+    padding: 12px 16px;
+    font-size: 13px;
+    color: #fff;
+    border-top: 1px solid rgba(0,0,0,0.04);
+    background: linear-gradient(180deg, transparent, rgba(0,0,0,0.01));
+    background: var(--nav-blue);
+}
+
+/* Global footer (bottom of main area) */
+.nav-footer {
+    color: var(--nav-blue);
+    padding: 10px 16px;
+    font-size: 13px;
+    text-align: center;
+}
+
+/* Responsive: collapse sidebar on small screens */
+@media (max-width:991.98px) {
+    .side-panel {
+        position: fixed;
+        left: -280px;
+        top: 0;
+        bottom: 0;
+        width: 260px;
+        box-shadow: 2px 0 8px rgba(0,0,0,0.12);
+        transition: left .18s ease;
+    }
+
+        .side-panel.open {
+            left: 0;
+        }
+
+    .main-wrapper {
+        margin-left: 0;
+    }
+}
+
+/* Utility */
+.btn-link {
+    cursor: pointer
+}
+
+
+
+/* ===============================
+   Base Card Typography
+=============================== */
+.card-header,
+.card-body,
+.card-footer {
+    font-family: "Segoe UI", Tahoma, Arial, sans-serif;
+    font-size: 12px;
+    line-height: 1.3;
+    color: #2b2b2b;
+}
+
+/* ===============================
+   Header
+=============================== */
+.card-header {
+    background-color: #f3f2f1;
+    border-bottom: 1px solid #d1d1d1;
+    padding: 4px 8px;
+    font-weight: 600;
+}
+
+/* ===============================
+   Body
+=============================== */
+.card-body {
+    background-color: #ffffff;
+}
+
+    /* Table */
+    .card-body table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+        .card-body table thead th {
+            background-color: #f3f2f1;
+            color: #323130;
+            font-weight: 600;
+            text-align: left;
+            padding: 4px 8px;
+            /*border-bottom: 1px solid #d1d1d1;*/
+        }
+
+        .card-body table tbody td {
+            padding: 3px 8px;
+            /*border-bottom: 1px solid #ececec;*/
+        }
+
+        .card-body table tbody tr:hover {
+            background-color: #f5f9ff;
+        }
+
+        .card-body table tbody tr.selected {
+            background-color: #cce4ff;
+        }
+
+    /* Grid tweaks */
+    .card-body .text-end {
+        text-align: right;
+    }
+
+    .card-body table td,
+    .card-body table th {
+        white-space: nowrap;
+    }
+
+/* ===============================
+   Footer
+=============================== */
+.card-footer {
+    background-color: #f3f2f1;
+    border-top: 1px solid #d1d1d1;
+    padding: 4px 8px;
+}
+
+    /* ===============================
+   Links (All Sections)
+=============================== */
+    .card-header a,
+    .card-body a,
+    .card-footer a {
+        /*color: #0063b1;*/
+        text-decoration: none;
+    }
+
+        .card-header a:hover,
+        .card-body a:hover,
+        .card-footer a:hover {
+            text-decoration: underline;
+        }
+
+    /* ===============================
+   Inputs (All Sections)
+=============================== */
+    .card-header input,
+    .card-header select,
+    .card-header textarea,
+    .card-body input,
+    .card-body select,
+    .card-body textarea,
+    .card-footer input,
+    .card-footer select,
+    .card-footer textarea {
+        font-family: "Segoe UI", Tahoma, Arial, sans-serif;
+        font-size: 12px;
+        padding: 3px 6px;
+        border: 1px solid #c8c8c8;
+        border-radius: 2px;
+        color: #2b2b2b;
+        background-color: #ffffff;
+        box-sizing: border-box;
+    }
+
+    /* Compact textarea */
+    .card-body textarea,
+    .card-header textarea,
+    .card-footer textarea {
+        resize: vertical;
+        min-height: 24px;
+        line-height: 1.3;
+    }
+
+        /* Focus */
+        .card-header input:focus,
+        .card-header select:focus,
+        .card-header textarea:focus,
+        .card-body input:focus,
+        .card-body select:focus,
+        .card-body textarea:focus,
+        .card-footer input:focus,
+        .card-footer select:focus,
+        .card-footer textarea:focus {
+            outline: none;
+            border-color: #0078d4;
+            box-shadow: 0 0 0 1px #0078d4;
+        }
+
+    /* ===============================
+   Buttons (All Sections)
+=============================== */
+    .card-header button,
+    .card-body button,
+    .card-footer button {
+        font-family: "Segoe UI", Tahoma, Arial, sans-serif;
+        font-size: 12px;
+        padding: 3px 10px;
+        border: 1px solid #c8c8c8;
+        border-radius: 2px;
+        background-color: #f3f2f1;
+        color: #2b2b2b;
+        cursor: pointer;
+        line-height: 1.3;
+        margin-top: 4px;
+    }
+
+        /* Active */
+        .card-header button:active,
+        .card-body button:active,
+        .card-footer button:active {
+            background-color: #d6d6d6;
+            border-color: #8a8a8a;
+        }
+
+        /* Focus */
+        .card-header button:focus,
+        .card-body button:focus,
+        .card-footer button:focus {
+            outline: none;
+            border-color: #0078d4;
+            box-shadow: 0 0 0 1px #0078d4;
+        }
+
+    /* Primary button */
+    .card-header .btn-primary,
+    .card-body .btn-primary,
+    .card-footer .btn-primary {
+        background-color: #0078d4;
+        color: #ffffff;
+        border-color: #0078d4;
+    }
+
+    /* Success button */
+    .card-header .btn-success,
+    .card-body .btn-success,
+    .card-footer .btn-success {
+        background-color: #107c10;
+        color: #ffffff;
+        border-color: #107c10;
+    }
+
+    /* Danger button */
+    .card-header .btn-danger,
+    .card-body .btn-danger,
+    .card-footer .btn-danger {
+        background-color: #d13438;
+        color: #ffffff;
+        border-color: #d13438;
+    }
+
+.card-header .btn-primary:hover,
+.card-body .btn-primary:hover {
+    background-color: #106ebe;
+    border-color: #106ebe;
+}
+
+/* Button spacing */
+.card-header button + button,
+.card-body button + button,
+.card-footer button + button {
+    margin-left: 4px;
+}
+/* ===============================
+   Labels (Header / Body / Footer)
+=============================== */
+.card-header label,
+.card-body label,
+.card-footer label {
+    font-family: "Segoe UI", Tahoma, Arial, sans-serif;
+    font-size: 12px;
+    color: #2b2b2b;
+    margin-right: 4px;
+    display: inline-block;
+    line-height: 1.3;
+}
+
+/* Optional: spacing when label is above input */
+.card-header label,
+.card-body label,
+.card-footer label {
+    margin-bottom: 2px;
+}
+
+/* Optional: make labels slightly muted (NAV feel) */
+.card-footer label {
+    color: #605e5c; /* subtle gray */
+}
+
+.pl_page-title {
+    font-size: 20px;
+    color: #1a73e8; /* softer modern blue */
+    font-weight: 400;
+}
+/* Default sidebar */
+.side-panel {
+    width: 250px;
+    transition: all 0.3s ease;
+}
+
+    /* Hidden state */
+    .side-panel.collapsed {
+        margin-left: -250px;
+    }
+
+/* Expand content when sidebar hidden */
+.main-wrapper {
+    transition: margin-left 0.3s ease;
+}
+
+    .main-wrapper.expanded {
+        margin-left: 0 !important;
+    }
+
+.app-container {
+    display: flex;
+}
+
+.main-wrapper {
+    flex: 1;
+}

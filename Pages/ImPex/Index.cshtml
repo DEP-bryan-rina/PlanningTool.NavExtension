@@ -1,0 +1,159 @@
+﻿@page
+@model PlanningTool.NavExtension.Pages.ImPex.IndexModel
+@{
+	ViewData["Title"] = "ImPex Control Center";
+}
+
+<div class="accordion" id="ImPexAccordion">
+
+	<div class="accordion-item">
+		<h3 class="accordion-header" id="headingImPex">
+			<button class="accordion-button py-2 px-3 small"
+					type="button"
+					data-bs-toggle="collapse"
+					data-bs-target="#collapseImPex"
+					aria-expanded="true"
+					aria-controls="collapseImPex">
+				General
+			</button>
+		</h3>
+
+		<div id="collapseImPex"
+			 class="accordion-collapse collapse show"
+			 aria-labelledby="headingImPex"
+			 data-bs-parent="#ImPexAccordion">
+
+			<div class="accordion-body">
+				<div class="row">
+
+					<form method="post" asp-page-handler="Save">
+						<input type="hidden" asp-for="Impex.PK_ptImpexID" />
+						<div class="row">
+
+							<div class="col-md-4">
+								<label class="form-label">
+									HBL No: <span class="text-danger">*</span>
+								</label>
+								<input asp-for="Impex._ptHBLNo" class="form-control" required />
+
+								<div class="mt-3">
+									<label class="form-label">
+										Container ETA: <span class="text-danger">*</span>
+									</label>
+									<input asp-for="Impex._ptContainerETA" class="form-control" required />
+								</div>
+							</div>
+
+							<div class="col-md-4">
+								<label class="form-label">
+									Container No: <span class="text-danger">*</span>
+								</label>
+								<input asp-for="Impex._ptContainerNo" class="form-control" required />
+
+								<div class="mt-3">
+									<label class="form-label">
+										Remarks:
+									</label>
+									<input asp-for="Impex._ptRemarks" class="form-control" />
+								</div>
+							</div>
+
+						</div>
+
+						<div class="mt-3">
+							@if (Model.Impex.PK_ptImpexID == 0)
+							{
+								<button type="submit" class="btn btn-primary btn-sm">
+									Add New
+								</button>
+							}
+							else
+							{
+								<button type="submit" class="btn btn-success btn-sm">
+									Update
+								</button>
+
+								<a asp-page="./Index"
+								   class="btn btn-secondary btn-sm">
+									Cancel
+								</a>
+							}
+
+						</div>
+					</form>
+
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+<!-- TABLE SHOULD BE OUTSIDE FORM -->
+<table class="table table-bordered table-hover table-sm">
+	<thead>
+		<tr>
+			<th class="text-center">No</th>
+			<th>HBL No</th>
+			<th>Container No</th>
+			<th>ETA</th>
+			<th>Remarks</th>
+			<th>Created By</th>
+			<th>Modified By</th>
+			<th class="text-center">Status</th>
+			<th class="text-center">Actions</th>
+		</tr>
+	</thead>
+	<tbody style="font-size:0.75rem;">
+		@{
+			int counter = 1;
+		}
+
+		@if (Model.ImpexList != null && Model.ImpexList.Any())
+		{
+			foreach (var item in Model.ImpexList)
+			{
+				<tr>
+					<form method="post" asp-page-handler="Edit">
+
+						<td class="text-center">@counter</td> <!-- ✅ NEW COLUMN -->
+						<td>@item._ptHBLNo</td>
+						<td>@item._ptContainerNo</td>
+						<td>@item._ptContainerETA?.ToString("yyyy-MM-dd")</td>
+						<td class="erp-truncate">@item._ptRemarks</td>
+						<td>@item._ptCreatedBy</td>
+						<td>@item._ptModifiedBy</td>
+						<td class="text-center align-middle">
+							@if (item._ptStatus == 1)
+							{
+								<span class="badge bg-success">Tagged</span>
+							}
+							else
+							{
+								<span class="badge bg-primary">For Tagging</span>
+							}
+						</td>
+						<td class="text-center">
+							@if (item._ptStatus == 1)
+							{
+								<a asp-page="./Index"
+								   asp-route-id="@item.PK_ptImpexID"
+								   class="btn btn-warning btn-sm"
+								   onclick="return confirm('Are you sure you want to update HBL NO: @item._ptHBLNo with corresponding PO tag?');">
+									Edit
+								</a>
+							}
+							else
+							{
+								<a asp-page="./Index"
+								   asp-route-id="@item.PK_ptImpexID"
+								   class="btn btn-warning btn-sm">
+									Edit
+								</a>
+							}
+						</td>
+					</form>
+				</tr>
+				counter++;
+			}
+		}		
+	</tbody>
+</table>

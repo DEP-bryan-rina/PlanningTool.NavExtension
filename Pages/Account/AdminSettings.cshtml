@@ -1,0 +1,159 @@
+﻿@page
+@model PlanningTool.NavExtension.Pages.Account.AdminSettingsModel
+@{
+	ViewData["Title"] = "Admin Settings";
+}
+<div class="accordion" id="emailNotificationAccordion">
+
+	<div class="accordion-item">
+		<h2 class="accordion-header" id="headingEmailNotification">
+			<button class="accordion-button py-2 px-3 small"
+					type="button"
+					data-bs-toggle="collapse"
+					data-bs-target="#collapseEmailNotification"
+					aria-expanded="true"
+					aria-controls="collapseEmailNotification">
+				Email Notification Setting
+			</button>
+		</h2>
+
+		<div id="collapseEmailNotification"
+			 class="accordion-collapse collapse show"
+			 aria-labelledby="headingEmailNotification"
+			 data-bs-parent="#emailNotificationAccordion">
+
+			<div class="accordion-body">
+
+				<div class="row">
+
+					<!-- Left Side: Form -->
+					<div class="col-md-3">
+						<div class="card p-3">
+
+							<form method="post" asp-page-handler="Save">
+
+								<input type="hidden"
+									   asp-for="EmailNotification._PK_ptEmailNotification_ID" />
+
+								<div class="mb-3">
+
+									<label class="form-label">
+										Email Address <span class="text-danger">*</span>
+									</label>
+
+									<input asp-for="EmailNotification._ptEmailAddress"
+										   class="form-control"
+										   type="email"
+										   required />
+
+								</div>
+
+								<div class="form-check mb-2">
+									<input asp-for="EmailNotification._ptImPex"
+										   class="form-check-input" />
+									<label class="form-check-label">
+										ImPex Notification?
+									</label>
+								</div>
+
+								<div class="form-check mb-3">
+									<input asp-for="EmailNotification._ptProcurement"
+										   class="form-check-input" />
+									<label class="form-check-label">
+										Procurement Notification?
+									</label>
+								</div>
+
+								<div class="mb-3">
+
+									<label class="form-label">
+										User Type <span class="text-danger">*</span>
+									</label>
+
+									<select asp-for="EmailNotification._ptUserType"
+											class="form-select"
+											required>
+										<option value="">-- Select --</option>
+										<option value="Admin">Admin</option>
+										<option value="User">User</option>
+										<option value="Notification">Notification</option>
+									</select>
+
+								</div>
+
+								@if (Model.EmailNotification._PK_ptEmailNotification_ID == 0)
+								{
+									<button type="submit" class="btn btn-primary">
+										Add New
+									</button>
+								}
+								else
+								{
+									<button type="submit" class="btn btn-success">
+										Update
+									</button>
+
+									<a asp-page="./AdminSettings"
+									   class="btn btn-secondary">
+										Cancel
+									</a>
+								}
+
+							</form>
+
+						</div>
+					</div>
+
+					<!-- Right Side: Table -->
+					<div class="col-md-9">                        
+						<table class="table table-bordered table-hover table-sm">
+							<thead>
+								<tr>
+									<th>Email Address</th>
+									<th>ImPex Notification</th>
+									<th>Procurement Notification</th>
+									<th>User Type</th>
+									<th width="140">Action</th>
+								</tr>
+							</thead>
+
+							<tbody>
+								@foreach (var item in Model.NotificationList)
+								{
+									<tr>
+										<td>@item._ptEmailAddress</td>
+										<td>@(item._ptImPex ? "Yes" : "No")</td>
+										<td>@(item._ptProcurement ? "Yes" : "No")</td>
+										<td>@item._ptUserType</td>
+
+										<td>
+											<a asp-page="./AdminSettings"
+											   asp-route-id="@item._PK_ptEmailNotification_ID"
+											   class="btn btn-warning btn-sm">
+												Edit
+											</a>
+
+											<a asp-page-handler="Delete"
+											   asp-route-id="@item._PK_ptEmailNotification_ID"
+											   class="btn btn-danger btn-sm"
+											   onclick="return confirm('Are you sure you want to delete the record for @item._ptEmailAddress?')">
+												Delete
+											</a>
+										</td>
+									</tr>
+								}
+							</tbody>
+
+						</table>
+
+                        
+					</div>
+
+				</div>
+
+			</div>
+		</div>
+	</div>
+
+</div>
+

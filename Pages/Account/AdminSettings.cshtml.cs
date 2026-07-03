@@ -1,0 +1,129 @@
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.RazorPages;
+using PlanningTool.NavExtension.Data;
+using PlanningTool.NavExtension.Models;
+
+namespace PlanningTool.NavExtension.Pages.Account
+{
+    public class AdminSettingsModel : PageModel
+    {
+        private readonly AppDbContext _context;
+
+        public AdminSettingsModel(AppDbContext context)
+        {
+            _context = context;
+        }
+
+        [BindProperty] public EmailNotication EmailNotification { get; set; } = new();
+
+        public List<EmailNotication> NotificationList { get; set; } = new();
+
+        public void OnGet(int? id)
+        {
+            NotificationList = _context.EmailNotifications.ToList();
+
+            if (id.HasValue)
+            {
+                EmailNotification = _context.EmailNotifications
+                    .FirstOrDefault(x => x._PK_ptEmailNotification_ID == id.Value)
+                    ?? new EmailNotication();
+            }
+        }
+
+        public IActionResult OnPostSave()
+        {
+            try
+            {
+                // ADD
+                if (EmailNotification._PK_ptEmailNotification_ID == 0)
+                {
+                    bool emailExists = _context.EmailNotifications
+                        .Any(x => x._ptEmailAddress == EmailNotification._ptEmailAddress);
+
+                    if (emailExists)
+                    {
+                        TempData["ErrorMessage"] = "Email address already exists.";
+                        NotificationList = _context.EmailNotifications.ToList();
+                        return Page();
+                    }
+
+                    EmailNotification._ptStatus = "Active";
+                    EmailNotification._ptCreatedDate = DateTime.Now;
+                    EmailNotification._ptUpdatedDate = null;
+
+
+                    _context.EmailNotifications.Add(EmailNotification);
+
+                    try
+                    {
+                        _context.SaveChanges();
+                    }
+                    catch (Exception ex)
+                    {
+                        TempData["ErrorMessage"] = ex.InnerException?.Message ?? ex.Message;
+
+                        NotificationList = _context.EmailNotifications.ToList();
+                        return Page();
+                    }
+
+                    TempData["SuccessMessage"] = EmailNotification._ptEmailAddress + "added successfully";
+                }
+                // UPDATE
+                else
+                {
+                    var existing = _context.EmailNotifications
+                        .FirstOrDefault(x => x._PK_ptEmailNotification_ID ==
+                                             EmailNotification._PK_ptEmailNotification_ID);
+
+                    if (existing != null)
+                    {
+                        bool emailExists = _context.EmailNotifications.Any(x =>
+                            x._ptEmailAddress == EmailNotification._ptEmailAddress &&
+                            x._PK_ptEmailNotification_ID != EmailNotification._PK_ptEmailNotification_ID);
+
+                        if (emailExists)
+                        {
+                            TempData["ErrorMessage"] = "Email address already exists.";
+                            NotificationList = _context.EmailNotifications.ToList();
+                            return Page();
+                        }
+
+                        existing._ptEmailAddress = EmailNotification._ptEmailAddress;
+                        existing._ptImPex = EmailNotification._ptImPex;
+                        existing._ptProcurement = EmailNotification._ptProcurement;
+                        existing._ptUserType = EmailNotification._ptUserType;
+                        existing._ptUpdatedDate = DateTime.Now;
+
+
+                        _context.SaveChanges();
+
+                        TempData["SuccessMessage"] = existing._ptEmailAddress + " updated successfully";
+                    }
+                }
+
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = "An error occurred: " + ex.Message;
+                NotificationList = _context.EmailNotifications.ToList();
+                return Page();
+            }
+            return RedirectToPage();
+        }
+
+        public IActionResult OnGetDelete(int id)
+        {
+            var data = _context.EmailNotifications
+                .FirstOrDefault(x => x._PK_ptEmailNotification_ID == id);
+
+            if (data != null)
+            {
+                _context.EmailNotifications.Remove(data);
+                _context.SaveChanges();
+            }
+
+            TempData["Success"] = "Deleted successfully";
+            return RedirectToPage();
+        }
+    }
+}
