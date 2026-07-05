@@ -597,3 +597,15 @@ body {
 .main-wrapper {
     flex: 1;
 }
+
+
+.nav-link.active {
+    background: #0078d4;
+    color: black !important;
+    border-radius: 6px;
+    font-weight: 600;
+}
+
+.nav-link:hover {
+    background: #f3f7fb;
+}

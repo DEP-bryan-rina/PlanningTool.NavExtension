@@ -3,7 +3,42 @@
 @{
 	ViewData["Title"] = "ImPex Control Center";
 }
+<script>
+	async function checkHblExists() {
 
+		const hblNo = document.getElementById("HBLNo").value.trim();
+		const btnAdd = document.getElementById("btnAdd");
+		const msg = document.getElementById("hblMessage");
+
+		if (!hblNo) {
+			msg.innerHTML = "";
+			if (btnAdd) btnAdd.disabled = false;
+			return;
+		}
+
+		const response = await fetch(
+			`?handler=CheckHbl&hblNo=${encodeURIComponent(hblNo)}`
+		);
+
+		const exists = await response.json();
+
+		if (exists) {
+			msg.innerHTML = "⚠ HBL No already exists.";
+			msg.style.color = "red";
+
+			if (btnAdd) {
+				btnAdd.disabled = true;
+			}
+		} else {
+			msg.innerHTML = "✓ HBL No available.";
+			msg.style.color = "green";
+
+			if (btnAdd) {
+				btnAdd.disabled = false;
+			}
+		}
+	}
+</script>
 <div class="accordion" id="ImPexAccordion">
 
 	<div class="accordion-item">
@@ -25,6 +60,7 @@
 
 			<div class="accordion-body">
 				<div class="row">
+					
 
 					<form method="post" asp-page-handler="Save">
 						<input type="hidden" asp-for="Impex.PK_ptImpexID" />
@@ -34,13 +70,20 @@
 								<label class="form-label">
 									HBL No: <span class="text-danger">*</span>
 								</label>
-								<input asp-for="Impex._ptHBLNo" class="form-control" required />
+								<input asp-for="Impex._ptHBLNo"
+									   id="HBLNo"
+									   class="form-control w-24 h-8 text-sm"
+									   onblur="checkHblExists()"
+									   required />
+
+								<small id="hblMessage"></small>
+
 
 								<div class="mt-3">
 									<label class="form-label">
-										Container ETA: <span class="text-danger">*</span>
+										Dedon ETA: <span class="text-danger">*</span>
 									</label>
-									<input asp-for="Impex._ptContainerETA" class="form-control" required />
+									<input asp-for="Impex._ptContainerETA" class="form-control w-24 h-8 text-sm px-" required />
 								</div>
 							</div>
 
@@ -48,13 +91,13 @@
 								<label class="form-label">
 									Container No: <span class="text-danger">*</span>
 								</label>
-								<input asp-for="Impex._ptContainerNo" class="form-control" required />
+								<input asp-for="Impex._ptContainerNo" class="form-control w-24 h-8 text-sm px-" required />
 
 								<div class="mt-3">
 									<label class="form-label">
 										Remarks:
 									</label>
-									<input asp-for="Impex._ptRemarks" class="form-control" />
+									<input asp-for="Impex._ptRemarks" class="form-control w-24 h-8 text-sm px-" />
 								</div>
 							</div>
 
@@ -63,7 +106,7 @@
 						<div class="mt-3">
 							@if (Model.Impex.PK_ptImpexID == 0)
 							{
-								<button type="submit" class="btn btn-primary btn-sm">
+								<button id="btnAdd" type="submit" class="btn btn-primary btn-sm">
 									Add New
 								</button>
 							}
@@ -94,7 +137,7 @@
 			<th class="text-center">No</th>
 			<th>HBL No</th>
 			<th>Container No</th>
-			<th>ETA</th>
+			<th>Dedon ETA</th>
 			<th>Remarks</th>
 			<th>Created By</th>
 			<th>Modified By</th>

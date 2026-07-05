@@ -5,6 +5,7 @@ using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using PlanningTool.NavExtension.Data;
 using PlanningTool.NavExtension.Models;
+using PlanningTool.NavExtension.Services;
 using System.Data;
 
 namespace PlanningTool.NavExtension.Pages.Procurement
@@ -13,19 +14,49 @@ namespace PlanningTool.NavExtension.Pages.Procurement
     {
         private readonly AppDbContext _context;
         private readonly EmailService _emailService;   // ✅ NEW
+        private readonly IUserPermissionService _userPermissionService;
 
         private readonly string conStr;
         public string searchString { get; set; }
 
-        public IndexModel(AppDbContext context, IConfiguration config, EmailService emailService)
+        public IndexModel(AppDbContext context, IConfiguration config, EmailService emailService, IUserPermissionService userPermissionService)
         {
 
             _context = context;
             _emailService = emailService;
+            _userPermissionService = userPermissionService;
             conStr = config.GetConnectionString("DefaultConnection");
         }
-        public List<ImPexCenterModel> ImpexList { get; set; } = new();
+        public async Task<IActionResult> OnGetAsync()
+        {
 
+            //var userId = User?.Identity?.Name;
+
+            //if (string.IsNullOrWhiteSpace(userId))
+            //{
+            //    return Unauthorized();
+            //}
+
+            //userId = userId.ToUpperInvariant();
+
+            //var userPermission = await _userPermissionService.GetUserPermissionAsync(userId);
+
+            //if (userPermission == null || !userPermission.Procurement)
+            //{
+            //    return RedirectToPage("/AccessDenied", new
+            //    {
+            //        returnUrl = "/Procurement/Index"
+            //    });
+            //}
+
+
+            LoadImpex();
+            LoadProcurementData(searchString);
+
+            return Page();
+        }
+
+        public List<ImPexCenterModel> ImpexList { get; set; } = new();
 
         public List<ProcurementCenterDto> ProcurementList { get; set; } = new();
 
@@ -36,11 +67,11 @@ namespace PlanningTool.NavExtension.Pages.Procurement
 
         private string GetUser()
         {
-            var userName = (User?.Identity != null && User.Identity.IsAuthenticated)
-            ? User.Identity.Name
-            : Environment.UserName;
 
-            return $"{userName} ({Environment.MachineName})";
+            return (User?.Identity != null && User.Identity.IsAuthenticated)
+                ? User.Identity.Name
+                : Environment.UserName;
+
         }
 
         private List<string> GetRecipients()
@@ -51,18 +82,10 @@ namespace PlanningTool.NavExtension.Pages.Procurement
              .Where(x => !string.IsNullOrWhiteSpace(x))
              .Distinct()
              .ToList();
-            
+
             return recipients;
         }
-        public void OnGet()
-        {
-            // Get Impex Data Dropdown view
-            this.LoadImpex();
-
-            // Get Procurement Data Stored Procedure
-            this.LoadProcurementData(searchString);
-
-        }
+        
         private void LoadImpex()
         {
             ImpexList = _context.tblImPexCenter
@@ -76,101 +99,117 @@ namespace PlanningTool.NavExtension.Pages.Procurement
                 })
                 .ToList();
         }
-        public async Task OnPostTagAsync(string HBLNo, List<string> SelectedRows)
+        public async Task<IActionResult> OnPostTagAsync(string HBLNo, List<string> SelectedRows)
         {
             try
-            {
-                if(SelectedRows == null || SelectedRows.Count == 0)
+            {               
+
+                if (SelectedRows == null || !SelectedRows.Any())
                 {
-                    TempData["ErrorMessage"] = "No rows selected.";
-                    this.LoadImpex();
-                    this.LoadProcurementData(searchString);
-                    return;
+                    TempData["ErrorMessage"] = "No PO rows selected.";
+                    LoadImpex();
+                    LoadProcurementData(searchString);
+                    return RedirectToPage();
                 }
 
-                // Call Stored Procedure function
+                // Get form values once
+                string hblNo = Request.Form["HBLNo"];
+                string containerNo = Request.Form["ContainerNo"];
+
+                
+
+                string? paramCETA = DateTime.TryParse(Request.Form["ParamCETA"], out var eta)
+                    ? eta.ToString("MMM dd, yyyy")
+                    : null;
+
+                int updatedCount = 0;
+
                 using (SqlConnection con = new SqlConnection(conStr))
                 {
                     await con.OpenAsync();
 
-                    foreach(var row in SelectedRows)
+                    foreach (string row in SelectedRows)
                     {
                         var parts = row.Split('|');
 
                         int docType = int.Parse(parts[0]);
                         string docNo = parts[1];
                         int lineNo = int.Parse(parts[2]);
-                        string itemcode = parts[3].Trim();
+                        string itemCode = parts[3].Trim();
 
-
-                        string key = $"{docType}|{docNo}|{lineNo}|{itemcode}";
-
+                        string key = $"{docType}|{docNo}|{lineNo}|{itemCode}";
                         string pdValue = Request.Form[$"PartialDeliveredValues[{key}]"];
 
+                        using SqlCommand cmd = new SqlCommand("_spTagProcurementCenter", con);
 
-                        // ✅ Get values from Request
-                        string hblno = Request.Form["HBLNo"];
-                        string containerNo = Request.Form["ContainerNo"];
+                        cmd.CommandType = CommandType.StoredProcedure;
 
-                         string? ParamCETA = DateTime.TryParse(Request.Form["ParamCETA"], out var eta)
-                            ? eta.ToString("MMM dd, yyyy")
-                            : null;
+                        cmd.Parameters.AddWithValue("@HBLNo", hblNo);
+                        cmd.Parameters.AddWithValue("@ContainerNo", containerNo);
+                        cmd.Parameters.AddWithValue("@DocType", docType);
+                        cmd.Parameters.AddWithValue("@DocNo", docNo);
+                        cmd.Parameters.AddWithValue("@LineNo", lineNo);
+                        cmd.Parameters.AddWithValue("@ItemCode", itemCode);
+                        cmd.Parameters.AddWithValue("@ParamPD", pdValue);
+                        cmd.Parameters.AddWithValue("@ParamCETA", (object?)paramCETA ?? DBNull.Value);
+                        cmd.Parameters.AddWithValue("@ParamCBY", GetUser());
+                        cmd.Parameters.AddWithValue(
+                            "@ParamRemarks",
+                            string.IsNullOrWhiteSpace(ParamRemarks)
+                                ? DBNull.Value
+                                : ParamRemarks);
 
-
-                        using (SqlCommand cmd = new SqlCommand("_spTagProcurementCenter", con))
-                        {
-                            cmd.CommandType = CommandType.StoredProcedure;
-
-                            cmd.Parameters.AddWithValue("@HBLNo", hblno);
-                            cmd.Parameters.AddWithValue("@ContainerNo", containerNo);
-                            cmd.Parameters.AddWithValue("@DocType", docType);
-                            cmd.Parameters.AddWithValue("@DocNo", docNo);
-                            cmd.Parameters.AddWithValue("@LineNo", lineNo);
-                            cmd.Parameters.AddWithValue("@ItemCode", itemcode); // ✅ IMPORTANT
-                            cmd.Parameters.AddWithValue("@ParamPD", pdValue);
-                            cmd.Parameters.AddWithValue("@ParamCETA", (object)ParamCETA ?? DBNull.Value);
-                            cmd.Parameters.AddWithValue("@ParamCBY", GetUser());
-                            cmd.Parameters.AddWithValue("@ParamRemarks",
-                                string.IsNullOrEmpty(ParamRemarks) ? (object)DBNull.Value : ParamRemarks);
-
-                            await cmd.ExecuteNonQueryAsync();
-
-                        }
+                        await cmd.ExecuteNonQueryAsync();
+                        updatedCount++;
                     }
                 }
-                TempData["SuccessMessage"] = $"{SelectedRows.Count} record(s) updated successfully!";
 
-                var recipients = GetRecipients();
+                TempData["SuccessMessage"] = $"{updatedCount} record(s) updated successfully.";
 
-                // ✅ EMAIL
-                _ = Task.Run(() => _emailService.SendEmailAsync(
-                recipients,
-                    "Procurement Control Center | HBL and Container ETA tagged from Purchase Orders",
-                    $@"
-                    <div style='font-family:'Segoe UI', Arial, sans-serif; font-size:12px; font-weight:400; line-height:1.5; color:#ffffff;'>
+                // Send email only once
+                if (updatedCount > 0)
+                {
+                    var recipients = GetRecipients();
 
-                        <p>Dear Team,</p>
-                        <p>
-                            Please be informed that the HBL Number <b></b>{HBLNo} </b> 
-                            and Container ETA <b>{ParamCETA}</b>
-                            have already been tagged to the corresponding Purchase Orders in the System.
-                        </p>
-                        <p>
-                            Should you encounter any issues or require assistance, please do not hesitate to contact the IT team.
-                        </p>
-                        <br/>
-                        <p>This is a system-generated email. Please do not reply.</p>
-                    </div>"
-                    ));
+                    _ = Task.Run(() =>
+                        _emailService.SendEmailAsync(
+                            recipients,
+                            "Tagging Notification",
+                            $@"
+                             <div style='font-family:'Segoe UI', Arial, sans-serif; font-size:12px; font-weight:400; line-height:1.5; color:#ffffff;'>
+                                <p>Dear Team,</p>
+
+                                <p>
+                                   Please be informed that the 
+                                    HBL No: <b>{hblNo}</b> and Dedon ETA <b>{paramCETA}</b>
+                                    have already been <b>Tagged</b> to the corresponding Purchase Orders in the System.
+                                </p>
+
+                                <p>
+                                    Should you encounter any issues or require assistance,
+                                    please do not hesitate to contact the IT Team.
+                                </p>
+
+                                <br />
+
+                                <p>
+                                    This is a system-generated email. Please do not reply.
+                                </p>
+                            </div>"
+                        ));
+                }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
-                TempData["ErrorMessage"] = "Error: " + ex.Message;               
+                TempData["ErrorMessage"] = $"Error: {ex.Message}";
             }
+
             this.LoadImpex();
             this.LoadProcurementData(searchString);
+
+            return RedirectToPage();
         }
-       public async Task OnPostUntagAsync(string action)
+        public async Task<IActionResult> OnPostUntagAsync(string action)
         {
             try
             {
@@ -214,14 +253,17 @@ namespace PlanningTool.NavExtension.Pages.Procurement
 
                     _ = Task.Run(() => _emailService.SendEmailAsync(
                         recipients,
-                        "Procurement Control Center | HBL and Container ETA Untagged from Purchase Orders",
+                        "Untag Notification",
                         $@"
                         <div style='font-family:'Segoe UI', Arial, sans-serif; font-size:12px; font-weight:400; line-height:1.5; color:#ffffff;'>
                             <p>Dear Team,</p>
 
                             <p>
-                                Please be informed that the HBL Number <b>{hblno}</b> 
-                                and Container ETA <b>{dateOnlyConETA}</b>
+                                Please be informed that the 
+                                HBL No: <b>{hblno}</b>, 
+                                PO No: <b>{docNo}</b>, 
+                                Item Code: <b>{itemcode}</b>, 
+                                Dedon ETA <b>{dateOnlyConETA}</b>
                                 have already been <b>Untagged</b> to the corresponding Purchase Orders in the System.
                             </p>
 
@@ -248,6 +290,8 @@ namespace PlanningTool.NavExtension.Pages.Procurement
             // ✅ Always reload data
             this.LoadProcurementData(searchString);
             this.LoadImpex();
+
+            return RedirectToPage();
         }
 
         private void LoadProcurementData(string _search)

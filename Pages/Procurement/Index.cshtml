@@ -4,25 +4,30 @@
 	ViewData["Title"] = "Procurement Control Center";
 }
 <script>
-	$(document).ready(function () {
+	$(function () {
 
-		// Select All
+		// Select All (ignore disabled checkboxes)
 		$("#selectAll").on("change", function () {
-			$(".row-check").prop("checked", this.checked).trigger("change");
+			$(".row-check:not(:disabled)")
+				.prop("checked", this.checked)
+				.trigger("change");
 		});
 
-		// Row Check / Uncheck
+		// Row checkbox change
 		$(document).on("change", ".row-check", function () {
+
+			const enabledChecks = $(".row-check:not(:disabled)");
 
 			$("#selectAll").prop(
 				"checked",
-				$(".row-check").length === $(".row-check:checked").length
+				enabledChecks.length > 0 &&
+				enabledChecks.length === enabledChecks.filter(":checked").length
 			);
 
 			const row = $(this).closest("tr");
 			const outstanding = parseFloat($(this).data("outstanding")) || 0;
 
-			if ($(this).is(":checked")) {
+			if (this.checked) {
 				row.find(".pd-input")
 					.val(outstanding)
 					.attr("max", outstanding)
@@ -30,13 +35,10 @@
 
 				row.find(".pd-text").hide();
 				row.addClass("table-warning");
-				row.find(".btn-tag").show();
 			} else {
 				row.find(".pd-input").hide();
 				row.find(".pd-text").show();
-
 				row.removeClass("table-warning table-danger");
-				row.find(".btn-tag").hide();
 			}
 		});
 
@@ -56,7 +58,7 @@
 			}
 		});
 
-		// Populate hidden fields from HBL dropdown
+		// Populate hidden fields from selected HBL
 		$("#impexDropdown").on("change", function () {
 
 			const selected = $(this).find(":selected");
@@ -66,8 +68,9 @@
 			$("#ParamCETA").val(selected.data("eta") || "");
 		});
 
-		// Initialize Select2
+		// Select2
 		$("#impexDropdown").select2();
+
 	});
 </script>
 
@@ -96,27 +99,43 @@
 						<div class="col-md-4">
 							<div class="d-flex align-items-center gap-2">
 
-								<select id="impexDropdown"
-										name="ImpexID"
-										class="form-control form-control-sm"
-										style="max-width:300px;"
-										required>
-									<option value="">Search HBL No</option>
-									@foreach (var item in Model.ImpexList)
-									{
-										<option value="@item.PK_ptImpexID"
-												data-hbl="@item._ptHBLNo"
-												data-container="@item._ptContainerNo"
-												data-eta="@item._ptContainerETA?.ToString("yyyy-MM-dd")">
-											@item._ptHBLNo
-										</option>
-									}
-								</select>
-								<button type="submit"
-										asp-page-handler="Tag"
-										class="btn btn-primary btn-sm">
-									Tagged
-								</button>
+								@{
+									var hasHBL = Model.ImpexList?.Any() == true;
+								}
+
+								@if (!hasHBL)
+								{
+									<div class="alert alert-info py-2 px-3 mb-0 small">
+										No available HBL information found. Please coordinate with the
+										<strong>ImPex Controller Team</strong> to create a new HBL record.
+									</div>
+								}
+								else
+								{
+									<select id="impexDropdown"
+											name="ImpexID"
+											class="form-control form-control-sm"
+											style="max-width:300px;"
+											required>
+										<option value="">Search HBL No</option>
+
+										@foreach (var item in Model.ImpexList!)
+										{
+											<option value="@item.PK_ptImpexID"
+													data-hbl="@item._ptHBLNo"
+													data-container="@item._ptContainerNo"
+													data-eta="@item._ptContainerETA?.ToString("yyyy-MM-dd")">
+												@item._ptHBLNo
+											</option>
+										}
+									</select>
+
+									<button type="submit"
+											asp-page-handler="Tag"
+											class="btn btn-primary btn-sm">
+										Tagged
+									</button>
+								}
 
 							</div>
 							<input type="hidden" id="HBLNo" name="HBLNo">
@@ -183,13 +202,13 @@
 								<span class="pd-text">@item.ptPartialDelivered</span>
 
 								<input type="number"
-									   class="form-control form-control-sm pd-input"
+									   class="form-control form-control-sm pd-input text-end"
 									   name="PartialDeliveredValues[@($"{item.IDDocType}|{item.IDDocNo}|{item.IDLineNo}|{item.ItemCode}")]"
 									   value="@item.ptPartialDelivered"
 									   max="@item.OutstandingQty"
 									   min="0"
 									   step="0.01"
-									   style="display:none; width:90px;" />
+									   style="display:none; width:70px; padding:2px 4px; font-size:10px;" />
 
 							</td>
 							<td>@item.ptHBLNo</td>

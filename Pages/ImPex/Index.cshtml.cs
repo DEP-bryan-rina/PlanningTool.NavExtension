@@ -4,6 +4,8 @@ using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using PlanningTool.NavExtension.Data;
 using PlanningTool.NavExtension.Models;
+using PlanningTool.NavExtension.Services;
+using System.Security;
 
 namespace PlanningTool.NavExtension.Pages.ImPex
 {
@@ -11,17 +13,56 @@ namespace PlanningTool.NavExtension.Pages.ImPex
     {
         private readonly AppDbContext _context;
         private readonly EmailService _emailService;
+        private readonly IUserPermissionService _userPermissionService;
 
-        public IndexModel(AppDbContext context, EmailService emailService)
+        public IndexModel(AppDbContext context, EmailService emailService, IUserPermissionService userPermissionService)
         {
             _context = context;
             _emailService = emailService;
+            _userPermissionService = userPermissionService;
+        }
+        public async Task<IActionResult> OnGetAsync(int? id)
+        {
+
+            //var userId = User?.Identity?.Name;
+
+            //if (string.IsNullOrWhiteSpace(userId))
+            //{
+            //    return Unauthorized();
+            //}
+
+            //userId = userId.ToUpperInvariant();
+
+            //var userPermission = await _userPermissionService.GetUserPermissionAsync(userId);
+
+            //if (userPermission == null || !userPermission.ImPex)
+            //{
+            //    return RedirectToPage("/AccessDenied", new
+            //    {
+            //        returnUrl = "/ImPex/Index"
+            //    });
+            //}
+
+            ImpexList.Clear();
+            ImpexList = _context.tblImPexCenter.ToList();
+
+            Impex = new ImPexCenterModel();
+
+            if (id.HasValue)
+            {
+                Impex = _context.tblImPexCenter
+                    .FirstOrDefault(x => x.PK_ptImpexID == id.Value)
+                    ?? new ImPexCenterModel();
+            }
+
+            return Page();
         }
 
         [BindProperty] public ImPexCenterModel Impex { get; set; }
 
 
         public List<ImPexCenterModel> ImpexList { get; set; } = new List<ImPexCenterModel>();
+        public List<ProcurementCenterDto> ProcurementList { get; set; } = new();
 
 
         private List<string> GetRecipients()
@@ -37,28 +78,12 @@ namespace PlanningTool.NavExtension.Pages.ImPex
             return recipients;
 
         }
-
-        public void OnGet(int? id)
-        {
-            ImpexList.Clear();
-            ImpexList = _context.tblImPexCenter.ToList();
-
-            Impex = new ImPexCenterModel();
-
-            if (id.HasValue)
-            {
-                Impex = _context.tblImPexCenter
-                    .FirstOrDefault(x => x.PK_ptImpexID == id.Value)
-                    ?? new ImPexCenterModel();
-            }
-        }
+      
         private string GetUser()
         {
-            var userName = (User?.Identity != null && User.Identity.IsAuthenticated)
-            ? User.Identity.Name
-            : Environment.UserName;
-
-            return $"{userName} ({Environment.MachineName})";
+            return (User?.Identity != null && User.Identity.IsAuthenticated)
+                ? User.Identity.Name
+                : Environment.UserName;
         }
         public IActionResult OnPostSave(int id)
         {
@@ -92,7 +117,7 @@ namespace PlanningTool.NavExtension.Pages.ImPex
                     // Email functionality can be added here if needed.                    
                     _ = Task.Run(() => _emailService.SendEmailAsync(
                         recipients,
-                        "Procurement Control Center | New HBL Entry Created",
+                        "New HBL Entry Created Notification",
                         $@"
                          <div style='font-family:'Segoe UI', Arial, sans-serif; font-size:12px; font-weight:400; line-height:1.5; color:#ffffff;'>
                           <p>Dear Team,</p>
@@ -102,7 +127,7 @@ namespace PlanningTool.NavExtension.Pages.ImPex
                           </p>
                           <p>
                             In the event of any updates or chages to the shipment details, a separate notification will be sent accordingly
-                            to kepp everyone informed.
+                            to keep everyone informed.
                           </p>
                           <p>
                             Should you encounter any issues or require assistance, please do not hesitate to contact the IT team.
@@ -147,6 +172,21 @@ namespace PlanningTool.NavExtension.Pages.ImPex
                         existing._ptModifiedBy = GetUser();
                         existing._ptModifiedDate = DateTime.Now;
 
+
+                        var procurementRecords = _context.tblProcurementCenter  
+                                .Where(x => x._ptHBLNo == oldHBL)
+                                .ToList();
+
+                        foreach (var record in procurementRecords)
+                        {
+                            record._ptHBLNo = Impex._ptHBLNo;
+                            record._ptContainerETA = Impex._ptContainerETA;
+                            record._ptContainerNo = Impex._ptContainerNo;
+
+                            record._ptModifiedBy = GetUser();
+                            record._ptModifiedDate = DateTime.Now;
+                        }
+
                         _context.SaveChanges();
                         TempData["SuccessMessage"] = "BHL No: " + Impex._ptHBLNo + " updated successfully!";
 
@@ -177,7 +217,7 @@ namespace PlanningTool.NavExtension.Pages.ImPex
                             // ✅ EMAIL
                             _ = Task.Run(() => _emailService.SendEmailAsync(
                                 recipients,
-                                "Procurement Control Center | Updated",
+                                "Update Notification",
                                 $@"
                                 <div style='font-family:'Segoe UI', Arial, sans-serif; font-size:12px; font-weight:400; line-height:1.5; color:#ffffff;'>
                                     <p>
@@ -238,6 +278,16 @@ namespace PlanningTool.NavExtension.Pages.ImPex
             }
 
             return RedirectToPage();
+        }
+
+        public async Task<JsonResult> OnGetCheckHblAsync(string hblNo)
+        {
+
+            bool exists = await _context.tblImPexCenter
+                    .AnyAsync(x => x._ptHBLNo == hblNo);
+
+            return new JsonResult(exists);
+
         }
     }
 }
