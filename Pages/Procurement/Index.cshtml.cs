@@ -25,7 +25,7 @@ namespace PlanningTool.NavExtension.Pages.Procurement
             _context = context;
             _emailService = emailService;
             _userPermissionService = userPermissionService;
-            conStr = config.GetConnectionString("DefaultConnection");
+            this.conStr = config.GetConnectionString("DefaultConnection");
         }
         public async Task<IActionResult> OnGetAsync()
         {
@@ -85,7 +85,7 @@ namespace PlanningTool.NavExtension.Pages.Procurement
 
             return recipients;
         }
-        
+
         private void LoadImpex()
         {
             ImpexList = _context.tblImPexCenter
@@ -93,7 +93,7 @@ namespace PlanningTool.NavExtension.Pages.Procurement
                 .Select(x => new ImPexCenterModel
                 {
                     PK_ptImpexID = x.PK_ptImpexID,
-                    _ptHBLNo = x._ptHBLNo,  
+                    _ptHBLNo = x._ptHBLNo,
                     _ptContainerNo = x._ptContainerNo,
                     _ptContainerETA = x._ptContainerETA
                 })
@@ -102,8 +102,7 @@ namespace PlanningTool.NavExtension.Pages.Procurement
         public async Task<IActionResult> OnPostTagAsync(string HBLNo, List<string> SelectedRows)
         {
             try
-            {               
-
+            {
                 if (SelectedRows == null || !SelectedRows.Any())
                 {
                     TempData["ErrorMessage"] = "No PO rows selected.";
@@ -112,17 +111,17 @@ namespace PlanningTool.NavExtension.Pages.Procurement
                     return RedirectToPage();
                 }
 
-                // Get form values once
                 string hblNo = Request.Form["HBLNo"];
                 string containerNo = Request.Form["ContainerNo"];
-
-                
 
                 string? paramCETA = DateTime.TryParse(Request.Form["ParamCETA"], out var eta)
                     ? eta.ToString("MMM dd, yyyy")
                     : null;
 
                 int updatedCount = 0;
+
+                // Hold checked PO / Item details for email
+                var taggedItems = new List<(string DocNo, string ItemCode)>();
 
                 using (SqlConnection con = new SqlConnection(conStr))
                 {
@@ -137,12 +136,15 @@ namespace PlanningTool.NavExtension.Pages.Procurement
                         int lineNo = int.Parse(parts[2]);
                         string itemCode = parts[3].Trim();
 
+                        taggedItems.Add((docNo, itemCode));
+
                         string key = $"{docType}|{docNo}|{lineNo}|{itemCode}";
                         string pdValue = Request.Form[$"PartialDeliveredValues[{key}]"];
 
-                        using SqlCommand cmd = new SqlCommand("_spTagProcurementCenter", con);
-
-                        cmd.CommandType = CommandType.StoredProcedure;
+                        using SqlCommand cmd = new("_spTagProcurementCenter", con)
+                        {
+                            CommandType = CommandType.StoredProcedure
+                        };
 
                         cmd.Parameters.AddWithValue("@HBLNo", hblNo);
                         cmd.Parameters.AddWithValue("@ContainerNo", containerNo);
@@ -166,36 +168,53 @@ namespace PlanningTool.NavExtension.Pages.Procurement
 
                 TempData["SuccessMessage"] = $"{updatedCount} record(s) updated successfully.";
 
-                // Send email only once
                 if (updatedCount > 0)
                 {
                     var recipients = GetRecipients();
+
+                    string itemRows = string.Join("",
+                        taggedItems.Select(x =>
+                            $"<tr><td>{x.DocNo}</td><td>{x.ItemCode}</td></tr>"));
 
                     _ = Task.Run(() =>
                         _emailService.SendEmailAsync(
                             recipients,
                             "Tagging Notification",
                             $@"
-                             <div style='font-family:'Segoe UI', Arial, sans-serif; font-size:12px; font-weight:400; line-height:1.5; color:#ffffff;'>
-                                <p>Dear Team,</p>
+                        <div style='font-family:'Segoe UI', Arial, sans-serif; font-size:12px; font-weight:400; line-height:1.5; color:#ffffff;'>
+                            <p>Dear Team,</p>
 
-                                <p>
-                                   Please be informed that the 
-                                    HBL No: <b>{hblNo}</b> and Dedon ETA <b>{paramCETA}</b>
-                                    have already been <b>Tagged</b> to the corresponding Purchase Orders in the System.
-                                </p>
+                            <p>
+                                Please be informed that the HBL No: <b>{hblNo}</b> 
+                                with Container No: <b>{containerNo}</b> 
+                                & Dedon ETA <b>{paramCETA}</b> has been successfully tagged.
+                            </p>
 
-                                <p>
-                                    Should you encounter any issues or require assistance,
-                                    please do not hesitate to contact the IT Team.
-                                </p>
+                            <p><b>Tagged Purchase Order Details:</b></p>
 
-                                <br />
+                            <table border='1' cellpadding='5' cellspacing='0' style='border-collapse:collapse;'>
+                                <thead>
+                                    <tr style='font-family:'Segoe UI', Arial, sans-serif; font-size:12px; font-weight:400; line-height:1.5; color:#ffffff;'>
+                                        <th style='align-items:left'>PO No</th>
+                                        <th>Item Code</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {itemRows}
+                                </tbody>
+                            </table>
 
-                                <p>
-                                    This is a system-generated email. Please do not reply.
-                                </p>
-                            </div>"
+                            <br/>
+
+                            <p>
+                                Should you encounter any issues or require assistance,
+                                please do not hesitate to contact the IT Team.
+                            </p>
+
+                            <p>
+                                This is a system-generated email. Please do not reply.
+                            </p>
+                        </div>"
                         ));
                 }
             }
@@ -330,6 +349,7 @@ namespace PlanningTool.NavExtension.Pages.Procurement
                             ptHBLNo = reader["ptHBLNo"].ToString(),
                             ptContainerNo = reader["ptContainerNo"].ToString(),
                             ptContainerETA = reader["ptContainerETA"] == DBNull.Value ? (DateTime?)null : Convert.ToDateTime(reader["ptContainerETA"]),
+                            ptCountryOfOrigin = reader["ptCountryOfOrigin"] == DBNull.Value ? "" : reader["ptCountryOfOrigin"].ToString(),
                             ptRemarks = reader["ptRemarks"] == DBNull.Value ? "" : reader["ptRemarks"].ToString()
                         });
                     }

@@ -23,6 +23,7 @@ namespace PlanningTool.NavExtension.Models
         public DateTime? _ptModifiedDate { get; set; }
 
         public int _ptStatus { get; set; }
+        public string? _ptCountryOfOrigin { get; set; }  // ✅ FIX
     }
 
 }

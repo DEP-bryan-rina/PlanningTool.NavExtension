@@ -31,6 +31,9 @@ namespace PlanningTool.NavExtension.Models
         
         public DateTime? ptContainerETA { get; set; }
 
+        public string? ptCountryOfOrigin { get; set; }
+
         public string? ptRemarks { get; set; }
+
     }
 }

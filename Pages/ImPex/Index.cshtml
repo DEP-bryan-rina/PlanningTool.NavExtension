@@ -3,6 +3,7 @@
 @{
 	ViewData["Title"] = "ImPex Control Center";
 }
+
 <script>
 	async function checkHblExists() {
 
@@ -16,187 +17,258 @@
 			return;
 		}
 
-		const response = await fetch(
-			`?handler=CheckHbl&hblNo=${encodeURIComponent(hblNo)}`
-		);
-
+		const response = await fetch(`?handler=CheckHbl&hblNo=${encodeURIComponent(hblNo)}`);
 		const exists = await response.json();
 
 		if (exists) {
 			msg.innerHTML = "⚠ HBL No already exists.";
-			msg.style.color = "red";
-
-			if (btnAdd) {
-				btnAdd.disabled = true;
-			}
+			msg.style.color = "red";	
+			if (btnAdd) btnAdd.disabled = true;
 		} else {
 			msg.innerHTML = "✓ HBL No available.";
 			msg.style.color = "green";
-
-			if (btnAdd) {
-				btnAdd.disabled = false;
-			}
+			if (btnAdd) btnAdd.disabled = false;
 		}
 	}
+	$(document).ready(function () {
+
+		const originalData = $('#frmImpex').serialize();
+
+		$('#frmImpex').on('input change', 'input, select, textarea', function () {
+
+			const currentData = $('#frmImpex').serialize();
+
+			$('#btnUpdate').toggle(currentData !== originalData);
+		});
+
+	});
 </script>
-<div class="accordion" id="ImPexAccordion">
 
-	<div class="accordion-item">
-		<h3 class="accordion-header" id="headingImPex">
-			<button class="accordion-button py-2 px-3 small"
-					type="button"
-					data-bs-toggle="collapse"
-					data-bs-target="#collapseImPex"
-					aria-expanded="true"
-					aria-controls="collapseImPex">
-				General
-			</button>
-		</h3>
+<form id="frmImpex" method="post" asp-page-handler="Save" class="erp-form">
 
-		<div id="collapseImPex"
-			 class="accordion-collapse collapse show"
-			 aria-labelledby="headingImPex"
-			 data-bs-parent="#ImPexAccordion">
+	<input type="hidden" asp-for="Impex.PK_ptImpexID" />
 
-			<div class="accordion-body">
-				<div class="row">
-					
+	<div class="row g-3">
 
-					<form method="post" asp-page-handler="Save">
-						<input type="hidden" asp-for="Impex.PK_ptImpexID" />
-						<div class="row">
+		<div class="col-md-4">
 
-							<div class="col-md-4">
-								<label class="form-label">
-									HBL No: <span class="text-danger">*</span>
-								</label>
-								<input asp-for="Impex._ptHBLNo"
-									   id="HBLNo"
-									   class="form-control w-24 h-8 text-sm"
-									   onblur="checkHblExists()"
-									   required />
+			<label class="form-label">
+				HBL No: <span class="text-danger">*</span>
+			</label>
 
-								<small id="hblMessage"></small>
+			<input asp-for="Impex._ptHBLNo"
+				   id="HBLNo"
+				   class="form-control"
+				   style="height:30px;"
+				   onblur="checkHblExists()"
+				   required />
 
+			<small id="hblMessage"></small>
 
-								<div class="mt-3">
-									<label class="form-label">
-										Dedon ETA: <span class="text-danger">*</span>
-									</label>
-									<input asp-for="Impex._ptContainerETA" class="form-control w-24 h-8 text-sm px-" required />
-								</div>
-							</div>
+			<div class="mt-3">
+				<label class="form-label">
+					Dedon ETA: <span class="text-danger">*</span>
+				</label>
 
-							<div class="col-md-4">
-								<label class="form-label">
-									Container No: <span class="text-danger">*</span>
-								</label>
-								<input asp-for="Impex._ptContainerNo" class="form-control w-24 h-8 text-sm px-" required />
-
-								<div class="mt-3">
-									<label class="form-label">
-										Remarks:
-									</label>
-									<input asp-for="Impex._ptRemarks" class="form-control w-24 h-8 text-sm px-" />
-								</div>
-							</div>
-
-						</div>
-
-						<div class="mt-3">
-							@if (Model.Impex.PK_ptImpexID == 0)
-							{
-								<button id="btnAdd" type="submit" class="btn btn-primary btn-sm">
-									Add New
-								</button>
-							}
-							else
-							{
-								<button type="submit" class="btn btn-success btn-sm">
-									Update
-								</button>
-
-								<a asp-page="./Index"
-								   class="btn btn-secondary btn-sm">
-									Cancel
-								</a>
-							}
-
-						</div>
-					</form>
-
-				</div>
+				<input asp-for="Impex._ptContainerETA"
+					   class="form-control"
+					   style="height:30px;"
+					   required />
 			</div>
 		</div>
+
+		<div class="col-md-4">
+
+			<label class="form-label">
+				Container No: <span class="text-danger">*</span>
+			</label>
+
+			<input asp-for="Impex._ptContainerNo"
+				   class="form-control"
+				   style="height:30px;"
+				   required />
+
+			<div class="mt-3">
+
+				<label class="form-label">
+					Country of Origin: <span class="text-danger">*</span>
+				</label>
+
+				<select id="countryOfOrigin"
+						asp-for="Impex._ptCountryOfOrigin"
+						class="form-select form-select-sm"
+						required>
+					<option value="">-- Search & Select Country --</option>
+
+					@foreach (var country in Model.CountryList)
+					{
+						<option value="@country.Value">@country.Text</option>
+					}
+				</select>
+
+				<span asp-validation-for="Impex._ptCountryOfOrigin"
+					  class="text-danger"></span>
+
+			</div>
+		</div>
+
+		<div class="col-md-4">
+
+			<label class="form-label">Remarks:</label>
+
+			<textarea asp-for="Impex._ptRemarks"
+					  class="form-control"
+					  style="min-height:80px;"></textarea>
+
+		</div>
+
 	</div>
-</div>
-<!-- TABLE SHOULD BE OUTSIDE FORM -->
-<table class="table table-bordered table-hover table-sm">
-	<thead>
-		<tr>
-			<th class="text-center">No</th>
-			<th>HBL No</th>
-			<th>Container No</th>
-			<th>Dedon ETA</th>
-			<th>Remarks</th>
-			<th>Created By</th>
-			<th>Modified By</th>
-			<th class="text-center">Status</th>
-			<th class="text-center">Actions</th>
-		</tr>
-	</thead>
-	<tbody style="font-size:0.75rem;">
-		@{
-			int counter = 1;
+
+	<div class="mt-3">
+
+		@if (Model.Impex != null && Model.Impex.PK_ptImpexID > 0)
+		{
+			<button id="btnUpdate"
+					type="submit"
+					class="btn btn-success btn-sm"
+					style="display:none;">
+				Update
+			</button>
+
+			<a asp-page="./Index" class="btn btn-secondary btn-sm">
+				Cancel
+			</a>
+		}
+		else
+		{
+			<button id="btnAdd" type="submit" class="btn btn-primary btn-sm">
+				Add New
+			</button>
 		}
 
-		@if (Model.ImpexList != null && Model.ImpexList.Any())
-		{
-			foreach (var item in Model.ImpexList)
-			{
-				<tr>
-					<form method="post" asp-page-handler="Edit">
+	</div>
 
-						<td class="text-center">@counter</td> <!-- ✅ NEW COLUMN -->
+</form>
+<br />
+<div class="table-responsive">
+
+	<table id="tblImPex" class="table table-hover w-100">
+
+		<thead class="sticky-top bg-white table-bordered" style="font-size:0.75rem;">
+			<tr>
+				<th class="text-center">No</th>
+				<th>HBL No</th>
+				<th>Container No</th>
+				<th>Dedon ETA</th>
+				<th>Country Of Origin</th>
+				<th>Remarks</th>
+				<th>Created By</th>
+				<th>Modified By</th>
+				<th class="text-center">Status</th>
+				<th class="text-center">Actions</th>
+			</tr>
+		</thead>
+
+		<tbody style="font-size:0.75rem;">
+
+			@{
+				int counter = 1;
+			}
+
+			@if (Model.ImpexList != null && Model.ImpexList.Any())
+			{
+				foreach (var item in Model.ImpexList)
+				{
+					<tr>
+						<td class="text-center">@counter</td>
 						<td>@item._ptHBLNo</td>
 						<td>@item._ptContainerNo</td>
 						<td>@item._ptContainerETA?.ToString("yyyy-MM-dd")</td>
+						<td>@item._ptCountryOfOrigin</td>
 						<td class="erp-truncate">@item._ptRemarks</td>
 						<td>@item._ptCreatedBy</td>
 						<td>@item._ptModifiedBy</td>
-						<td class="text-center align-middle">
+
+						<td class="text-center">
 							@if (item._ptStatus == 1)
 							{
 								<span class="badge bg-success">Tagged</span>
+							}
+							else if (item._ptStatus == 2)
+							{
+								<span class="badge bg-secondary">Completed</span>
 							}
 							else
 							{
 								<span class="badge bg-primary">For Tagging</span>
 							}
 						</td>
+
 						<td class="text-center">
-							@if (item._ptStatus == 1)
+							@if (item._ptStatus != 2)
 							{
 								<a asp-page="./Index"
 								   asp-route-id="@item.PK_ptImpexID"
-								   class="btn btn-warning btn-sm"
-								   onclick="return confirm('Are you sure you want to update HBL NO: @item._ptHBLNo with corresponding PO tag?');">
-									Edit
+								   class="erp-btn erp-btn-warning"
+								   onclick="return confirmEdit(@item._ptStatus, '@item._ptHBLNo');">
+									<i class="fa-solid fa-pencil"></i>
 								</a>
 							}
 							else
 							{
-								<a asp-page="./Index"
-								   asp-route-id="@item.PK_ptImpexID"
-								   class="btn btn-warning btn-sm">
-									Edit
-								</a>
+								<button type="button" class="btn btn-secondary btn-sm">
+									<i class="fa-solid fa-lock"></i>
+								</button>
 							}
 						</td>
-					</form>
-				</tr>
-				counter++;
+					</tr>
+
+					counter++;
+				}
 			}
-		}		
-	</tbody>
-</table>
+
+		</tbody>
+	</table>
+</div>
+
+@section Scripts {
+	<script>
+		$(function () {
+
+			$('#countryOfOrigin').select2();
+
+            
+				const table = $('#tblImPex').DataTable({
+				pageLength: 25,
+				scrollX: true,
+				stateSave: true,
+				autoWidth: false,
+				fixedHeader: true
+			});
+
+
+				const savedSearch = sessionStorage.getItem('tblImPexSearch');
+
+				if (savedSearch) {
+					table.search(savedSearch).draw();
+					$('.dataTables_filter input').val(savedSearch);
+				}
+
+				$('.dataTables_filter input').on('keyup', function () {
+					sessionStorage.setItem('tblImPexSearch', this.value);
+			});
+
+		});
+		function confirmEdit(status, hblNo) {
+
+			if (status === 1) {
+				return confirm(
+					"⚠ This HBL No is already TAGGED: " + hblNo +
+					"\n\nDo you want to continue editing?"
+				);
+			}
+
+			return true;
+		}
+	</script>
+}

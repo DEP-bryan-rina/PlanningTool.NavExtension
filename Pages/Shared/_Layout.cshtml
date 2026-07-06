@@ -3,13 +3,11 @@
 
 @{
 	var currentPath = Context.Request.Path.Value ?? "";
-
 	var currentUser = User?.Identity?.Name ?? "Contact IT Arky";
 
 	var permission = string.IsNullOrWhiteSpace(currentUser)
 		? null
-		: await PermissionService.GetUserPermissionAsync(
-			currentUser.ToUpperInvariant());
+		: await PermissionService.GetUserPermissionAsync(currentUser.ToUpperInvariant());
 }
 
 <!DOCTYPE html>
@@ -17,212 +15,182 @@
 <head>
 	<meta charset="utf-8" />
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-	<title>@ViewData["Title"] - DEDON Planning Tool</title>
+	<title>@ViewData["Title"] - Planning Tool - NAV Extension</title>
 
-	<link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-	<link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+	<!-- Bootstrap -->
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 
-	<!-- ✅ jQuery -->
-	<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
-	<!-- ✅ Select2 -->
-	<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0/dist/css/select2.min.css" rel="stylesheet" />
-	<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0/dist/js/select2.min.js"></script>
-
+	<!-- Icons -->
 	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
-	
-	<script>
-		document.addEventListener("DOMContentLoaded", function () {
-			const toastElList = document.querySelectorAll('.show-toast');
+	<!-- Select2 -->
+	<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0/dist/css/select2.min.css" rel="stylesheet">
 
-			toastElList.forEach(function (toastEl) {
-				const toast = new bootstrap.Toast(toastEl, {
-					delay: 3000,
-					autohide: true
-				});
-				toast.show();
-			});
-		});
-	</script>
+	<!-- DataTables -->
+	<link rel="stylesheet" href="https://cdn.datatables.net/1.13.8/css/dataTables.bootstrap5.min.css">
+	<link rel="stylesheet" href="https://cdn.datatables.net/fixedheader/3.4.1/css/fixedHeader.bootstrap5.min.css">
+
+	<link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+
+	<!-- jQuery -->
+	<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+	<!-- Bootstrap JS -->
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+	<!-- Select2 -->
+	<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0/dist/js/select2.min.js"></script>
+
+	<!-- DataTables -->
+	<script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
+	<script src="https://cdn.datatables.net/1.13.8/js/dataTables.bootstrap5.min.js"></script>
+	<script src="https://cdn.datatables.net/fixedheader/3.4.1/js/dataTables.fixedHeader.min.js"></script>
 
 </head>
-<body>
-	<div class="app-container">
-		<!-- ✅ Global Toast Container -->
-		<div class="toast-container position-fixed top-0 end-0 p-3" style="z-index:1100">
 
-			@if (TempData["SuccessMessage"] != null)
-			{
-				<div class="toast text-bg-success border-0 show-toast"
-					 role="alert" data-bs-delay="3000">
-					<div class="d-flex">
-						<div class="toast-body">
-							<strong>Success</strong><br />
-							@TempData["SuccessMessage"]
-						</div>
-						<button type="button" class="btn-close btn-close-white me-2 m-auto"
-								data-bs-dismiss="toast"></button>
-					</div>
-				</div>
-			}
-			@if (TempData["ErrorMessage"] != null)
-			{
-				<div class="toast text-bg-danger border-0 show-toast"
-					 role="alert" data-bs-delay="3000">
-					<div class="d-flex">
-						<div class="toast-body">
-							<strong>Error</strong><br />
-							@TempData["ErrorMessage"]
-						</div>
-						<button type="button" class="btn-close btn-close-white me-2 m-auto"
-								data-bs-dismiss="toast"></button>
-					</div>
-				</div>
-			}
+<body class="d-flex flex-column min-vh-100">
 
-		</div>
+	<!-- ✅ TOP NAVBAR ONLY -->
+	<nav class="navbar navbar-expand-lg navbar-dark bg-dark px-3">
 
-		<nav class="side-panel" id="sidePanel" aria-label="Main navigation">
-			<div class="sidebar-header">
-				<span>DEDON Planning Tool</span>
-			</div>
+		<a class="navbar-brand fw-bold" asp-page="/Index">
+			Planning Tool - Nav Extension
+		</a>
 
-			<div class="nav-section fw-bold">Navigation</div>
+		<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#topMenu">
+			<span class="navbar-toggler-icon"></span>
+		</button>
 
-			<ul class="nav-menu" role="menu">
+		<div class="collapse navbar-collapse" id="topMenu">
 
-				@if (permission.ImPex)
-				{
-					<li role="none">
-						<a asp-page="/Impex/Index"
-						   class="nav-link @(currentPath.StartsWith("/Impex") ? "active" : "")"
-						   role="menuitem">
-							Impex Center
-						</a>
-					</li>
-				}
+			<ul class="navbar-nav me-auto">
 
-				@if (permission.Procurement)
-				{
-					<li role="none">
-						<a asp-page="/Procurement/Index"
-						   class="nav-link @(currentPath.StartsWith("/Procurement") ? "active" : "")"
-						   role="menuitem">
-							Procurement Center
-						</a>
-					</li>
-				}
+				<!-- 🔷 Material Planning Main Menu -->
+				<li class="nav-item dropdown">
+					<a class="nav-link dropdown-toggle"
+					   href="#"
+					   id="materialPlanningMenu"
+					   role="button"
+					   data-bs-toggle="dropdown"
+					   aria-expanded="false">
+						Material Planning
+					</a>
+
+					<ul class="dropdown-menu" aria-labelledby="materialPlanningMenu">
+
+						@if (permission?.ImPex == true)
+						{
+							<li>
+								<a class="dropdown-item @(currentPath.StartsWith("/Impex") ? "active" : "")"
+								   asp-page="/Impex/Index">
+									Impex Center
+								</a>
+							</li>
+						}
+
+						@if (permission?.Procurement == true)
+						{
+							<li>
+								<a class="dropdown-item @(currentPath.StartsWith("/Procurement") ? "active" : "")"
+								   asp-page="/Procurement/Index">
+									Procurement Center
+								</a>
+							</li>
+						}
+
+					</ul>
+				</li>
 
 			</ul>
-			<div class="side-footer">
-				<div><strong>Version</strong> 1.0.0</div>
-				<div class="small">PlanningTool.NAVExtension</div>
+
+			<div class="d-flex align-items-center text-white">
+				<i class="bi bi-person-circle me-1"></i>
+				@currentUser
 			</div>
-		</nav>
 
-		<div class="main-wrapper">
-			<header class="topbar">
-				<button id="toggleSideBtn" class="btn btn-sm btn-outline-secondary">
-					☰
-				</button>
-
-				<span class="topbar-title">@ViewData["Title"]</span>
-
-				<div class="ms-auto d-flex align-items-center gap-3">
-					<div>
-						<i class="bi bi-person-circle me-1"></i>
-						@currentUser
-					</div>
-				</div>
-			</header>
-
-			<main class="content">
-				<div class="nav-body">
-
-					@RenderBody()
-				</div>
-			</main>
-
-			<footer class="nav-footer">
-				&copy; 2026 - DEDONPlanningTool.NAVExtension — @DateTime.Now.ToString("MMMM dd, yyyy") @(User?.Identity?.IsAuthenticated == true ? User.Identity.Name : System.Security.Principal.WindowsIdentity.GetCurrent().Name)
-			</footer>
 		</div>
+	</nav>
+
+	<!-- ✅ MAIN CONTENT -->
+	
+	<main class="flex-fill container-fluid mt-3">
+		@RenderBody()
+	</main>
+	<footer class="bg-dark text-white py-2 mt-auto">
+		<div class="container-fluid d-flex justify-content-between small">
+			<div>Planning Tool - NAV.Extension</div>
+			<div id="liveDate"></div>
+			<div>@User.Identity?.Name</div>
+			<div>Version 1.0.1</div>
+		</div>
+	</footer>
+	<!-- ✅ TOASTS -->
+	<div class="toast-container position-fixed top-0 end-0 p-3" style="z-index:1100">
+
+		@if (TempData["SuccessMessage"] != null)
+		{
+			<div class="toast text-bg-success border-0 show-toast">
+				<div class="d-flex">
+					<div class="toast-body">
+						<strong>Success</strong><br />
+						@TempData["SuccessMessage"]
+					</div>
+					<button type="button" class="btn-close btn-close-white me-2 m-auto"
+							data-bs-dismiss="toast"></button>
+				</div>
+			</div>
+		}
+
+		@if (TempData["ErrorMessage"] != null)
+		{
+			<div class="toast text-bg-danger border-0 show-toast">
+				<div class="d-flex">
+					<div class="toast-body">
+						<strong>Error</strong><br />
+						@TempData["ErrorMessage"]
+					</div>
+					<button type="button" class="btn-close btn-close-white me-2 m-auto"
+							data-bs-dismiss="toast"></button>
+				</div>
+			</div>
+		}
+
 	</div>
 
-	@* <script src="~/lib/jquery/dist/jquery.min.js"></script> *@
-	<script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+	<!-- Toast script -->
 	<script>
-		// Toggle sidebar (mobile)
-		(function(){
-		const btn = document.getElementById('toggleSideBtn');
-		const side = document.getElementById('sidePanel');
-		btn?.addEventListener('click', function(){
-		const open = side.classList.toggle('open');
-		btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+		document.addEventListener("DOMContentLoaded", function () {
+
+		// ✅ Toasts
+		document.querySelectorAll('.show-toast').forEach(el => {
+		new bootstrap.Toast(el, { delay: 3000 }).show();
 		});
 
-		// Mark active nav item by matching href to current path
-		function normalize(p){ return (p||'').replace(/\/+$/, '').toLowerCase() || '/'; }
-		document.addEventListener('DOMContentLoaded', function(){
-		const links = Array.from(document.querySelectorAll('.nav-menu a'));
-		const current = normalize(window.location.pathname);
-		let found = false;
-		links.forEach(a => {
-		const href = normalize(a.getAttribute('href'));
-		if(href === current){
-		a.classList.add('active');
-		a.setAttribute('aria-current','page');
-		found = true;
-		} else {
-		a.classList.remove('active');
+		// ✅ Live Clock
+		function updateClock() {
+		const now = new Date();
+
+		const formatted =
+		now.toLocaleDateString('en-GB', {
+		day: '2-digit',
+		month: 'short',
+		year: 'numeric'
+		}) + " " + now.toLocaleTimeString();
+
+		const liveDateEl = document.getElementById("liveDate");
+		if (liveDateEl) {
+		liveDateEl.innerText = formatted;
 		}
-		// persist last clicked item
-		a.addEventListener('click', () => {
-		try { localStorage.setItem('navActive', a.getAttribute('href')); } catch {}
-		});
-		});
-		// restore persisted selection if present
-		try{
-		const saved = localStorage.getItem('navActive');
-		if(!found && saved){
-		const target = links.find(l => normalize(l.getAttribute('href')) === normalize(saved));
-		if(target){ target.classList.add('active'); target.setAttribute('aria-current','page'); }
 		}
-		}catch(e){}
+
+		updateClock();
+		setInterval(updateClock, 1000);
+
 		});
-		})();
-	</script>
-	<script>
-		(function () {
-		const btn = document.getElementById('toggleSideBtn');
-		const side = document.getElementById('sidePanel');
-		const main = document.querySelector('.main-wrapper');
-
-		// Restore state
-		try {
-		const collapsed = localStorage.getItem('sidebarCollapsed') === 'true';
-		if (collapsed) {
-		side.classList.add('collapsed');
-		main.classList.add('expanded');
-		}
-		} catch {}
-
-		btn?.addEventListener('click', function () {
-		const isCollapsed = side.classList.toggle('collapsed');
-		main.classList.toggle('expanded');
-
-		btn.setAttribute('aria-expanded', !isCollapsed);
-
-		// Save state
-		try {
-		localStorage.setItem('sidebarCollapsed', isCollapsed);
-		} catch {}
-		});
-		})();
 	</script>
 
 	@await RenderSectionAsync("Scripts", required: false)
+
 </body>
 </html>

@@ -75,106 +75,81 @@
 </script>
 
 <form method="post">
-	<div class="accordion" id="ImPexAccordion">
+	<div class="form erp-form">
+		<div class="col-md-4 ">
+			<div class="d-flex align-items-center gap-2">
 
-		<div class="accordion-item">
-			<h3 class="accordion-header" id="headingProcurement">
-				<button class="accordion-button py-2 px-3 small"
-						type="button"
-						data-bs-toggle="collapse"
-						data-bs-target="#collapseProcurement"
-						aria-expanded="true"
-						aria-controls="collapseProcurement">
-					General
-				</button>
-			</h3>
+				@{
+					var hasHBL = Model.ImpexList?.Any() == true;
+				}
 
-			<div id="collapseProcurement"
-				 class="accordion-collapse collapse show"
-				 aria-labelledby="headingProcurement"
-				 data-bs-parent="#ImPexAccordion">
-
-				<div class="accordion-body">
-					<div class="row">
-						<div class="col-md-4">
-							<div class="d-flex align-items-center gap-2">
-
-								@{
-									var hasHBL = Model.ImpexList?.Any() == true;
-								}
-
-								@if (!hasHBL)
-								{
-									<div class="alert alert-info py-2 px-3 mb-0 small">
-										No available HBL information found. Please coordinate with the
-										<strong>ImPex Controller Team</strong> to create a new HBL record.
-									</div>
-								}
-								else
-								{
-									<select id="impexDropdown"
-											name="ImpexID"
-											class="form-control form-control-sm"
-											style="max-width:300px;"
-											required>
-										<option value="">Search HBL No</option>
-
-										@foreach (var item in Model.ImpexList!)
-										{
-											<option value="@item.PK_ptImpexID"
-													data-hbl="@item._ptHBLNo"
-													data-container="@item._ptContainerNo"
-													data-eta="@item._ptContainerETA?.ToString("yyyy-MM-dd")">
-												@item._ptHBLNo
-											</option>
-										}
-									</select>
-
-									<button type="submit"
-											asp-page-handler="Tag"
-											class="btn btn-primary btn-sm">
-										Tagged
-									</button>
-								}
-
-							</div>
-							<input type="hidden" id="HBLNo" name="HBLNo">
-							<input type="hidden" id="ContainerNo" name="ContainerNo">
-							<input type="hidden" id="ParamCETA" name="ParamCETA">
-						</div>
+				@if (!hasHBL)
+				{
+					<div class="alert alert-info py-2 px-3 mb-0 small">
+						No available HBL information found. Please coordinate with the
+						<strong>ImPex Controller Team</strong> to create a new HBL record.
 					</div>
-				</div>
+				}
+				else
+				{
+					<select id="impexDropdown"
+							name="ImpexID"
+							class="form-control form-control-sm"
+							style="max-width:300px;"
+							required>
+						<option value="">-- Search & Select HBL No --</option>
+
+						@foreach (var item in Model.ImpexList!)
+						{
+							<option value="@item.PK_ptImpexID"
+									data-hbl="@item._ptHBLNo"
+									data-container="@item._ptContainerNo"
+									data-eta="@item._ptContainerETA?.ToString("yyyy-MM-dd")">
+								@item._ptHBLNo
+							</option>
+						}
+					</select>
+
+					<button type="submit"
+							asp-page-handler="Tag"
+							class="btn btn-primary btn-sm">
+						Tagged
+					</button>
+				}
 
 			</div>
+			<input type="hidden" id="HBLNo" name="HBLNo">
+			<input type="hidden" id="ContainerNo" name="ContainerNo">
+			<input type="hidden" id="ParamCETA" name="ParamCETA">
 		</div>
 	</div>
+	<br />
 	@* Table display *@
-	<div style="max-height: 700px; overflow-y:auto; font-size:0.75rem; line-height:1.2;">
-		<table class="table table-bordered table-hover table-sm mb-0">
-			<thead class="sticky-top bg-white" style="font-size:0.75rem;">
-
+	<div class="table-responsive">
+		<table id="tblProcurement" class="table table-hover w-100">
+			<thead class="sticky-top bg-white table-bordered" style="font-size:0.75rem;">
 				<tr class="data-row">
-					<th><input type="checkbox" id="selectAll" /></th>
-					<th>No</th>
-					<th>PO No</th>
-					<th>Vendor</th>
-					<th>Item Code</th>
-					<th>Description</th>
-					<th>NAV Outstanding Qty</th>
-					@* Display Information Header from Procurement Table *@
-					<th>Balance Qty</th>
-					<th>Partial Delivered</th>
-					<th>HBL No</th>
-					<th>Container No</th>
-					<th>Container ETA</th>
-					<th>Remarks</th>
-					<th>Action</th>
+					<th style="width:40px;"><input type="checkbox" id="selectAll" /></th>
+					<th style="width:120px;">PO No</th>
+					<th style="width:220px;">Vendor</th>
+					<th style="width:120px;">Item Code</th>
+					<th style="width:300px;">Description</th>
+					<th style="width:120px;">Outstanding Qty</th>
+
+					@* Procurement Table *@
+					@* <th style="width:120px;">Balance Qty</th> *@
+					<th style="width:140px;">Partial Delivered</th>
+					<th style="width:150px;">HBL No</th>
+					<th style="width:150px;">Container No</th>
+					<th style="width:120px;">Dedon ETA</th>
+					<th style="width:180px;">Country of Origin</th>
+					<th style="width:250px;">Remarks</th>
+					<th style="width:120px;" class="text-center">Action</th>
 				</tr>
 			</thead>
+
 			<tbody style="font-size:0.75rem;">
-				@{
-					int counter = 1;
-				}
+
 				@if (Model.ProcurementList != null && Model.ProcurementList.Any())
 				{
 					@foreach (var item in Model.ProcurementList)
@@ -189,15 +164,13 @@
 									   data-outstanding="@item.OutstandingQty"
 								@(!string.IsNullOrEmpty(item.ptHBLNo) && item.ptPartialDelivered == item.OutstandingQty ? "disabled" : "") />
 							</td>
-
-							<td>@counter</td> <!-- ✅ NEW COLUMN -->
 							<td>@item.IDDocNo</td>
 							<td>@item.VendorName</td>
 							<td>@item.ItemCode</td>
 							<td>@item.ItemDescription</td>
 							<td>@item.OutstandingQty</td>
 							@* Display Information from Procurement Table *@
-							<td>@item.ptBalanceQty</td>
+							@* <td>@item.ptBalanceQty</td> *@
 							<td>
 								<span class="pd-text">@item.ptPartialDelivered</span>
 
@@ -214,8 +187,9 @@
 							<td>@item.ptHBLNo</td>
 							<td>@item.ptContainerNo</td>
 							<td>@item.ptContainerETA?.ToString("yyyy-MM-dd")</td>
+							<td>@item.ptCountryOfOrigin</td>
 							<td>@item.ptRemarks</td>
-							<td>
+							<td class="text-center">
 								@if (!string.IsNullOrEmpty(item.ptHBLNo))
 								{
 									<button type="submit"
@@ -233,33 +207,45 @@
 								}
 							</td>
 						</tr>
-						counter++;
+
 					}
 				}
-				else
-				{
 
-				}
-
+				
 			</tbody>
 		</table>
 	</div>
-	<div class="card-footer">
-		<div class="d-flex justify-content-between align-items-center">
-			<!-- LEFT -->
-			<span>
-				Total Records:
-				<strong>@Model.ProcurementList.Count</strong>
-			</span>
-
-		</div>
-	</div>
 </form>
+
 
 @section Scripts {
 	<script>
-		$(document).ready(function () {
-		$('#impexDropdown').select2();
+		$(function () {
+
+			$('#impexDropdown').select2();
+
+            
+			const table = $('#tblProcurement').DataTable({
+					pageLength: 25,
+					scrollX: true,
+					scrollY: '60vh',
+					scrollCollapse: true,
+					paging: true,
+					autoWidth: false,
+					fixedHeader: true
+				});
+
+				const savedSearch = sessionStorage.getItem('tblProcurementSearch');
+
+				if (savedSearch) {
+					table.search(savedSearch).draw();
+					$('.dataTables_filter input').val(savedSearch);
+				}
+
+				$('.dataTables_filter input').on('keyup', function () {
+					sessionStorage.setItem('tblProcurementSearch', this.value);
+			});
+
 		});
 	</script>
 }

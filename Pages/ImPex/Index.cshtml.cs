@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using PlanningTool.NavExtension.Data;
@@ -14,16 +15,17 @@ namespace PlanningTool.NavExtension.Pages.ImPex
         private readonly AppDbContext _context;
         private readonly EmailService _emailService;
         private readonly IUserPermissionService _userPermissionService;
+        private readonly string conStr;
 
         public IndexModel(AppDbContext context, EmailService emailService, IUserPermissionService userPermissionService)
         {
             _context = context;
             _emailService = emailService;
             _userPermissionService = userPermissionService;
+            this.conStr = _context.Database.GetConnectionString();
         }
         public async Task<IActionResult> OnGetAsync(int? id)
         {
-
             //var userId = User?.Identity?.Name;
 
             //if (string.IsNullOrWhiteSpace(userId))
@@ -43,16 +45,23 @@ namespace PlanningTool.NavExtension.Pages.ImPex
             //    });
             //}
 
-            ImpexList.Clear();
-            ImpexList = _context.tblImPexCenter.ToList();
-
-            Impex = new ImPexCenterModel();
+            this.ImpexList = _context.tblImPexCenter.ToList();
+            this.LoadCountries();
 
             if (id.HasValue)
             {
-                Impex = _context.tblImPexCenter
-                    .FirstOrDefault(x => x.PK_ptImpexID == id.Value)
-                    ?? new ImPexCenterModel();
+                Impex = await _context.tblImPexCenter
+                    .FirstOrDefaultAsync(x => x.PK_ptImpexID == id.Value);
+
+                if (Impex == null)
+                {
+                    TempData["ErrorMessage"] = "Record not found.";
+                    Impex = new ImPexCenterModel();
+                }
+            }
+            else
+            {
+                Impex = new ImPexCenterModel();
             }
 
             return Page();
@@ -60,9 +69,36 @@ namespace PlanningTool.NavExtension.Pages.ImPex
 
         [BindProperty] public ImPexCenterModel Impex { get; set; }
 
-
         public List<ImPexCenterModel> ImpexList { get; set; } = new List<ImPexCenterModel>();
         public List<ProcurementCenterDto> ProcurementList { get; set; } = new();
+        public List<SelectListItem> CountryList { get; set; } = new();
+
+
+        private void LoadCountries()
+        {
+            using SqlConnection con = new(conStr);
+
+            string sql = @"
+                SELECT [Code], [Name]
+                FROM [DEDON2019].[dbo].[DEDONPH$Country_Region]
+                WHERE NULLIF(LTRIM(RTRIM([Name])), '') IS NOT NULL
+                ORDER BY [Name]";
+
+            using SqlCommand cmd = new(sql, con);
+
+            con.Open();
+
+            using SqlDataReader dr = cmd.ExecuteReader();
+
+            while (dr.Read())
+            {
+                this.CountryList.Add(new SelectListItem
+                {               
+                    Value = dr["Name"].ToString(), // or dr["Code"].ToString()
+                    Text = $"{dr["Code"]} - {dr["Name"]}"
+                });
+            }
+        }
 
 
         private List<string> GetRecipients()
@@ -124,6 +160,7 @@ namespace PlanningTool.NavExtension.Pages.ImPex
                           <p>
                               Please be informed that the New HBL Entry <b>{Impex._ptHBLNo}</b> has been successfully created and is now ready 
                               for use.
+
                           </p>
                           <p>
                             In the event of any updates or chages to the shipment details, a separate notification will be sent accordingly
@@ -163,11 +200,13 @@ namespace PlanningTool.NavExtension.Pages.ImPex
                         var oldContainer = existing._ptContainerNo;
                         var oldETA = existing._ptContainerETA;
                         var oldRemarks = existing._ptRemarks;
+                        var oldCOO = existing._ptCountryOfOrigin;
 
 
                         existing._ptHBLNo = Impex._ptHBLNo;
                         existing._ptContainerNo = Impex._ptContainerNo;
                         existing._ptContainerETA = Impex._ptContainerETA;
+                        existing._ptCountryOfOrigin = Impex._ptCountryOfOrigin;
                         existing._ptRemarks = Impex._ptRemarks;
                         existing._ptModifiedBy = GetUser();
                         existing._ptModifiedDate = DateTime.Now;
