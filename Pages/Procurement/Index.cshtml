@@ -75,58 +75,73 @@
 </script>
 
 <form method="post">
-	<div class="form erp-form">
-		<div class="col-md-4 ">
-			<div class="d-flex align-items-center gap-2">
+	<div class="card border-0 shadow-sm erp-form">
+		<div class="card-header bg-white border-bottom">
+			<h5 class="mb-0 fw-semibold">
+				<i class="fas fa-tag text-primary me-2"></i>
+				Procurement Shipment Tagging
+			</h5>
+		</div>
 
-				@{
-					var hasHBL = Model.ImpexList?.Any() == true;
-				}
+		<div class="card-body">
 
-				@if (!hasHBL)
-				{
-					<div class="alert alert-info py-2 px-3 mb-0 small">
-						No available HBL information found. Please coordinate with the
-						<strong>ImPex Controller Team</strong> to create a new HBL record.
-					</div>
-				}
-				else
-				{
-					<select id="impexDropdown"
-							name="ImpexID"
-							class="form-control form-control-sm"
-							style="max-width:300px;"
-							required>
-						<option value="">-- Search & Select HBL No --</option>
+			<div class="row g-4">
 
-						@foreach (var item in Model.ImpexList!)
+				<!-- Left Column -->
+				<div class="d-flex align-items-end gap-2 flex-wrap">
+
+					<div>
+						<label class="erp-label mb-1">
+							HBL Reference
+						</label>
+
+						@if (Model.ImpexList?.Any() == true)
 						{
-							<option value="@item.PK_ptImpexID"
-									data-hbl="@item._ptHBLNo"
-									data-container="@item._ptContainerNo"
-									data-eta="@item._ptContainerETA?.ToString("yyyy-MM-dd")">
-								@item._ptHBLNo
-							</option>
+							<select id="impexDropdown"
+									name="ImpexID"
+									class="form-select erp-control"
+									style="min-width:300px;"
+									required>
+
+								<option value="">
+									Select HBL No...
+								</option>
+
+								@foreach (var item in Model.ImpexList)
+								{
+									<option value="@item.PK_ptImpexID"
+											data-hbl="@item._ptHBLNo"
+											data-container="@item._ptContainerNo"
+											data-eta="@item._ptContainerETA?.ToString("yyyy-MM-dd")">
+										@item._ptHBLNo
+									</option>
+								}
+
+							</select>
 						}
-					</select>
+					</div>
 
 					<button type="submit"
 							asp-page-handler="Tag"
-							class="btn btn-primary btn-sm">
-						Tagged
-					</button>
-				}
+							class="btn btn-primary erp-btn">
 
+						<i class="fas fa-link me-2"></i>
+						Tag Selected PO
+
+					</button>
+
+				</div>
 			</div>
-			<input type="hidden" id="HBLNo" name="HBLNo">
-			<input type="hidden" id="ContainerNo" name="ContainerNo">
-			<input type="hidden" id="ParamCETA" name="ParamCETA">
+
 		</div>
 	</div>
+	<input type="hidden" id="HBLNo" name="HBLNo">
+	<input type="hidden" id="ContainerNo" name="ContainerNo">
+	<input type="hidden" id="ParamCETA" name="ParamCETA">
 	<br />
 	@* Table display *@
 	<div class="table-responsive">
-		<table id="tblProcurement" class="table table-hover w-100">
+		<table id="tblProcurement" class="table table-hover w-100 erp-table">
 			<thead class="sticky-top bg-white table-bordered" style="font-size:0.75rem;">
 				<tr class="data-row">
 					<th style="width:40px;"><input type="checkbox" id="selectAll" /></th>
@@ -184,9 +199,51 @@
 									   style="display:none; width:70px; padding:2px 4px; font-size:10px;" />
 
 							</td>
-							<td>@item.ptHBLNo</td>
+							<td>
+								@if (!string.IsNullOrEmpty(item.ptHBLNo))
+								{
+									<span class="badge bg-success">
+										@item.ptHBLNo
+									</span>
+								}
+								else
+								{
+									<span class="badge bg-warning text-dark">
+										Pending
+									</span>
+								}
+							</td>
 							<td>@item.ptContainerNo</td>
-							<td>@item.ptContainerETA?.ToString("yyyy-MM-dd")</td>
+							<td>
+																
+								@if (item.ptContainerETA.HasValue)
+								{
+									var days = (item.ptContainerETA.Value.Date - DateTime.Today).Days;
+
+									if (days < 0)
+									{
+										<span class="badge bg-danger">
+											<i class="fas fa-triangle-exclamation me-1"></i>
+											@item.ptContainerETA.Value.ToString("yyyy-MM-dd")
+										</span>
+									}
+									else if (days <= 14)
+									{
+										<span class="badge bg-success">
+											<i class="fas fa-shipping-fast me-1"></i>
+											@item.ptContainerETA.Value.ToString("yyyy-MM-dd")
+										</span>
+									}
+									else
+									{
+										<span class="badge bg-secondary">
+											<i class="fas fa-calendar-alt me-1"></i>
+											@item.ptContainerETA.Value.ToString("yyyy-MM-dd")
+										</span>
+									}
+								}
+								
+							</td>
 							<td>@item.ptCountryOfOrigin</td>
 							<td>@item.ptRemarks</td>
 							<td class="text-center">

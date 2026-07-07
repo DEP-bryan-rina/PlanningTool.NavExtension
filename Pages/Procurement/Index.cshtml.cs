@@ -30,24 +30,24 @@ namespace PlanningTool.NavExtension.Pages.Procurement
         public async Task<IActionResult> OnGetAsync()
         {
 
-            //var userId = User?.Identity?.Name;
+            var userId = User?.Identity?.Name;
 
-            //if (string.IsNullOrWhiteSpace(userId))
-            //{
-            //    return Unauthorized();
-            //}
+            if (string.IsNullOrWhiteSpace(userId))
+            {
+                return Unauthorized();
+            }
 
-            //userId = userId.ToUpperInvariant();
+            userId = userId.ToUpperInvariant();
 
-            //var userPermission = await _userPermissionService.GetUserPermissionAsync(userId);
+            var userPermission = await _userPermissionService.GetUserPermissionAsync(userId);
 
-            //if (userPermission == null || !userPermission.Procurement)
-            //{
-            //    return RedirectToPage("/AccessDenied", new
-            //    {
-            //        returnUrl = "/Procurement/Index"
-            //    });
-            //}
+            if (userPermission == null || !userPermission.Procurement)
+            {
+                return RedirectToPage("/AccessDenied", new
+                {
+                    returnUrl = "/Procurement/Index"
+                });
+            }
 
 
             LoadImpex();

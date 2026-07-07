@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.EntityFrameworkCore;
 using PlanningTool.NavExtension.Data;
 using PlanningTool.NavExtension.Models;
 
@@ -17,10 +18,16 @@ namespace PlanningTool.NavExtension.Pages.Account
         [BindProperty] public EmailNotication EmailNotification { get; set; } = new();
 
         public List<EmailNotication> NotificationList { get; set; } = new();
+        public IList<ReminderNofication> ReminderNotifications { get; set; } = new List<ReminderNofication>();
 
-        public void OnGet(int? id)
+        public async Task OnGet(int? id)
         {
             NotificationList = _context.EmailNotifications.ToList();
+
+            ReminderNotifications = await _context.tblReminderNotification
+                        .OrderByDescending(x => x.CreatedDate)
+                        .ToListAsync();
+
 
             if (id.HasValue)
             {
@@ -91,6 +98,8 @@ namespace PlanningTool.NavExtension.Pages.Account
                         existing._ptEmailAddress = EmailNotification._ptEmailAddress;
                         existing._ptImPex = EmailNotification._ptImPex;
                         existing._ptProcurement = EmailNotification._ptProcurement;
+                        existing._pt2WeeksReminder = EmailNotification._pt2WeeksReminder;
+                        existing._ptDelaysReminder = EmailNotification._ptDelaysReminder;
                         existing._ptUserType = EmailNotification._ptUserType;
                         existing._ptUpdatedDate = DateTime.Now;
 
@@ -124,6 +133,64 @@ namespace PlanningTool.NavExtension.Pages.Account
 
             TempData["Success"] = "Deleted successfully";
             return RedirectToPage();
+        }
+        private string GenerateEmailBody(ReminderNofication reminder)
+        {
+            if (reminder.ReminderType == "2WeeksReminder")
+            {
+                return $@"
+            <p>Hello Team,</p>
+
+            <p>
+                This is an automated reminder that the following shipment
+                is expected to arrive within the next 14 days.
+            </p>
+
+            <table border='1' cellpadding='5'>
+                <tr>
+                    <td><b>PO No</b></td>
+                    <td>{reminder.PONo}</td>
+                </tr>
+                <tr>
+                    <td><b>HBL No</b></td>
+                    <td>{reminder.HBLNo}</td>
+                </tr>
+                <tr>
+                    <td><b>Container No</b></td>
+                    <td>{reminder.ContainerNo}</td>
+                </tr>
+                <tr>
+                    <td><b>ETA</b></td>
+                    <td>{reminder.ContainerETA:MMMM dd, yyyy}</td>
+                </tr>
+            </table>";
+            }
+
+            return $@"
+                <p>Hello Team,</p>
+
+                <p>
+                    The following shipment has exceeded its expected arrival date.
+                </p>
+
+                <table border='1' cellpadding='5'>
+                    <tr>
+                        <td><b>PO No</b></td>
+                        <td>{reminder.PONo}</td>
+                    </tr>
+                    <tr>
+                        <td><b>HBL No</b></td>
+                        <td>{reminder.HBLNo}</td>
+                    </tr>
+                    <tr>
+                        <td><b>Container No</b></td>
+                        <td>{reminder.ContainerNo}</td>
+                    </tr>
+                    <tr>
+                        <td><b>ETA</b></td>
+                        <td>{reminder.ContainerETA:MMMM dd, yyyy}</td>
+                    </tr>
+                </table>";
         }
     }
 }

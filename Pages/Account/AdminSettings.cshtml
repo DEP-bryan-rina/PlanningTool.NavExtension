@@ -52,15 +52,31 @@
 									<input asp-for="EmailNotification._ptImPex"
 										   class="form-check-input" />
 									<label class="form-check-label">
-										ImPex Notification?
+										ImPex?
+									</label>
+								</div>
+
+								<div class="form-check mb-2">
+									<input asp-for="EmailNotification._ptProcurement"
+										   class="form-check-input" />
+									<label class="form-check-label">
+										Procurement?
+									</label>
+								</div>
+
+								<div class="form-check mb-2">
+									<input asp-for="EmailNotification._pt2WeeksReminder"
+										   class="form-check-input" />
+									<label class="form-check-label">
+										2 Weeks Reminder?
 									</label>
 								</div>
 
 								<div class="form-check mb-3">
-									<input asp-for="EmailNotification._ptProcurement"
+									<input asp-for="EmailNotification._ptDelaysReminder"
 										   class="form-check-input" />
 									<label class="form-check-label">
-										Procurement Notification?
+										Delays Reminder?
 									</label>
 								</div>
 
@@ -76,7 +92,7 @@
 										<option value="">-- Select --</option>
 										<option value="Admin">Admin</option>
 										<option value="User">User</option>
-										<option value="Notification">Notification</option>
+										<option value="Notification" selected>Notification</option>
 									</select>
 
 								</div>
@@ -106,38 +122,97 @@
 
 					<!-- Right Side: Table -->
 					<div class="col-md-9">                        
-						<table class="table table-bordered table-hover table-sm">
-							<thead>
+						<table class="table table-bordered table-hover w-100">
+							<thead class="sticky-top bg-white table-bordered" style="font-size:0.75rem;">
 								<tr>
 									<th>Email Address</th>
 									<th>ImPex Notification</th>
 									<th>Procurement Notification</th>
+									<th>2 Weeks Reminder</th>
+									<th>Delays Reminder</th>
 									<th>User Type</th>
-									<th width="140">Action</th>
+									<th width="140" class="text-center">Action</th>
 								</tr>
 							</thead>
 
-							<tbody>
+							<tbody style="font-size:0.75rem;">
 								@foreach (var item in Model.NotificationList)
 								{
 									<tr>
 										<td>@item._ptEmailAddress</td>
-										<td>@(item._ptImPex ? "Yes" : "No")</td>
-										<td>@(item._ptProcurement ? "Yes" : "No")</td>
-										<td>@item._ptUserType</td>
+										<td>
+											@if (item._ptImPex)
+											{
+												<span class="badge bg-success">
+													<i class="bi bi-check-circle-fill"></i> Active
+												</span>
+											}
+											else
+											{
+												<span class="badge bg-danger">
+													<i class="bi bi-x-circle-fill"></i> Inactive
+												</span>
+											}
+										</td>
 
 										<td>
+											@if (item._ptProcurement)
+											{
+												<span class="badge bg-success">
+													<i class="bi bi-check-circle-fill"></i> Active
+												</span>
+											}
+											else
+											{
+												<span class="badge bg-danger">
+													<i class="bi bi-x-circle-fill"></i> Inactive
+												</span>
+											}
+										</td>
+
+										<td>
+											@if (item._pt2WeeksReminder)
+											{
+												<span class="badge bg-success">
+													<i class="bi bi-check-circle-fill"></i> Active
+												</span>
+											}
+											else
+											{
+												<span class="badge bg-danger">
+													<i class="bi bi-x-circle-fill"></i> Inactive
+												</span>
+											}
+										</td>
+
+										<td>
+											@if (item._ptDelaysReminder)
+											{
+												<span class="badge bg-success">
+													<i class="bi bi-check-circle-fill"></i> Active
+												</span>
+											}
+											else
+											{
+												<span class="badge bg-danger">
+													<i class="bi bi-x-circle-fill"></i> Inactive
+												</span>
+											}
+										</td>
+										<td>@item._ptUserType</td>
+
+										<td class="text-center">
 											<a asp-page="./AdminSettings"
 											   asp-route-id="@item._PK_ptEmailNotification_ID"
 											   class="btn btn-warning btn-sm">
-												Edit
+												<i class="fa fa-pencil small"></i>
 											</a>
 
 											<a asp-page-handler="Delete"
 											   asp-route-id="@item._PK_ptEmailNotification_ID"
 											   class="btn btn-danger btn-sm"
 											   onclick="return confirm('Are you sure you want to delete the record for @item._ptEmailAddress?')">
-												Delete
+												<i class="fa fa-trash small"></i>
 											</a>
 										</td>
 									</tr>
@@ -151,9 +226,291 @@
 
 				</div>
 
+				
+
 			</div>
 		</div>
 	</div>
 
 </div>
+<div class="card shadow-sm mt-4">
+	<div class="card-header bg-light">
+		<h5 class="mb-0">
+			<i class="fa fa-bell me-2"></i>
+			Procurement Reminders
+		</h5>
+	</div>
 
+	<div class="card-body">
+
+		@if (!Model.ReminderNotifications.Any())
+		{
+			<div class="alert alert-info">
+				No reminders found.
+			</div>
+		}
+		else
+		{
+			<div class="table-responsive">
+
+				<table class="table table-hover w-100">
+					<thead class="sticky-top bg-white table-bordered" style="font-size:0.75rem;">
+						<tr>
+							<th>Permit ID</th>
+							<th>PO No</th>
+							<th>HBL No</th>
+							<th>Container No</th>
+							<th>Type</th>
+							<th>Email</th>
+							<th>Container ETA</th>
+							<th>Status</th>
+							<th>Created Date</th>
+							<th>Sent Date</th>
+							<th width="100" class="text-center">Preview</th>
+						</tr>
+					</thead>
+
+					<tbody style="font-size:0.75rem;">
+
+						@foreach (var item in Model.ReminderNotifications)
+						{
+							<tr>
+
+								<td>
+									@item.PermitID
+								</td>
+								<td>@item.PONo</td>
+								<td>@item.HBLNo</td>
+								<td>@item.ContainerNo</td>
+								<td>
+									@if (item.ReminderType == "2WeeksReminder")
+									{
+										<span class="badge bg-warning text-dark">
+											2 Weeks Reminder
+										</span>
+									}
+									else
+									{
+										<span class="badge bg-danger">
+											Delays Reminder
+										</span>
+									}
+								</td>
+
+								<td>
+									@item.RecipientEmail
+								</td>
+
+								<td>
+									@(item.ContainerETA?.ToString("yyyy-MM-dd"))
+								</td>
+
+								<td>
+									@if (item.EmailStatus == "Sent")
+									{
+										<span class="badge bg-success">Sent</span>
+									}
+									else
+									{
+										<span class="badge bg-warning text-dark">Pending</span>
+									}
+								</td>
+
+								<td>
+									@item.CreatedDate.ToString("yyyy-MM-dd HH:mm")
+								</td>
+
+								<td>
+									@(item.SentDate?.ToString("yyyy-MM-dd HH:mm"))
+								</td>
+								<td class="text-center">
+									<button type="button"
+											class="btn btn-primary btn-sm"
+											data-bs-toggle="modal"
+											data-bs-target="#previewMail_@item.PermitID">
+										<i class="fa fa-envelope"></i>
+									</button>
+								</td>
+
+							</tr>
+						}
+
+					</tbody>
+
+				</table>
+
+			</div>
+		}
+
+	</div>
+</div>
+<br />
+<div class="row mb-3">
+
+	<div class="col-md-3">
+		<div class="card border-warning">
+			<div class="card-body">
+
+				<h6 class="text-muted">
+					Pending Reminders
+				</h6>
+
+				<h3>
+					@Model.ReminderNotifications.Count(x => x.EmailStatus == "Pending")
+				</h3>
+
+			</div>
+		</div>
+	</div>
+
+	<div class="col-md-3">
+		<div class="card border-success">
+			<div class="card-body">
+
+				<h6 class="text-muted">
+					Reminder Sent
+				</h6>
+
+				<h3>
+					@Model.ReminderNotifications.Count(x => x.EmailStatus == "Sent")
+				</h3>
+
+			</div>
+		</div>
+	</div>
+
+</div>
+@foreach (var item in Model.ReminderNotifications)
+{
+	<div class="modal fade"
+		 id="previewMail_@item.PermitID"
+		 tabindex="-1">
+
+		<div class="modal-dialog modal-lg">
+			<div class="modal-content">
+
+				<div class="modal-header">
+					<h5 class="modal-title">
+						Email Preview
+					</h5>
+					<button type="button"
+							class="btn-close"
+							data-bs-dismiss="modal">
+					</button>
+				</div>
+
+				<div class="modal-body">
+
+					@if (item.ReminderType == "2WeeksReminder")
+					{
+						<div>
+
+							<strong>Subject:</strong>
+							[Procurement ETA Reminder] Container ETA in 14 Days
+
+							<hr />
+
+							<p>Hello Team,</p>
+
+							<p>
+								This is an automated reminder that the following shipment
+								is expected to arrive within the next
+								<strong>14 days</strong>.
+							</p>
+
+							<table class="table table-bordered">
+
+								<tr>
+									<th>PO No</th>
+									<td>@item.PONo</td>
+								</tr>
+
+								<tr>
+									<th>HBL No</th>
+									<td>@item.HBLNo</td>
+								</tr>
+
+								<tr>
+									<th>Container No</th>
+									<td>@item.ContainerNo</td>
+								</tr>
+
+								<tr>
+									<th>Container ETA</th>
+									<td>@item.ContainerETA?.ToString("MMMM dd, yyyy")</td>
+								</tr>
+
+							</table>
+
+							<p>
+								Please coordinate with the concerned supplier
+								and forwarder for the expected arrival.
+							</p>
+
+							<p>
+								Regards,<br />
+								Procurement Monitoring System
+							</p>
+
+						</div>
+					}
+					else
+					{
+						<div>
+
+							<strong>Subject:</strong>
+							[Procurement Delay Alert] Container ETA Overdue
+
+							<hr />
+
+							<p>Hello Team,</p>
+
+							<p>
+								The following shipment has exceeded its expected
+								arrival date and requires immediate follow-up.
+							</p>
+
+							<table class="table table-bordered">
+
+								<tr>
+									<th>PO No</th>
+									<td>@item.PONo</td>
+								</tr>
+
+								<tr>
+									<th>HBL No</th>
+									<td>@item.HBLNo</td>
+								</tr>
+
+								<tr>
+									<th>Container No</th>
+									<td>@item.ContainerNo</td>
+								</tr>
+
+								<tr>
+									<th>Container ETA</th>
+									<td>@item.ContainerETA?.ToString("MMMM dd, yyyy")</td>
+								</tr>
+
+							</table>
+
+							<p>
+								Please coordinate with the supplier and logistics
+								provider immediately.
+							</p>
+
+							<p>
+								Regards,<br />
+								Procurement Monitoring System
+							</p>
+
+						</div>
+					}
+
+				</div>
+
+			</div>
+		</div>
+
+	</div>
+}

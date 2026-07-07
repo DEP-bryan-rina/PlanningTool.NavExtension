@@ -205,3 +205,38 @@
     background: #2563eb;
     color: white;
 }
+
+/* ===== Global Loader ===== */
+
+.loader-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(255,255,255,.98);
+    z-index: 99999;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: opacity .4s ease;
+}
+
+.loader-content {
+    text-align: center;
+}
+
+.loader-gif {
+    width: 180px;
+    max-width: 100%;
+}
+
+.navbar-brand {
+    font-weight: 600;
+}
+
+.dropdown-item.active {
+    background: #0d6efd;
+    color: #fff;
+}
+
+main {
+    min-height: calc(100vh - 130px);
+}

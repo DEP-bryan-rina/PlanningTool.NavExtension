@@ -14,6 +14,9 @@ namespace PlanningTool.NavExtension.Models
 
         public bool _ptProcurement { get; set; }
 
+        public bool _pt2WeeksReminder { get; set; }
+        public bool _ptDelaysReminder { get; set; }
+
         public string _ptUserType { get; set; }
 
         public string _ptStatus { get; set; }

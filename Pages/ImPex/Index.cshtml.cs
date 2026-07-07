@@ -24,28 +24,37 @@ namespace PlanningTool.NavExtension.Pages.ImPex
             _userPermissionService = userPermissionService;
             this.conStr = _context.Database.GetConnectionString();
         }
+        [BindProperty] public ImPexCenterModel Impex { get; set; }
+
+        public List<ImPexCenterModel> ImpexList { get; set; } = new List<ImPexCenterModel>();
+        
+        public List<ProcurementCenterModel> ProcurementList { get; set; } = new();
+        public List<SelectListItem> CountryList { get; set; } = new();
+
         public async Task<IActionResult> OnGetAsync(int? id)
         {
-            //var userId = User?.Identity?.Name;
+            var userId = User?.Identity?.Name;
 
-            //if (string.IsNullOrWhiteSpace(userId))
-            //{
-            //    return Unauthorized();
-            //}
+            if (string.IsNullOrWhiteSpace(userId))
+            {
+                return Unauthorized();
+            }
 
-            //userId = userId.ToUpperInvariant();
+            userId = userId.ToUpperInvariant();
 
-            //var userPermission = await _userPermissionService.GetUserPermissionAsync(userId);
+            var userPermission = await _userPermissionService.GetUserPermissionAsync(userId);
 
-            //if (userPermission == null || !userPermission.ImPex)
-            //{
-            //    return RedirectToPage("/AccessDenied", new
-            //    {
-            //        returnUrl = "/ImPex/Index"
-            //    });
-            //}
+            if (userPermission == null || !userPermission.ImPex)
+            {
+                return RedirectToPage("/AccessDenied", new
+                {
+                    returnUrl = "/ImPex/Index"
+                });
+            }
 
             this.ImpexList = _context.tblImPexCenter.ToList();
+            ProcurementList = await _context.tblProcurementCenter.ToListAsync();
+
             this.LoadCountries();
 
             if (id.HasValue)
@@ -62,17 +71,11 @@ namespace PlanningTool.NavExtension.Pages.ImPex
             else
             {
                 Impex = new ImPexCenterModel();
-            }
+            }           
+
 
             return Page();
-        }
-
-        [BindProperty] public ImPexCenterModel Impex { get; set; }
-
-        public List<ImPexCenterModel> ImpexList { get; set; } = new List<ImPexCenterModel>();
-        public List<ProcurementCenterDto> ProcurementList { get; set; } = new();
-        public List<SelectListItem> CountryList { get; set; } = new();
-
+        }    
 
         private void LoadCountries()
         {

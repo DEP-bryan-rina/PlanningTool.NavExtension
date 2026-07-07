@@ -48,80 +48,128 @@
 
 	<input type="hidden" asp-for="Impex.PK_ptImpexID" />
 
-	<div class="row g-3">
+	<div class="card border-0 shadow-sm">
+		<div class="card-header bg-white border-bottom">
+			<h5 class="mb-0 fw-semibold">
+				<i class="fas fa-file-import text-primary me-2"></i>
+				Shipment Information
+			</h5>
+		</div>
 
-		<div class="col-md-4">
+		<div class="card-body">
 
-			<label class="form-label">
-				HBL No: <span class="text-danger">*</span>
-			</label>
+			<div class="row g-4">
 
-			<input asp-for="Impex._ptHBLNo"
-				   id="HBLNo"
-				   class="form-control"
-				   style="height:30px;"
-				   onblur="checkHblExists()"
-				   required />
+				<!-- Left Column -->
+				<div class="col-md-4">
 
-			<small id="hblMessage"></small>
+					<div class="mb-3">
+						<label class="form-label fw-semibold">
+							HBL No <span class="text-danger">*</span>
+						</label>
 
-			<div class="mt-3">
-				<label class="form-label">
-					Dedon ETA: <span class="text-danger">*</span>
-				</label>
+						<div class="input-group">
+							<span class="input-group-text">
+								<i class="fas fa-file-alt"></i>
+							</span>
 
-				<input asp-for="Impex._ptContainerETA"
-					   class="form-control"
-					   style="height:30px;"
-					   required />
+							<input asp-for="Impex._ptHBLNo"
+								   id="HBLNo"
+								   class="form-control"
+								   placeholder="Enter HBL Number"
+								   onblur="checkHblExists()"
+								   required />
+						</div>
+
+						<small id="hblMessage" class="mt-1 d-block"></small>
+					</div>
+
+					<div>
+						<label class="form-label fw-semibold">
+							Dedon ETA <span class="text-danger">*</span>
+						</label>
+
+						<div class="input-group">
+							<span class="input-group-text">
+								<i class="fas fa-calendar-alt"></i>
+							</span>
+
+							<input asp-for="Impex._ptContainerETA"
+								   type="date"
+								   class="form-control"
+								   required />
+						</div>
+					</div>
+
+				</div>
+
+				<!-- Middle Column -->
+				<div class="col-md-4">
+
+					<div class="mb-3">
+						<label class="form-label fw-semibold">
+							Container No <span class="text-danger">*</span>
+						</label>
+
+						<div class="input-group">
+							<span class="input-group-text">
+								<i class="fas fa-shipping-fast"></i>
+							</span>
+
+							<input asp-for="Impex._ptContainerNo"
+								   class="form-control"
+								   placeholder="Enter Container Number"
+								   required />
+						</div>
+					</div>
+
+					<div>
+						<label class="form-label fw-semibold">
+							Country of Origin <span class="text-danger">*</span>
+						</label>
+
+						<div class="input-group">						
+
+							<select id="countryOfOrigin"
+									asp-for="Impex._ptCountryOfOrigin"
+									class="form-select"
+									required>
+								<option value="">
+									Select Country...
+								</option>
+
+								@foreach (var country in Model.CountryList)
+								{
+									<option value="@country.Value">
+										@country.Text
+									</option>
+								}
+							</select>
+						</div>
+
+						<span asp-validation-for="Impex._ptCountryOfOrigin"
+							  class="text-danger small"></span>
+					</div>
+
+				</div>
+
+				<!-- Right Column -->
+				<div class="col-md-4">
+
+					<label class="form-label fw-semibold">
+						Remarks
+					</label>
+
+					<textarea asp-for="Impex._ptRemarks"
+							  class="form-control"
+							  rows="5"
+							  placeholder="Enter remarks, notes, shipment details..."></textarea>
+
+				</div>
+
 			</div>
-		</div>
-
-		<div class="col-md-4">
-
-			<label class="form-label">
-				Container No: <span class="text-danger">*</span>
-			</label>
-
-			<input asp-for="Impex._ptContainerNo"
-				   class="form-control"
-				   style="height:30px;"
-				   required />
-
-			<div class="mt-3">
-
-				<label class="form-label">
-					Country of Origin: <span class="text-danger">*</span>
-				</label>
-
-				<select id="countryOfOrigin"
-						asp-for="Impex._ptCountryOfOrigin"
-						class="form-select form-select-sm"
-						required>
-					<option value="">-- Search & Select Country --</option>
-
-					@foreach (var country in Model.CountryList)
-					{
-						<option value="@country.Value">@country.Text</option>
-					}
-				</select>
-
-				<span asp-validation-for="Impex._ptCountryOfOrigin"
-					  class="text-danger"></span>
-
-			</div>
-		</div>
-
-		<div class="col-md-4">
-
-			<label class="form-label">Remarks:</label>
-
-			<textarea asp-for="Impex._ptRemarks"
-					  class="form-control"
-					  style="min-height:80px;"></textarea>
 
 		</div>
-
 	</div>
 
 	<div class="mt-3">
@@ -130,41 +178,48 @@
 		{
 			<button id="btnUpdate"
 					type="submit"
-					class="btn btn-success btn-sm"
+					class="btn btn-success px-4 shadow-sm"
 					style="display:none;">
+				<i class="fas fa-save me-1"></i>
 				Update
 			</button>
 
-			<a asp-page="./Index" class="btn btn-secondary btn-sm">
+			<a asp-page="./Index"
+			   class="btn btn-outline-secondary px-4">
+				<i class="fas fa-times me-1"></i>
 				Cancel
 			</a>
 		}
 		else
 		{
-			<button id="btnAdd" type="submit" class="btn btn-primary btn-sm">
-				Add New
+			<button id="btnAdd"
+					type="submit"
+					class="btn btn-primary px-4 shadow-sm">
+				<i class="fas fa-plus-circle me-1"></i>
+				Add New Record
 			</button>
 		}
 
-	</div>
+	</div>	
 
 </form>
 <br />
 <div class="table-responsive">
 
-	<table id="tblImPex" class="table table-hover w-100">
+	<table id="tblImPex" class="table table-hover w-100 erp-table">
 
 		<thead class="sticky-top bg-white table-bordered" style="font-size:0.75rem;">
 			<tr>
 				<th class="text-center">No</th>
-				<th>HBL No</th>
+				<th>HBL No</th>				
 				<th>Container No</th>
 				<th>Dedon ETA</th>
 				<th>Country Of Origin</th>
 				<th>Remarks</th>
 				<th>Created By</th>
 				<th>Modified By</th>
-				<th class="text-center">Status</th>
+				<th>PO No Tagged</th>
+				<th class="text-center">Status</th>				
 				<th class="text-center">Actions</th>
 			</tr>
 		</thead>
@@ -181,6 +236,7 @@
 				{
 					<tr>
 						<td class="text-center">@counter</td>
+						
 						<td>@item._ptHBLNo</td>
 						<td>@item._ptContainerNo</td>
 						<td>@item._ptContainerETA?.ToString("yyyy-MM-dd")</td>
@@ -188,21 +244,36 @@
 						<td class="erp-truncate">@item._ptRemarks</td>
 						<td>@item._ptCreatedBy</td>
 						<td>@item._ptModifiedBy</td>
-
+						<td>
+							@Html.Raw(string.Join(" ",
+								Model.ProcurementList
+									.Where(x => x._ptHBLNo == item._ptHBLNo && x._ptStatus != 0)
+									.Select(x => $"<span class='badge bg-primary me-1'>{x._ptDocNo}</span>")))
+						</td>
 						<td class="text-center">
 							@if (item._ptStatus == 1)
 							{
-								<span class="badge bg-success">Tagged</span>
+								<span class="badge bg-secondary">
+									<i class="fas fa-tag"></i> Tagged
+								</span>
+
+
 							}
 							else if (item._ptStatus == 2)
 							{
-								<span class="badge bg-secondary">Completed</span>
+								<span class="badge bg-success">
+									<i class="fas fa-check-circle"></i> Completed
+								</span>
 							}
 							else
 							{
-								<span class="badge bg-primary">For Tagging</span>
+								<span class="badge bg-warning text-dark">
+									<i class="fas fa-clock"></i> Pending
+								</span>
 							}
 						</td>
+
+					
 
 						<td class="text-center">
 							@if (item._ptStatus != 2)
@@ -216,12 +287,12 @@
 							}
 							else
 							{
-								<button type="button" class="btn btn-secondary btn-sm">
+								<button type="button" class="btn btn-success btn-sm">
 									<i class="fa-solid fa-lock"></i>
 								</button>
 							}
 						</td>
-					</tr>
+					</tr>		
 
 					counter++;
 				}
