@@ -174,47 +174,82 @@ namespace PlanningTool.NavExtension.Pages.Procurement
 
                     string itemRows = string.Join("",
                         taggedItems.Select(x =>
-                            $"<tr><td>{x.DocNo}</td><td>{x.ItemCode}</td></tr>"));
+                            $"<tr>" +
+                            $"<td style='padding:2px 5px; text-align:left;'>{x.DocNo}</td>" +
+                            $"<td style='padding:2px 5px; text-align:left;'>{x.ItemCode}</td>" +
+                            $"</tr>"));
 
                     _ = Task.Run(() =>
                         _emailService.SendEmailAsync(
                             recipients,
-                            "Tagging Notification",
+                            "Purchase Order Successfully Tagged",
                             $@"
-                        <div style='font-family:'Segoe UI', Arial, sans-serif; font-size:12px; font-weight:400; line-height:1.5; color:#ffffff;'>
-                            <p>Dear Team,</p>
+                            <div style='font-family:'Segoe UI', Arial, sans-serif; font-size:12px; font-weight:400; line-height:1.5; color:#ffffff; text-align:left;'>
+                                <p>Dear Team,</p>
 
-                            <p>
-                                Please be informed that the HBL No: <b>{hblNo}</b> 
-                                with Container No: <b>{containerNo}</b> 
-                                & Dedon ETA <b>{paramCETA}</b> has been successfully tagged.
-                            </p>
+                                <p>
+                                    This is to inform you that the following shipment has been successfully
+                                    <strong>tagged</strong> in the system.
+                                </p>
 
-                            <p><b>Tagged Purchase Order Details:</b></p>
+                                <table>
 
-                            <table border='1' cellpadding='5' cellspacing='0' style='border-collapse:collapse;'>
-                                <thead>
-                                    <tr style='font-family:'Segoe UI', Arial, sans-serif; font-size:12px; font-weight:400; line-height:1.5; color:#ffffff;'>
-                                        <th style='align-items:left'>PO No</th>
-                                        <th>Item Code</th>
+                                    <tr>
+                                        <th style='text-align:left;'>HBL No</th>
+                                        <td>: {hblNo}</td>
                                     </tr>
-                                </thead>
-                                <tbody>
-                                    {itemRows}
-                                </tbody>
-                            </table>
 
-                            <br/>
+                                    <tr>
+                                        <th style='text-align:left;'>Container No</th>
+                                        <td>: {containerNo}</td>
+                                    </tr>
 
-                            <p>
-                                Should you encounter any issues or require assistance,
-                                please do not hesitate to contact the IT Team.
-                            </p>
+                                    <tr>
+                                        <th style='text-align:left;'>Dedon ETA</th>
+                                        <td>: {paramCETA}</td>
+                                    </tr>
 
-                            <p>
-                                This is a system-generated email. Please do not reply.
-                            </p>
-                        </div>"
+                                    <tr>
+                                        <th style='text-align:left;'>Status</th>
+                                        <td>: Tagged </td>
+                                    </tr>
+
+                                </table>
+
+                                <p><strong>Tagged Purchase Order Details:</strong></p>
+
+                                <table class='table table-bordered'>
+
+                                    <thead>
+                                        <tr>
+                                            <th style='text-align:left;'>PO No</th>
+                                            <th style='text-align:left;'>Item Code</th>
+                                        </tr>
+                                    </thead>
+
+                                    <tbody>
+                                        {itemRows}
+                                    </tbody>
+
+                                </table>
+
+                                <p>
+                                    Should you encounter any issues or require further assistance,
+                                    please do not hesitate to contact the IT Team.
+                                </p>
+
+                                <p>
+                                    Regards,<br />
+                                    Procurement Monitoring Team
+                                </p>
+
+                                <hr />
+
+                                <small>
+                                    This is a system-generated email. Please do not reply.
+                                </small>
+
+                            </div>"
                         ));
                 }
             }
@@ -272,26 +307,60 @@ namespace PlanningTool.NavExtension.Pages.Procurement
 
                     _ = Task.Run(() => _emailService.SendEmailAsync(
                         recipients,
-                        "Untag Notification",
+                        "PO Untagged from Shipment",
                         $@"
                         <div style='font-family:'Segoe UI', Arial, sans-serif; font-size:12px; font-weight:400; line-height:1.5; color:#ffffff;'>
                             <p>Dear Team,</p>
 
                             <p>
-                                Please be informed that the 
-                                HBL No: <b>{hblno}</b>, 
-                                PO No: <b>{docNo}</b>, 
-                                Item Code: <b>{itemcode}</b>, 
-                                Dedon ETA <b>{dateOnlyConETA}</b>
-                                have already been <b>Untagged</b> to the corresponding Purchase Orders in the System.
+                                This is to inform you that the following shipment details have already been
+                                <strong>Untagged</strong> from the corresponding Purchase Order(s) in the system.
+                            </p>
+
+                            <table>
+
+                                <tr>
+                                    <th style='text-align:left;'>HBL No</th>
+                                    <td style='text-align:left;'>: {hblno}</td>
+                                </tr>
+
+                                <tr>
+                                    <th style='text-align:left;'>PO No</th>
+                                    <td style='text-align:left;'>: {docNo}</td>
+                                </tr>
+
+                                <tr>
+                                    <th style='text-align:left;'>Item Code</th>
+                                    <td style='text-align:left;'>: {itemcode}</td>
+                                </tr>
+
+                                <tr>
+                                    <th style='text-align:left;'>Dedon ETA</th>
+                                    <td style='text-align:left;'>: {dateOnlyConETA}</td>
+                                </tr>
+
+                                <tr>
+                                    <th style='text-align:left;'>Status</th>
+                                    <td style='text-align:left;'>: Untagged </td>
+                                </tr>
+
+                            </table>
+
+                            <p>
+                                Should you encounter any issues or require further assistance,
+                                please do not hesitate to contact the IT Team.
                             </p>
 
                             <p>
-                                Should you encounter any issues or require assistance, please do not hesitate to contact the IT team.
+                                Regards,<br />
+                                Procurement Monitoring Team
                             </p>
 
-                            <br/>
-                            <p>This is a system-generated email. Please do not reply.</p>
+                            <hr />
+
+                            <small>
+                                This is a system-generated email. Please do not reply.
+                            </small>
 
                         </div>"
                       ));
@@ -300,10 +369,6 @@ namespace PlanningTool.NavExtension.Pages.Procurement
             catch (SqlException sqlEx)
             {
                 TempData["ErrorMessage"] = "Database error: " + sqlEx.Message;
-            }
-            catch (Exception ex)
-            {
-                TempData["ErrorMessage"] = "Unexpected error: " + ex.Message;
             }
 
             // ✅ Always reload data
@@ -315,45 +380,52 @@ namespace PlanningTool.NavExtension.Pages.Procurement
 
         private void LoadProcurementData(string _search)
         {
-            _search = string.IsNullOrWhiteSpace(_search) ? null : _search.Trim();
-
-            using (SqlConnection con = new SqlConnection(conStr))
+            try
             {
-                SqlCommand cmd = new SqlCommand("_spGetProcurementCenter", con);
-                cmd.CommandType = CommandType.StoredProcedure;
+                _search = string.IsNullOrWhiteSpace(_search) ? null : _search.Trim();
 
-                // ✅ Pass parameter properly
-                cmd.Parameters.AddWithValue("@Search",
-                    string.IsNullOrEmpty(_search) ? (object)DBNull.Value : _search);
-
-                con.Open();
-
-                using (var reader = cmd.ExecuteReader())
+                using (SqlConnection con = new SqlConnection(conStr))
                 {
-                    ProcurementList.Clear();
+                    SqlCommand cmd = new SqlCommand("_spGetProcurementCenter", con);
+                    cmd.CommandType = CommandType.StoredProcedure;
 
-                    while (reader.Read())
+                    // ✅ Pass parameter properly
+                    cmd.Parameters.AddWithValue("@Search",
+                        string.IsNullOrEmpty(_search) ? (object)DBNull.Value : _search);
+
+                    con.Open();
+
+                    using (var reader = cmd.ExecuteReader())
                     {
-                        ProcurementList.Add(new ProcurementCenterDto
-                        {
-                            IDDocType = Convert.ToInt32(reader["IDDocType"]),
-                            IDDocNo = reader["IDDocNo"].ToString(),
-                            IDLineNo = Convert.ToInt32(reader["IDLineNo"]),
-                            VendorName = reader["VendorName"].ToString(),
-                            ItemCode = reader["ItemCode"].ToString(),
-                            ItemDescription = reader["ItemDescription"].ToString(),
-                            OutstandingQty = reader["OutstandingQty"] == DBNull.Value ? 0 : Convert.ToDecimal(reader["OutstandingQty"]),
+                        ProcurementList.Clear();
 
-                            ptBalanceQty = reader["ptBalanceQty"] == DBNull.Value ? 0 : Convert.ToDecimal(reader["ptBalanceQty"]),
-                            ptPartialDelivered = reader["ptPartialDelivered"] == DBNull.Value ? 0 : Convert.ToDecimal(reader["ptPartialDelivered"]),
-                            ptHBLNo = reader["ptHBLNo"].ToString(),
-                            ptContainerNo = reader["ptContainerNo"].ToString(),
-                            ptContainerETA = reader["ptContainerETA"] == DBNull.Value ? (DateTime?)null : Convert.ToDateTime(reader["ptContainerETA"]),
-                            ptCountryOfOrigin = reader["ptCountryOfOrigin"] == DBNull.Value ? "" : reader["ptCountryOfOrigin"].ToString(),
-                            ptRemarks = reader["ptRemarks"] == DBNull.Value ? "" : reader["ptRemarks"].ToString()
-                        });
+                        while (reader.Read())
+                        {
+                            ProcurementList.Add(new ProcurementCenterDto
+                            {
+                                IDDocType = Convert.ToInt32(reader["IDDocType"]),
+                                IDDocNo = reader["IDDocNo"].ToString(),
+                                IDLineNo = Convert.ToInt32(reader["IDLineNo"]),
+                                VendorName = reader["VendorName"].ToString(),
+                                ItemCode = reader["ItemCode"].ToString(),
+                                ItemDescription = reader["ItemDescription"].ToString(),
+                                OutstandingQty = reader["OutstandingQty"] == DBNull.Value ? 0 : Convert.ToDecimal(reader["OutstandingQty"]),
+
+                                ptBalanceQty = reader["ptBalanceQty"] == DBNull.Value ? 0 : Convert.ToDecimal(reader["ptBalanceQty"]),
+                                ptPartialDelivered = reader["ptPartialDelivered"] == DBNull.Value ? 0 : Convert.ToDecimal(reader["ptPartialDelivered"]),
+                                ptHBLNo = reader["ptHBLNo"].ToString(),
+                                ptContainerNo = reader["ptContainerNo"].ToString(),
+                                ptContainerETA = reader["ptContainerETA"] == DBNull.Value ? (DateTime?)null : Convert.ToDateTime(reader["ptContainerETA"]),
+                                ptCountryOfOrigin = reader["ptCountryOfOrigin"] == DBNull.Value ? "" : reader["ptCountryOfOrigin"].ToString(),
+                                ptRemarks = reader["ptRemarks"] == DBNull.Value ? "" : reader["ptRemarks"].ToString()
+                            });
+                        }
                     }
                 }
+            }
+            catch (SqlException sqlEx)
+            {
+                TempData["ErrorMessage"] = "Database error: " + sqlEx.Message;
             }
         }
     }

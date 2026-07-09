@@ -84,15 +84,14 @@
 		</div>
 
 		<div class="card-body">
-
 			<div class="row g-4">
 
 				<!-- Left Column -->
-				<div class="d-flex align-items-end gap-2 flex-wrap">
+				<div class="d-flex justify-content-between align-items-end flex-wrap gap-3">
 
 					<div>
-						<label class="erp-label mb-1">
-							HBL Reference
+						<label class="erp-label">
+							HBL No Reference <span class="text-danger">*</span>
 						</label>
 
 						@if (Model.ImpexList?.Any() == true)
@@ -119,20 +118,49 @@
 
 							</select>
 						}
+
+						<button type="submit" id="btnTagPO"
+								asp-page-handler="Tag"
+								class="btn btn-primary erp-btn">
+
+							<i class="fas fa-link me-2"></i>
+							Tag Selected PO
+
+						</button>
 					</div>
 
-					<button type="submit"
-							asp-page-handler="Tag"
-							class="btn btn-primary erp-btn">
+					<div class="ms-auto d-flex align-items-center small">
 
-						<i class="fas fa-link me-2"></i>
-						Tag Selected PO
+						<span class="fw-semibold pe-2 border-end">
+							ETA Legend
+						</span>
 
-					</button>
+						<span class="badge bg-danger ms-2">
+							<i class="fas fa-triangle-exclamation me-1"></i>
+							Overdue
+						</span>
 
+						<span class="border-start ps-2 ms-2">
+							<span class="badge bg-success">
+								<i class="fas fa-shipping-fast me-1"></i>
+								≤ 14 Days
+							</span>
+						</span>
+
+						<span class="border-start ps-2 ms-2">
+							<span class="badge bg-secondary">
+								<i class="fas fa-calendar-alt me-1"></i>
+								&gt; 14 Days
+							</span>
+						</span>
+
+					</div>
 				</div>
-			</div>
-
+			</div>			
+			<small id="tagInfo" class="text-warning">
+				<i class="fas fa-info-circle me-1"></i>
+				Please select an HBL and check at least one Purchase Order.
+			</small>
 		</div>
 	</div>
 	<input type="hidden" id="HBLNo" name="HBLNo">
@@ -141,7 +169,7 @@
 	<br />
 	@* Table display *@
 	<div class="table-responsive">
-		<table id="tblProcurement" class="table table-hover w-100 erp-table">
+		<table id="tblProcurement" class="table table-hover w-100">
 			<thead class="sticky-top bg-white table-bordered" style="font-size:0.75rem;">
 				<tr class="data-row">
 					<th style="width:40px;"><input type="checkbox" id="selectAll" /></th>
@@ -154,7 +182,7 @@
 					@* Procurement Table *@
 					@* <th style="width:120px;">Balance Qty</th> *@
 					<th style="width:140px;">Partial Delivered</th>
-					<th style="width:150px;">HBL No</th>
+					<th style="width:150px; text-align: center">HBL No</th>
 					<th style="width:150px;">Container No</th>
 					<th style="width:120px;">Dedon ETA</th>
 					<th style="width:180px;">Country of Origin</th>
@@ -172,7 +200,7 @@
 						<tr>
 							<td>
 								<input type="checkbox"
-									   class="row-check"
+									   class="row-check po-checkbox"
 									   name="SelectedRows"
 									   value="@($"{item.IDDocType}|{item.IDDocNo}|{item.IDLineNo}|{item.ItemCode}")"
 									   data-pd="@item.ptPartialDelivered"
@@ -199,10 +227,10 @@
 									   style="display:none; width:70px; padding:2px 4px; font-size:10px;" />
 
 							</td>
-							<td>
+							<td class="text-center">
 								@if (!string.IsNullOrEmpty(item.ptHBLNo))
 								{
-									<span class="badge bg-success">
+									<span class="badge bg-primary">
 										@item.ptHBLNo
 									</span>
 								}
@@ -215,7 +243,7 @@
 							</td>
 							<td>@item.ptContainerNo</td>
 							<td>
-																
+
 								@if (item.ptContainerETA.HasValue)
 								{
 									var days = (item.ptContainerETA.Value.Date - DateTime.Today).Days;
@@ -242,7 +270,7 @@
 										</span>
 									}
 								}
-								
+
 							</td>
 							<td>@item.ptCountryOfOrigin</td>
 							<td>@item.ptRemarks</td>
@@ -291,6 +319,10 @@
 					autoWidth: false,
 					fixedHeader: true
 				});
+			$('.dataTables_filter input').css({
+			'width': '300px',
+			'min-width': '300px'
+			});
 
 				const savedSearch = sessionStorage.getItem('tblProcurementSearch');
 
@@ -302,6 +334,33 @@
 				$('.dataTables_filter input').on('keyup', function () {
 					sessionStorage.setItem('tblProcurementSearch', this.value);
 			});
+
+		});
+
+		// Enable or disable the Tag button based on HBL selection and checked POs
+		function toggleTagButton() {
+
+			const hblSelected = $('#impexDropdown').val();
+			const hasCheckedPO = $('.po-checkbox:checked').length > 0;
+
+			const enabled = hblSelected && hasCheckedPO;
+
+			$('#btnTagPO').prop('disabled', !enabled);
+
+			if (enabled) {
+				$('#tagInfo').hide();
+			} else {
+				$('#tagInfo').show();
+			}
+		}
+
+		$(document).ready(function () {
+
+			toggleTagButton();
+
+			$('#impexDropdown').on('change', toggleTagButton);
+
+			$(document).on('change', '.po-checkbox', toggleTagButton);
 
 		});
 	</script>

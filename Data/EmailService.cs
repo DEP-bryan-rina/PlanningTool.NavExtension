@@ -25,7 +25,7 @@ namespace PlanningTool.NavExtension.Data
             {
                 From = new MailAddress(
                     "no-reply@dedon.ph",
-                    "PlanningTool-NAV.Extension"),
+                    "PT-NAVExtension"),
                 Subject = subject,
                 Body = body,
                 IsBodyHtml = true

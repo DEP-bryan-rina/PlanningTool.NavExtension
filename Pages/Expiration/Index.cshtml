@@ -38,7 +38,7 @@
 		<!-- WMS -->
 		<div class="tab-pane fade show active" id="wms">
 
-			<table id="tblWMS" class="table table-hover w-100 erp-table">
+			<table id="tblWMS" class="table table-hover w-100">
 
 				<thead class="sticky-top bg-white table-bordered" style="font-size:0.75rem;">
 
@@ -100,7 +100,7 @@
 
 	<div class="tab-pane fade" id="qa">
 
-		<table id="tblQA" class="table table-hover w-100 erp-table">
+		<table id="tblQA" class="table table-hover w-100 ">
 
 			<thead class="sticky-top bg-white table-bordered" style="font-size:0.75rem;">
 
@@ -170,7 +170,10 @@
 					autoWidth: false,
 					fixedHeader: true
 				});
-
+				$('.dataTables_filter input').css({
+					'width': '300px',
+					'min-width': '300px'
+				});
 				const savedSearch = sessionStorage.getItem('ttblWMSSearch');
 
 				if (savedSearch) {
@@ -193,7 +196,10 @@
 					autoWidth: false,
 					fixedHeader: true
 				});
-
+				$('.dataTables_filter input').css({
+					'width': '300px',
+					'min-width': '300px'
+				});
 				const savedSearch = sessionStorage.getItem('tblQASearch');
 
 				if (savedSearch) {

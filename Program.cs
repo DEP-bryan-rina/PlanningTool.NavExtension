@@ -5,6 +5,13 @@ using Microsoft.AspNetCore.Authentication.Negotiate;
 
 var builder = WebApplication.CreateBuilder(args);
 
+
+builder.WebHost.ConfigureKestrel((context, options) =>
+{
+    options.Configure(context.Configuration.GetSection("Kestrel"));
+});
+
+
 // Add services to the container.
 builder.Services.AddRazorPages();
 builder.Services.AddScoped<EmailService>();
@@ -32,12 +39,6 @@ app.UseAuthorization();
 // Serve static files (wwwroot)
 app.UseStaticFiles();
 
-// Set Default Page
-app.MapGet("/", context =>
-{
-    context.Response.Redirect("/ImPex/Index");
-    return Task.CompletedTask;
-});
 
 app.UseSession();
 

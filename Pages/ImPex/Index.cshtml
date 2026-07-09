@@ -57,95 +57,70 @@
 		</div>
 
 		<div class="card-body">
-
-			<div class="row g-4">
-
-				<!-- Left Column -->
-				<div class="col-md-4">
+			<div class="row g-3">
+				<!-- Column 1 -->
+				<div class="col-lg-4">
 
 					<div class="mb-3">
-						<label class="form-label fw-semibold">
+						<label class="erp-label">
 							HBL No <span class="text-danger">*</span>
 						</label>
 
-						<div class="input-group">
-							<span class="input-group-text">
-								<i class="fas fa-file-alt"></i>
-							</span>
+						<input asp-for="Impex._ptHBLNo"
+							   id="HBLNo"
+							   class="form-control erp-control"
+							   placeholder="HBL Number"
+							   onblur="checkHblExists()"
+							   required />
 
-							<input asp-for="Impex._ptHBLNo"
-								   id="HBLNo"
-								   class="form-control"
-								   placeholder="Enter HBL Number"
-								   onblur="checkHblExists()"
-								   required />
-						</div>
-
-						<small id="hblMessage" class="mt-1 d-block"></small>
+						<small id="hblMessage"></small>
 					</div>
 
 					<div>
-						<label class="form-label fw-semibold">
+						<label class="erp-label">
 							Dedon ETA <span class="text-danger">*</span>
 						</label>
 
-						<div class="input-group">
-							<span class="input-group-text">
-								<i class="fas fa-calendar-alt"></i>
-							</span>
-
-							<input asp-for="Impex._ptContainerETA"
-								   type="date"
-								   class="form-control"
-								   required />
-						</div>
+						<input asp-for="Impex._ptContainerETA"
+							   type="date"
+							   class="form-control erp-control"
+							   min="@DateTime.Today.ToString("yyyy-MM-dd")"
+							   required />
 					</div>
 
 				</div>
 
-				<!-- Middle Column -->
-				<div class="col-md-4">
+				<!-- Column 2 -->
+				<div class="col-lg-4">
 
 					<div class="mb-3">
-						<label class="form-label fw-semibold">
+						<label class="erp-label">
 							Container No <span class="text-danger">*</span>
 						</label>
 
-						<div class="input-group">
-							<span class="input-group-text">
-								<i class="fas fa-shipping-fast"></i>
-							</span>
-
-							<input asp-for="Impex._ptContainerNo"
-								   class="form-control"
-								   placeholder="Enter Container Number"
-								   required />
-						</div>
+						<input asp-for="Impex._ptContainerNo"
+							   class="form-control erp-control"
+							   placeholder="Container Number"
+							   required />
 					</div>
 
 					<div>
-						<label class="form-label fw-semibold">
+						<label class="erp-label">
 							Country of Origin <span class="text-danger">*</span>
 						</label>
 
-						<div class="input-group">						
+						<select asp-for="Impex._ptCountryOfOrigin"
+								class="form-select erp-control"
+								required>
+							<option value="">Select Country...</option>
 
-							<select id="countryOfOrigin"
-									asp-for="Impex._ptCountryOfOrigin"
-									class="form-select"
-									required>
-								<option value="">
-									Select Country...
+							@foreach (var country in Model.CountryList)
+							{
+								<option value="@country.Value">
+									@country.Text
 								</option>
-
-								@foreach (var country in Model.CountryList)
-								{
-									<option value="@country.Value">
-										@country.Text
-									</option>
-								}
-							</select>
-						</div>
+							}
+						</select>
 
 						<span asp-validation-for="Impex._ptCountryOfOrigin"
 							  class="text-danger small"></span>
@@ -153,17 +128,17 @@
 
 				</div>
 
-				<!-- Right Column -->
-				<div class="col-md-4">
+				<!-- Column 3 -->
+				<div class="col-lg-4">
 
-					<label class="form-label fw-semibold">
+					<label class="erp-label">
 						Remarks
 					</label>
 
-					<textarea asp-for="Impex._ptRemarks"
-							  class="form-control"
+					<textarea asp-for="Impex._ptRemarks" style="height: 115px"
+							  class="form-control erp-control"
 							  rows="5"
-							  placeholder="Enter remarks, notes, shipment details..."></textarea>
+							  placeholder="Remarks"></textarea>
 
 				</div>
 
@@ -206,7 +181,7 @@
 <br />
 <div class="table-responsive">
 
-	<table id="tblImPex" class="table table-hover w-100 erp-table">
+	<table id="tblImPex" class="table table-hover w-100 ">
 
 		<thead class="sticky-top bg-white table-bordered" style="font-size:0.75rem;">
 			<tr>
@@ -280,16 +255,17 @@
 							{
 								<a asp-page="./Index"
 								   asp-route-id="@item.PK_ptImpexID"
-								   class="erp-btn erp-btn-warning"
+								   class="text-secondary"
+								   title="Edit HBL"
 								   onclick="return confirmEdit(@item._ptStatus, '@item._ptHBLNo');">
-									<i class="fa-solid fa-pencil"></i>
+									<i class="fa-solid fa-pen-to-square"></i>
 								</a>
 							}
 							else
 							{
-								<button type="button" class="btn btn-success btn-sm">
+								<span class="text-success" title="Locked">
 									<i class="fa-solid fa-lock"></i>
-								</button>
+								</span>
 							}
 						</td>
 					</tr>		
@@ -317,6 +293,12 @@
 				fixedHeader: true
 			});
 
+			$('.dataTables_filter input').css({
+				'width': '300px',
+				'min-width': '300px'
+			});
+
+
 
 				const savedSearch = sessionStorage.getItem('tblImPexSearch');
 
@@ -333,10 +315,17 @@
 		function confirmEdit(status, hblNo) {
 
 			if (status === 1) {
-				return confirm(
+
+				const result = confirm(
 					"⚠ This HBL No is already TAGGED: " + hblNo +
 					"\n\nDo you want to continue editing?"
 				);
+
+				if (!result) {
+					hideLoader(); // or $('#loader').hide();
+				}
+
+				return result;
 			}
 
 			return true;

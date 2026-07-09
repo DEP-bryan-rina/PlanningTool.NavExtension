@@ -27,7 +27,7 @@ namespace PlanningTool.NavExtension.Pages.ImPex
         [BindProperty] public ImPexCenterModel Impex { get; set; }
 
         public List<ImPexCenterModel> ImpexList { get; set; } = new List<ImPexCenterModel>();
-        
+
         public List<ProcurementCenterModel> ProcurementList { get; set; } = new();
         public List<SelectListItem> CountryList { get; set; } = new();
 
@@ -71,11 +71,11 @@ namespace PlanningTool.NavExtension.Pages.ImPex
             else
             {
                 Impex = new ImPexCenterModel();
-            }           
+            }
 
 
             return Page();
-        }    
+        }
 
         private void LoadCountries()
         {
@@ -96,7 +96,7 @@ namespace PlanningTool.NavExtension.Pages.ImPex
             while (dr.Read())
             {
                 this.CountryList.Add(new SelectListItem
-                {               
+                {
                     Value = dr["Name"].ToString(), // or dr["Code"].ToString()
                     Text = $"{dr["Code"]} - {dr["Name"]}"
                 });
@@ -117,7 +117,7 @@ namespace PlanningTool.NavExtension.Pages.ImPex
             return recipients;
 
         }
-      
+
         private string GetUser()
         {
             return (User?.Identity != null && User.Identity.IsAuthenticated)
@@ -158,22 +158,41 @@ namespace PlanningTool.NavExtension.Pages.ImPex
                         recipients,
                         "New HBL Entry Created Notification",
                         $@"
-                         <div style='font-family:'Segoe UI', Arial, sans-serif; font-size:12px; font-weight:400; line-height:1.5; color:#ffffff;'>
-                          <p>Dear Team,</p>
-                          <p>
-                              Please be informed that the New HBL Entry <b>{Impex._ptHBLNo}</b> has been successfully created and is now ready 
-                              for use.
+                         <div style='font-family:'Segoe UI', Arial, sans-serif; font-size:12px; font-weight:400; line-height:1.5; color:#ffffff; text-align:left;'>
+                            
+                            <p>Dear Team,</p>
 
-                          </p>
-                          <p>
-                            In the event of any updates or chages to the shipment details, a separate notification will be sent accordingly
-                            to keep everyone informed.
-                          </p>
-                          <p>
-                            Should you encounter any issues or require assistance, please do not hesitate to contact the IT team.
-                          </p>        
-                          <br/>
-                          <p>This is a system-generated email. Please do not reply.</p>
+                                <p>
+                                    This is to inform you that a new HBL entry has been successfully created and is now available in the system.
+                                </p>
+
+                                <p>
+                                    <strong>HBL No:</strong> {Impex._ptHBLNo}
+                                </p>
+
+                                <p>
+                                    The shipment record is now ready for use and reference within the ImPex Monitoring System.
+                                </p>
+
+                                <p>
+                                    Should any shipment information be updated in the future, a separate notification will be sent to keep all concerned parties informed.
+                                </p>
+
+                                <p>
+                                    Should you encounter any issues or require further assistance, please do not hesitate to contact the IT Team.
+                                </p>
+
+                                <p>
+                                    Regards,<br />
+                                    ImPex Monitoring Team
+                                </p>
+
+                                <hr />
+
+                                <small>
+                                    This is a system-generated email. Please do not reply.
+                                </small>
+
                         </div>"
                     ));
 
@@ -215,7 +234,7 @@ namespace PlanningTool.NavExtension.Pages.ImPex
                         existing._ptModifiedDate = DateTime.Now;
 
 
-                        var procurementRecords = _context.tblProcurementCenter  
+                        var procurementRecords = _context.tblProcurementCenter
                                 .Where(x => x._ptHBLNo == oldHBL)
                                 .ToList();
 
@@ -233,24 +252,63 @@ namespace PlanningTool.NavExtension.Pages.ImPex
                         TempData["SuccessMessage"] = "BHL No: " + Impex._ptHBLNo + " updated successfully!";
 
                         // ✅ DETECT CHANGES
-                        var changes = new List<string>();
+                        var changeRows = new List<string>();
 
                         if (oldHBL != existing._ptHBLNo)
-                            changes.Add($"HBL No: {oldHBL} → {existing._ptHBLNo}");
+                        {
+                            changeRows.Add($@"
+                            <tr>
+                                <td>HBL No</td>
+                                <td style='padding:2px 5px; text-align:left;'>: {oldHBL}</td>
+                                <td style='padding:2px 5px; text-align:left;'>: {existing._ptHBLNo}</td>
+                            </tr>");
+                        }
 
                         if (oldContainer != existing._ptContainerNo)
-                            changes.Add($"<span style='color:#00ff99;'>HBL No: {oldHBL} → {existing._ptHBLNo}</span>");
-
+                        {
+                            changeRows.Add($@"
+                            <tr>
+                                <td>Container No</td>
+                                <td style='padding:2px 5px; text-align:left;'>: {oldContainer}</td>
+                                <td style='padding:2px 5px; text-align:left;'>: {existing._ptContainerNo}</td>
+                            </tr>");
+                         }
 
                         if (oldETA != existing._ptContainerETA)
-                            changes.Add($"Container ETA: {oldETA:yyyy-MM-dd} → {existing._ptContainerETA:yyyy-MM-dd}");
+                        {
+                            changeRows.Add($@"
+                            <tr>
+                                <td>Container ETA</td>
+                                <td style='padding:2px 5px; text-align:left;'>: {oldETA:yyyy-MM-dd}</td>
+                                <td style='padding:2px 5px; text-align:left;'>: {existing._ptContainerETA:yyyy-MM-dd}</td>
+                            </tr>");
+                        }
 
                         if (oldRemarks != existing._ptRemarks)
-                            changes.Add($"Remarks: {oldRemarks} → {existing._ptRemarks}");
+                        {
+                            changeRows.Add($@"
+                            <tr>
+                                <td>Remarks</td>
+                                <td style='padding:2px 5px; text-align:left;'>: {oldRemarks}</td>
+                                <td style='padding:2px 5px; text-align:left;'>: {existing._ptRemarks}</td>
+                            </tr>");
+                                            }
 
-                        string changesHtml = changes.Any()
-                            ? string.Join("<br/>", changes)
-                            : "No changes detected";
+                        string changesHtml = changeRows.Any()
+                            ? $@"
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th style='text-align:left;'>Field</th>
+                                        <th style='text-align:left;'>Previous Value</th>
+                                        <th style='text-align:left;'>Updated Value</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {string.Join("", changeRows)}
+                                </tbody>
+                            </table>"
+                        : "No changes detected.";
 
                         try
                         {
@@ -259,41 +317,70 @@ namespace PlanningTool.NavExtension.Pages.ImPex
                             // ✅ EMAIL
                             _ = Task.Run(() => _emailService.SendEmailAsync(
                                 recipients,
-                                "Update Notification",
+                                "HBL Information Updated",
                                 $@"
-                                <div style='font-family:'Segoe UI', Arial, sans-serif; font-size:12px; font-weight:400; line-height:1.5; color:#ffffff;'>
-                                    <p>
-                                        Dear Team,
-                                    </p>
-                                    <p>
-                                        Please be informed that the following HBL: {existing._ptHBLNo} has been updated.
-                                    </p>
-                                        <p><b>Current Details:</b></p>
-                                        <table style='border-collapse:collapse; font-family: 'Segoe UI', Arial, sans-serif; font-size:12px; font-weight:400; line-height:1.5; color:#ffffff;'>
-                                          <tr>
-                                                <td>BHL No: </td>
-                                                <td>{existing._ptHBLNo}</td>
-                                          </tr>
-                                          <tr>            
-                                                <td>Container No: </td>
-                                                <td>{existing._ptContainerNo}</td>
-                                           </tr>
-                                           <tr>
-                                                <td>Container ETA: </td>
-                                                <td>{existing._ptContainerETA:yyyy-MM-dd}</td>
-                                           </tr>
-                                            <tr>
-                                                <td>Remarks:</td>
-                                                <td>{existing._ptRemarks}</td>
-                                            </tr>
-                                            </table>
-                                        <br/>
-                                    <p><b>Changes Made:</b></p>
-                                    <p>{changesHtml}</p>
-                                    <br/>
-                                <p>This is a system-generated email. Please do not reply.</p>
+                                <div style='font-family:'Segoe UI', Arial, sans-serif; font-size:12px; font-weight:400; line-height:1.5; color:#ffffff; text-align:left;'>
 
-                            </div>
+                                    <p>Hello Team,</p>
+
+                                    <p>
+                                        This is to inform you that the following HBL record has been successfully updated in the system.
+                                    </p>
+
+                                    <p><strong>Current Details:</strong></p>
+
+                                    <table>
+
+                                        <tr>
+                                            <th style=""text-align:left;"">HBL No</th>
+                                            <td>: {existing._ptHBLNo}</td>
+                                        </tr>
+
+                                        <tr>
+                                            <th style=""text-align:left;"">Container No</th>
+                                            <td>: {existing._ptContainerNo}</td>
+                                        </tr>
+
+                                        <tr>
+                                            <th style=""text-align:left;"">Container ETA</th>
+                                            <td>: {existing._ptContainerETA:yyyy-MM-dd}</td>
+                                        </tr>
+
+                                        <tr>
+                                            <th style=""text-align:left;"">Remarks</th>
+                                            <td>: {existing._ptRemarks}</td>
+                                        </tr>
+
+                                    </table>
+
+                                    <br />
+
+                                    <p><strong>Changes Made:</strong></p>
+
+                                    {changesHtml}
+
+                                    <br />
+
+                                    <p>
+                                        Please take note of the updated information and make any necessary adjustments to your processes.
+                                    </p>
+
+                                    <p>
+                                        Should you encounter any issues or require further assistance, please do not hesitate to contact the IT Team.
+                                    </p>
+
+                                    <p>
+                                        Regards,<br />
+                                        ImPex Monitoring Team
+                                    </p>
+
+                                    <hr />
+
+                                    <small>
+                                        This is a system-generated email. Please do not reply.
+                                    </small>
+
+                                </div>
                                 "
                             ));
 

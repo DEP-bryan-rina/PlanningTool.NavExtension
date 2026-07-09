@@ -240,3 +240,8 @@
 main {
     min-height: calc(100vh - 130px);
 }
+
+#btnTagPO:disabled {
+    opacity: .5;
+    cursor: not-allowed;
+}
