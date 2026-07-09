@@ -15,6 +15,8 @@ builder.WebHost.ConfigureKestrel((context, options) =>
 // Add services to the container.
 builder.Services.AddRazorPages();
 builder.Services.AddScoped<EmailService>();
+builder.Services.AddScoped<ProcurementReminderService>();
+builder.Services.AddHostedService<ProcurementReminderHostedService>();
 builder.Services.AddSession();
 
 builder.Services.AddDbContext<AppDbContext>(options =>
@@ -43,5 +45,6 @@ app.UseStaticFiles();
 app.UseSession();
 
 app.MapRazorPages();
+
 
 app.Run();

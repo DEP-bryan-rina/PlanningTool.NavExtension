@@ -11,7 +11,8 @@ namespace PlanningTool.NavExtension.Data
         public DbSet<UserModel> tblUserCenter { get; set; }
         public DbSet<ImPexCenterModel> tblImPexCenter { get; set; }
         public DbSet<ProcurementCenterModel> tblProcurementCenter { get; set; }
-        public DbSet<ReminderNofication> tblReminderNotification { get; set; }
+        public DbSet<ReminderNotification> tblReminderNotification { get; set; }
+        public DbSet<EmailNotication> tblEmailNotification { get; set; }
 
         public DbSet<ProcurementCenterDto> ProcurementCenterDto { get; set; }
 
@@ -29,7 +30,7 @@ namespace PlanningTool.NavExtension.Data
                 .ToTable("_tblProcurementCenter");
             modelBuilder.Entity<EmailNotication>()
                 .ToTable("_tblEmailNotification");
-            modelBuilder.Entity<ReminderNofication>()
+            modelBuilder.Entity<ReminderNotification>()
                 .ToTable("_tblReminderNotification");
         }
     }

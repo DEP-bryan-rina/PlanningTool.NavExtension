@@ -18,7 +18,7 @@ namespace PlanningTool.NavExtension.Pages.Account
         [BindProperty] public EmailNotication EmailNotification { get; set; } = new();
 
         public List<EmailNotication> NotificationList { get; set; } = new();
-        public IList<ReminderNofication> ReminderNotifications { get; set; } = new List<ReminderNofication>();
+        public IList<ReminderNotification> ReminderNotifications { get; set; } = new List<ReminderNotification>();
 
         public async Task OnGet(int? id)
         {
@@ -134,7 +134,7 @@ namespace PlanningTool.NavExtension.Pages.Account
             TempData["Success"] = "Deleted successfully";
             return RedirectToPage();
         }
-        private string GenerateEmailBody(ReminderNofication reminder)
+        private string GenerateEmailBody(ReminderNotification reminder)
         {
             if (reminder.ReminderType == "2WeeksReminder")
             {

@@ -27,53 +27,9 @@ namespace PlanningTool.NavExtension.Pages.Procurement
             _userPermissionService = userPermissionService;
             this.conStr = config.GetConnectionString("DefaultConnection");
         }
-        public async Task<IActionResult> OnGetAsync()
-        {
-
-            var userId = User?.Identity?.Name;
-
-            if (string.IsNullOrWhiteSpace(userId))
-            {
-                return Unauthorized();
-            }
-
-            userId = userId.ToUpperInvariant();
-
-            var userPermission = await _userPermissionService.GetUserPermissionAsync(userId);
-
-            if (userPermission == null || !userPermission.Procurement)
-            {
-                return RedirectToPage("/AccessDenied", new
-                {
-                    returnUrl = "/Procurement/Index"
-                });
-            }
-
-
-            LoadImpex();
-            LoadProcurementData(searchString);
-
-            return Page();
-        }
-
         public List<ImPexCenterModel> ImpexList { get; set; } = new();
 
         public List<ProcurementCenterDto> ProcurementList { get; set; } = new();
-
-        [BindProperty] public string ParamRemarks { get; set; }
-        [BindProperty] public string HBLNo { get; set; }
-        [BindProperty] public ImPexCenterModel Impex { get; set; }
-        [BindProperty] public DateTime? ParamCETA { get; set; }
-
-        private string GetUser()
-        {
-
-            return (User?.Identity != null && User.Identity.IsAuthenticated)
-                ? User.Identity.Name
-                : Environment.UserName;
-
-        }
-
         private List<string> GetRecipients()
         {
             var recipients = _context.EmailNotifications
@@ -86,19 +42,48 @@ namespace PlanningTool.NavExtension.Pages.Procurement
             return recipients;
         }
 
-        private void LoadImpex()
+        [BindProperty] public string ParamRemarks { get; set; }
+        [BindProperty] public string HBLNo { get; set; }
+        [BindProperty] public ImPexCenterModel Impex { get; set; }
+        [BindProperty] public DateTime? ParamCETA { get; set; }
+
+        public async Task<IActionResult> OnGetAsync()
         {
-            ImpexList = _context.tblImPexCenter
-                .Where(x => x._ptStatus == 0)
-                .Select(x => new ImPexCenterModel
-                {
-                    PK_ptImpexID = x.PK_ptImpexID,
-                    _ptHBLNo = x._ptHBLNo,
-                    _ptContainerNo = x._ptContainerNo,
-                    _ptContainerETA = x._ptContainerETA
-                })
-                .ToList();
-        }
+
+            var userId = User?.Identity?.Name;
+
+            //if (string.IsNullOrWhiteSpace(userId))
+            //{
+            //    return Unauthorized();
+            //}
+
+            //userId = userId.ToUpperInvariant();
+
+            //var userPermission = await _userPermissionService.GetUserPermissionAsync(userId);
+
+            //if (userPermission == null || !userPermission.Procurement)
+            //{
+            //    return RedirectToPage("/AccessDenied", new
+            //    {
+            //        returnUrl = "/Procurement/Index"
+            //    });
+            //}
+
+
+            LoadImpex();
+            LoadProcurementData(searchString);
+
+            return Page();
+        }        
+
+        private string GetUser()
+        {
+
+            return (User?.Identity != null && User.Identity.IsAuthenticated)
+                ? User.Identity.Name
+                : Environment.UserName;
+
+        }                
         public async Task<IActionResult> OnPostTagAsync(string HBLNo, List<string> SelectedRows)
         {
             try
@@ -377,7 +362,6 @@ namespace PlanningTool.NavExtension.Pages.Procurement
 
             return RedirectToPage();
         }
-
         private void LoadProcurementData(string _search)
         {
             try
@@ -428,5 +412,19 @@ namespace PlanningTool.NavExtension.Pages.Procurement
                 TempData["ErrorMessage"] = "Database error: " + sqlEx.Message;
             }
         }
+        private void LoadImpex()
+        {
+            ImpexList = _context.tblImPexCenter
+                .Where(x => x._ptStatus == 0)
+                .Select(x => new ImPexCenterModel
+                {
+                    PK_ptImpexID = x.PK_ptImpexID,
+                    _ptHBLNo = x._ptHBLNo,
+                    _ptContainerNo = x._ptContainerNo,
+                    _ptContainerETA = x._ptContainerETA
+                })
+                .ToList();
+        }        
+        
     }
 }

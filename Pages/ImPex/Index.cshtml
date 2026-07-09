@@ -192,10 +192,12 @@
 				<th>Country Of Origin</th>
 				<th>Remarks</th>
 				<th>Created By</th>
+				<th>Date Created</th>				
 				<th>Modified By</th>
-				<th>PO No Tagged</th>
+				<th>Date Modified</th>
+				@* <th>PO No Tagged</th> *@
 				<th class="text-center">Status</th>				
-				<th class="text-center">Actions</th>
+				<th class="text-center">Action</th>
 			</tr>
 		</thead>
 
@@ -214,17 +216,19 @@
 						
 						<td>@item._ptHBLNo</td>
 						<td>@item._ptContainerNo</td>
-						<td>@item._ptContainerETA?.ToString("yyyy-MM-dd")</td>
+						<td>@item._ptContainerETA?.ToString("yyyy-MM-dd HH:mm:ss")</td>
 						<td>@item._ptCountryOfOrigin</td>
 						<td class="erp-truncate">@item._ptRemarks</td>
 						<td>@item._ptCreatedBy</td>
+						<td>@item._ptCreatedDate</td>
 						<td>@item._ptModifiedBy</td>
-						<td>
+						<td>@item._ptModifiedDate</td>
+						@* <td>
 							@Html.Raw(string.Join(" ",
 								Model.ProcurementList
 									.Where(x => x._ptHBLNo == item._ptHBLNo && x._ptStatus != 0)
 									.Select(x => $"<span class='badge bg-primary me-1'>{x._ptDocNo}</span>")))
-						</td>
+						</td> *@
 						<td class="text-center">
 							@if (item._ptStatus == 1)
 							{
@@ -247,6 +251,7 @@
 								</span>
 							}
 						</td>
+						
 
 					
 

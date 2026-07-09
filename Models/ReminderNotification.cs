@@ -2,7 +2,7 @@
 
 namespace PlanningTool.NavExtension.Models
 {
-    public class ReminderNofication
+    public class ReminderNotification
     {
         [Key]
         public int PK_ReminderID { get; set; }

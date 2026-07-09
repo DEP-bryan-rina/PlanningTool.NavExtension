@@ -1,10 +1,226 @@
 ﻿@page
 @model IndexModel
 @{
-    ViewData["Title"] = "Home page";
+    ViewData["Title"] = "Dashboard";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="container-fluid">
+
+    <div class="mb-4">
+        <h2 class="fw-bold">Procurement & ImPEx Dashboard</h2>
+        <p class="text-muted">
+            Procurement Monitoring and Import/Export Tracking
+        </p>
+    </div>
+
+    <!-- KPI Cards -->
+    <div class="row g-4 mb-4">
+
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <small class="text-muted">Procurement Records</small>
+                    <h2 class="fw-bold text-primary">
+                        @Model.TotalProcurements
+                    </h2>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <small class="text-muted">Open Procurement</small>
+                    <h2 class="fw-bold text-warning">
+                        @Model.OpenProcurements
+                    </h2>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <small class="text-muted">Containers</small>
+                    <h2 class="fw-bold text-success">
+                        @Model.TotalContainers
+                    </h2>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <small class="text-muted">Outstanding Qty</small>
+                    <h2 class="fw-bold text-danger">
+                        @Model.TotalOutstandingQty.ToString("N0")
+                    </h2>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="row g-4">
+
+        <!-- Upcoming ETA -->
+        <div class="col-lg-6">
+
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white">
+                    <strong>Upcoming Container ETA</strong>
+                </div>
+
+                <div class="card-body">
+
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Container</th>
+                                <th>Country</th>
+                                <th>ETA</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            @foreach (var item in Model.UpcomingContainers)
+                            {
+                                <tr>
+                                    <td>@item._ptContainerNo</td>
+                                    <td>@item._ptCountryOfOrigin</td>
+                                    <td>@item._ptContainerETA?.ToString("MMM dd, yyyy")</td>
+                                </tr>
+                            }
+                        </tbody>
+
+                    </table>
+
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Procurement Summary -->
+        <div class="col-lg-6">
+
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white">
+                    <strong>Procurement Summary</strong>
+                </div>
+
+                <div class="card-body">
+
+                    <div class="row text-center">
+
+                        <div class="col-6">
+                            <h3 class="text-warning">
+                                @Model.OpenProcurements
+                            </h3>
+                            <small>Open Items</small>
+                        </div>
+
+                        <div class="col-6">
+                            <h3 class="text-success">
+                                @Model.CompletedProcurements
+                            </h3>
+                            <small>Completed</small>
+                        </div>
+
+                    </div>
+
+                    <hr />
+
+                    <h6>Total Outstanding Quantity</h6>
+                    <h3 class="text-danger">
+                        @Model.TotalOutstandingQty.ToString("N0")
+                    </h3>
+
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="row g-4 mt-1">
+
+        <!-- Recent Procurement -->
+        <div class="col-lg-6">
+
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white">
+                    <strong>Recent Procurement Updates</strong>
+                </div>
+
+                <div class="card-body">
+
+                    <table class="table table-hover">
+
+                        <thead>
+                            <tr>
+                                <th>Document</th>
+                                <th>Vendor</th>
+                                <th>Modified</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            @foreach (var item in Model.RecentProcurements)
+                            {
+                                <tr>
+                                    <td>@item._ptDocNo</td>
+                                    <td>@item._ptVendorName</td>
+                                    <td>@item._ptModifiedDate?.ToString("MMM dd")</td>
+                                </tr>
+                            }
+                        </tbody>
+
+                    </table>
+
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Recent Shipments -->
+        <div class="col-lg-6">
+
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white">
+                    <strong>Latest Shipment Updates</strong>
+                </div>
+
+                <div class="card-body">
+
+                    <table class="table table-hover">
+
+                        <thead>
+                            <tr>
+                                <th>HBL</th>
+                                <th>Container</th>
+                                <th>ETA</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            @foreach (var item in Model.LatestShipments)
+                            {
+                                <tr>
+                                    <td>@item._ptHBLNo</td>
+                                    <td>@item._ptContainerNo</td>
+                                    <td>@item._ptContainerETA?.ToString("MMM dd")</td>
+                                </tr>
+                            }
+                        </tbody>
+
+                    </table>
+
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
 </div>

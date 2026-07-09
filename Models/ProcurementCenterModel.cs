@@ -31,6 +31,6 @@ namespace PlanningTool.NavExtension.Models
         public DateTime? _ptModifiedDate { get; set; }
 
         public string? _ptRemarks { get; set; }
-        public int? _ptStatus { get; set; }
+        public int? _ptStatus { get; set; }        
     }
 }
