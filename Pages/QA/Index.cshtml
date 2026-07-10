@@ -15,53 +15,69 @@
 
 <div class="row mb-4">
 
+	<!-- Defect Rate -->
 	<div class="col-md-3 mb-3">
 		<div class="card qa-card h-100">
-			<div class="card-body text-center">
-				<div class="kpi-value text-danger">
-					@Model.DefectRate%
-				</div>
-				<div class="kpi-label">
-					Defect Rate
+			<div class="card-body d-flex align-items-center">
+				<i class="bi bi-exclamation-triangle text-danger fs-1 me-3"></i>
+				<div>
+					<div class="kpi-value text-danger">
+						@Model.DefectRate%
+					</div>
+					<div class="kpi-label">
+						Defect Rate
+					</div>
 				</div>
 			</div>
 		</div>
 	</div>
 
+	<!-- Completion -->
 	<div class="col-md-3 mb-3">
 		<div class="card qa-card h-100">
-			<div class="card-body text-center">
-				<div class="kpi-value text-success">
-					@Model.Completion%
-				</div>
-				<div class="kpi-label">
-					Completion
+			<div class="card-body d-flex align-items-center">
+				<i class="bi bi-stopwatch text-success fs-1 me-3"></i>
+				<div>
+					<div class="kpi-value text-success">
+						@Model.Completion%
+					</div>
+					<div class="kpi-label">
+						Completion
+					</div>
 				</div>
 			</div>
 		</div>
 	</div>
 
+	<!-- Quality Rating -->
 	<div class="col-md-3 mb-3">
 		<div class="card qa-card h-100">
-			<div class="card-body text-center">
-				<div class="kpi-value text-primary">
-					@Model.QualityRating%
-				</div>
-				<div class="kpi-label">
-					Quality Rating
+			<div class="card-body d-flex align-items-center">
+				<i class="bi bi-clipboard2-check text-primary fs-1 me-3"></i>
+				<div>
+					<div class="kpi-value text-primary">
+						@Model.QualityRating%
+					</div>
+					<div class="kpi-label">
+						Quality Rating
+					</div>
 				</div>
 			</div>
 		</div>
 	</div>
 
+	<!-- Lead Time -->
 	<div class="col-md-3 mb-3">
 		<div class="card qa-card h-100">
-			<div class="card-body text-center">
-				<div class="kpi-value text-warning">
-					@Model.LeadTime
-				</div>
-				<div class="kpi-label">
-					Lead Time (Days)
+			<div class="card-body d-flex align-items-center">
+				<i class="bi bi-calendar-check text-warning fs-1 me-3"></i>
+				<div>
+					<div class="kpi-value text-warning">
+						@Model.LeadTime
+					</div>
+					<div class="kpi-label">
+						Lead Time (Days)
+					</div>
 				</div>
 			</div>
 		</div>
@@ -77,12 +93,13 @@
 				<th>Description</th>
 				<th>Date Received</th>
 				<th>UoM</th>
-				<th>Qty Received</th>
+				<th class="text-center">Qty Received</th>
 				<th class="text-center">Status</th>
 				<th class="text-center">Qty Good</th>
 				<th class="text-center">Qty Reject</th>
 				<th class="text-center"> Qty Repair</th>
 				<th class="text-center">Earliest WK Required</th>
+				<th class="text-center">Lead Time Day(s)</th>
 			</tr>
 		</thead>
 
@@ -109,7 +126,7 @@
 
 						<td>@item.UOM</td>
 
-						<td>@item.QtyReceived.ToString("N0")</td>
+						<td class="text-center">@item.QtyReceived.ToString("N0")</td>
 
 						<td class="@statusClass text-center">
 							@item.Status
@@ -148,6 +165,7 @@
 						<td class="text-center">
 							@item.EarliestWKRequired
 						</td>
+						<td class="text-center" style="width: 100px">@item.LeadTimeDays</td>
 					</tr>
 				}
 			}
@@ -165,86 +183,6 @@
 	</table>
 </div>
 
-<style>
-	.qa-dashboard-header {
-		background: #2200a8;
-		color: white;
-		padding: 35px;
-		border-radius: 8px;
-	}
-
-	.qa-logo {
-		color: #f0b000;
-		font-size: 60px;
-		margin-right: 20px;
-		font-weight: bold;
-	}
-
-	.qa-title {
-		font-size: 42px;
-		font-weight: 700;
-	}
-
-	.qa-card {
-		border: none;
-		border-radius: 12px;
-		box-shadow: 0 2px 10px rgba(0,0,0,.08);
-	}
-
-	.kpi-value {
-		font-size: 48px;
-		font-weight: bold;
-	}
-
-	.kpi-label {
-		font-size: 22px;
-		font-weight: 600;
-	}
-
-	.status-ok {
-		background: #00d600;
-		color: white;
-		font-weight: bold;
-		text-align: center;
-	}
-
-	.status-wip {
-		background: #f5a037;
-		color: white;
-		font-weight: bold;
-		text-align: center;
-	}
-
-	.status-ns {
-		background: #8b8b8b;
-		color: white;
-		font-weight: bold;
-		text-align: center;
-	}
-
-	.status-na {
-		background: white;
-		color: black;
-		font-weight: bold;
-		text-align: center;
-	}
-
-	.reject-cell {
-		background: #ff3030;
-		color: white;
-		font-weight: bold;
-	}
-
-	.repair-cell {
-		background: #0d19d8;
-		color: white;
-		font-weight: bold;
-	}
-
-	table th {
-		vertical-align: middle;
-	}
-</style>
 @section Scripts {
 	<script>
 		$(function () {

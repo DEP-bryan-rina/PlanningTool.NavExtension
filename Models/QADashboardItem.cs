@@ -22,5 +22,6 @@ namespace PlanningTool.NavExtension.Models
         public string EarliestWKRequired { get; set; }
 
         public DateTime? InspectionCompletionDate { get; set; }
+        public int? LeadTimeDays { get; set; }
     }
 }
