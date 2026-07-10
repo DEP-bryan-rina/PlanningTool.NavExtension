@@ -50,7 +50,7 @@ namespace PlanningTool.NavExtension.Pages.Procurement
         public async Task<IActionResult> OnGetAsync()
         {
 
-            var userId = User?.Identity?.Name;
+            //var userId = User?.Identity?.Name;
 
             //if (string.IsNullOrWhiteSpace(userId))
             //{
@@ -68,7 +68,6 @@ namespace PlanningTool.NavExtension.Pages.Procurement
             //        returnUrl = "/Procurement/Index"
             //    });
             //}
-
 
             LoadImpex();
             LoadProcurementData(searchString);

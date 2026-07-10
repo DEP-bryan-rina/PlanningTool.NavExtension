@@ -1,50 +1,48 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Server.IISIntegration;
 using PlanningTool.NavExtension.Data;
 using PlanningTool.NavExtension.Services;
-using Microsoft.AspNetCore.Authentication.Negotiate;
 
 var builder = WebApplication.CreateBuilder(args);
 
-
+// Configure Kestrel
 builder.WebHost.ConfigureKestrel((context, options) =>
 {
     options.Configure(context.Configuration.GetSection("Kestrel"));
 });
 
-
-// Add services to the container.
+// Add services to the container
 builder.Services.AddRazorPages();
-builder.Services.AddScoped<EmailService>();
-builder.Services.AddScoped<ProcurementReminderService>();
-builder.Services.AddHostedService<ProcurementReminderHostedService>();
+
 builder.Services.AddSession();
 
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-
+builder.Services.AddScoped<EmailService>();
+builder.Services.AddScoped<ProcurementReminderService>();
 builder.Services.AddScoped<IUserPermissionService, UserPermissionService>();
 
+builder.Services.AddHostedService<ProcurementReminderHostedService>();
 
-builder.Services.AddAuthentication(NegotiateDefaults.AuthenticationScheme)
-    .AddNegotiate();
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseSqlServer(
+        builder.Configuration.GetConnectionString("DefaultConnection")));
+
+// Use IIS Windows Authentication
+builder.Services.AddAuthentication(IISDefaults.AuthenticationScheme);
 
 builder.Services.AddAuthorization();
 
-
 var app = builder.Build();
 
+// Middleware pipeline
+app.UseStaticFiles();
+
+app.UseRouting();
+
+app.UseSession();
 
 app.UseAuthentication();
 app.UseAuthorization();
 
-
-// Serve static files (wwwroot)
-app.UseStaticFiles();
-
-
-app.UseSession();
-
 app.MapRazorPages();
-
 
 app.Run();

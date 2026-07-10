@@ -216,7 +216,7 @@
 						
 						<td>@item._ptHBLNo</td>
 						<td>@item._ptContainerNo</td>
-						<td>@item._ptContainerETA?.ToString("yyyy-MM-dd HH:mm:ss")</td>
+						<td>@item._ptContainerETA?.ToString("yyyy-MM-dd")</td>
 						<td>@item._ptCountryOfOrigin</td>
 						<td class="erp-truncate">@item._ptRemarks</td>
 						<td>@item._ptCreatedBy</td>
@@ -290,7 +290,7 @@
 			$('#countryOfOrigin').select2();
 
             
-				const table = $('#tblImPex').DataTable({
+			const table = $('#tblImPex').DataTable({
 				pageLength: 25,
 				scrollX: true,
 				stateSave: true,

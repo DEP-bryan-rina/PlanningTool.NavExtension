@@ -58,8 +58,8 @@ namespace PlanningTool.NavExtension.Services
 
                     var subject = reminder.ReminderType switch
                     {
-                        "2WeeksReminder" => "Container ETA Reminder",
-                        "DelaysReminder" => "Delayed Container Notification",
+                        "2WeeksReminder" => "Dedon ETA Reminder",
+                        "DelaysReminder" => "Delayed Dedon ETA Notification",
                         _ => "Procurement Notification"
                     };
 
@@ -92,7 +92,7 @@ namespace PlanningTool.NavExtension.Services
                             </tr>
 
                             <tr>
-                                <th style='text-align:left;'>Container ETA</th>
+                                <th style='text-align:left;'>Dedon ETA</th>
                                 <td style='text-align:left;'>: {reminder.ContainerETA:yyyy-MM-dd}</td>
                             </tr>
 
@@ -107,12 +107,6 @@ namespace PlanningTool.NavExtension.Services
                             Please ensure the necessary preparations and coordination are completed
                             prior to the shipment arrival.
                         </p>
-
-                        <p>
-                            Regards,<br />
-                            Procurement Monitoring Team
-                        </p>
-
                         <hr />
 
                         <small>
@@ -148,7 +142,7 @@ namespace PlanningTool.NavExtension.Services
                             </tr>
 
                             <tr>
-                                <th style='text-align:left;'>Container ETA</th>
+                                <th style='text-align:left;'>Dedon ETA</th>
                                 <td style='text-align:left;'>: {reminder.ContainerETA:yyyy-MM-dd}</td>
                             </tr>
 
@@ -163,12 +157,6 @@ namespace PlanningTool.NavExtension.Services
                             Kindly review the shipment status and take the necessary actions
                             if follow-up is required.
                         </p>
-
-                        <p>
-                            Regards,<br />
-                            Procurement Monitoring Team
-                        </p>
-
                         <hr />
 
                         <small>

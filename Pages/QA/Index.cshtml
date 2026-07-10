@@ -1,0 +1,282 @@
+﻿@page
+@model PlanningTool.NavExtension.Pages.QA.IndexModel
+
+<div class="qa-dashboard-header mb-4">
+	<div class="d-flex align-items-center">
+		<div class="qa-logo">
+			◉
+		</div>
+
+		<div class="qa-title">
+			RAW MATERIAL QUALITY INSPECTION DASHBOARD
+		</div>
+	</div>
+</div>
+
+<div class="row mb-4">
+
+	<div class="col-md-3 mb-3">
+		<div class="card qa-card h-100">
+			<div class="card-body text-center">
+				<div class="kpi-value text-danger">
+					@Model.DefectRate%
+				</div>
+				<div class="kpi-label">
+					Defect Rate
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="col-md-3 mb-3">
+		<div class="card qa-card h-100">
+			<div class="card-body text-center">
+				<div class="kpi-value text-success">
+					@Model.Completion%
+				</div>
+				<div class="kpi-label">
+					Completion
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="col-md-3 mb-3">
+		<div class="card qa-card h-100">
+			<div class="card-body text-center">
+				<div class="kpi-value text-primary">
+					@Model.QualityRating%
+				</div>
+				<div class="kpi-label">
+					Quality Rating
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="col-md-3 mb-3">
+		<div class="card qa-card h-100">
+			<div class="card-body text-center">
+				<div class="kpi-value text-warning">
+					@Model.LeadTime
+				</div>
+				<div class="kpi-label">
+					Lead Time (Days)
+				</div>
+			</div>
+		</div>
+	</div>
+
+</div>
+
+<div class="table-responsive qa-table-container">
+	<table id="tblQA" class="table table-hover w-100">
+		<thead class="sticky-top bg-white table-bordered" style="font-size:0.75rem;">
+			<tr>
+				<th>Item Code</th>
+				<th>Description</th>
+				<th>Date Received</th>
+				<th>UoM</th>
+				<th>Qty Received</th>
+				<th class="text-center">Status</th>
+				<th class="text-center">Qty Good</th>
+				<th class="text-center">Qty Reject</th>
+				<th class="text-center"> Qty Repair</th>
+				<th class="text-center">Earliest WK Required</th>
+			</tr>
+		</thead>
+
+		<tbody style="font-size:0.75rem;">
+
+			@if (Model.Items != null && Model.Items.Any())
+			{
+				@foreach (var item in Model.Items)
+				{
+					var statusClass =
+						item.Status == "OK" ? "status-ok" :
+						item.Status == "WIP" ? "status-wip" :
+						item.Status == "NS" ? "status-ns" :
+						"status-na";
+
+					<tr>
+						<td><strong>@item.ItemCode</strong></td>
+
+						<td>@item.Description</td>
+
+						<td>
+							@(item.DateReceived?.ToString("yyyy-MM-dd") ?? "NA")
+						</td>
+
+						<td>@item.UOM</td>
+
+						<td>@item.QtyReceived.ToString("N0")</td>
+
+						<td class="@statusClass text-center">
+							@item.Status
+						</td>
+
+						<td class="text-center">
+							@item.QtyGood.ToString("N0")
+						</td>
+
+						<td class="text-center">
+							@if (item.QtyReject > 0)
+							{
+								<span class="badge bg-danger">
+									@item.QtyReject.ToString("N0")
+								</span>
+							}
+							else
+							{
+								@item.QtyReject.ToString("N0")
+							}
+						</td>
+
+						<td class="text-center">
+							@if (item.QtyRepair > 0)
+							{
+								<span class="badge bg-primary">
+									@item.QtyRepair.ToString("N0")
+								</span>
+							}
+							else
+							{
+								@item.QtyRepair.ToString("N0")
+							}
+						</td>
+
+						<td class="text-center">
+							@item.EarliestWKRequired
+						</td>
+					</tr>
+				}
+			}
+			else
+			{
+				<tr>
+					<td colspan="10" class="text-center">
+						No records found.
+					</td>
+				</tr>
+			}
+
+		</tbody>
+
+	</table>
+</div>
+
+<style>
+	.qa-dashboard-header {
+		background: #2200a8;
+		color: white;
+		padding: 35px;
+		border-radius: 8px;
+	}
+
+	.qa-logo {
+		color: #f0b000;
+		font-size: 60px;
+		margin-right: 20px;
+		font-weight: bold;
+	}
+
+	.qa-title {
+		font-size: 42px;
+		font-weight: 700;
+	}
+
+	.qa-card {
+		border: none;
+		border-radius: 12px;
+		box-shadow: 0 2px 10px rgba(0,0,0,.08);
+	}
+
+	.kpi-value {
+		font-size: 48px;
+		font-weight: bold;
+	}
+
+	.kpi-label {
+		font-size: 22px;
+		font-weight: 600;
+	}
+
+	.status-ok {
+		background: #00d600;
+		color: white;
+		font-weight: bold;
+		text-align: center;
+	}
+
+	.status-wip {
+		background: #f5a037;
+		color: white;
+		font-weight: bold;
+		text-align: center;
+	}
+
+	.status-ns {
+		background: #8b8b8b;
+		color: white;
+		font-weight: bold;
+		text-align: center;
+	}
+
+	.status-na {
+		background: white;
+		color: black;
+		font-weight: bold;
+		text-align: center;
+	}
+
+	.reject-cell {
+		background: #ff3030;
+		color: white;
+		font-weight: bold;
+	}
+
+	.repair-cell {
+		background: #0d19d8;
+		color: white;
+		font-weight: bold;
+	}
+
+	table th {
+		vertical-align: middle;
+	}
+</style>
+@section Scripts {
+	<script>
+		$(function () {
+
+			const table = $('#tblQA').DataTable({
+				pageLength: 25,
+				scrollX: true,
+				scrollY: '600px',
+				scrollCollapse: true,
+
+				stateSave: true,
+				autoWidth: false,
+				fixedHeader: true
+			});
+
+			$('.dataTables_filter input').css({
+				'width': '300px',
+				'min-width': '300px'
+			});
+
+				const savedSearch = sessionStorage.getItem('tblQASearch');
+
+				if (savedSearch) {
+					table.search(savedSearch).draw();
+					$('.dataTables_filter input').val(savedSearch);
+				}
+
+				$('.dataTables_filter input').on('keyup', function () {
+					sessionStorage.setItem('tblQASearch', this.value);
+			});
+
+		});
+
+	</script>
+}

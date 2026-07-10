@@ -47,17 +47,31 @@
 	<script src="https://cdn.datatables.net/1.13.8/js/dataTables.bootstrap5.min.js"></script>
 	<script src="https://cdn.datatables.net/fixedheader/3.4.1/js/dataTables.fixedHeader.min.js"></script>
 
+	
+
 </head>
 
 <body class="d-flex flex-column min-vh-100">
 	<!-- Global Loader -->
 	<div id="globalLoader" class="loader-overlay">
-		<div class="loader-title">
-			Planning Management System
-		</div>
-		<br />
-		<div class="loader-text" style="margin-left: 5px">
-			Synchronizing NAV Data...
+		<div class="loader-container">
+
+			<div class="loader-title">
+				Planning Management System
+			</div>
+
+			<div class="loader-icon">
+				<i class="fas fa-sync-alt"></i>
+			</div>
+
+			<div class="loader-text">
+				Synchronizing NAV Data...
+			</div>
+
+			<div class="loader-subtext">
+				Please wait while the latest planning information is being updated.
+			</div>
+
 		</div>
 	</div>
 
@@ -125,6 +139,16 @@
 			</ul>
 
 			<div class="d-flex align-items-center text-white">
+
+				<!-- Refresh Button -->
+
+				<button id="btnRefresh"
+						class="btn btn-link text-white me-3"
+						title="Sync all data">
+
+					<i class="fas fa-sync-alt"></i>
+
+				</button>
 				<i class="bi bi-person-circle me-1"></i>
 				@currentUser
 			</div>
@@ -258,6 +282,13 @@
 
 		}, 200);
 		});
+
+		$(document).ready(function () {
+		$("#btnRefresh").click(function () {
+		location.reload();
+		});
+		});
+		
 	</script>
 
 	@await RenderSectionAsync("Scripts", required: false)

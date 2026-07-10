@@ -20,6 +20,8 @@ namespace PlanningTool.NavExtension.Data
 
         public DbSet<ExpirationMonitoringModel> ExpirationMonitoring { get; set; }
 
+        public DbSet<QADashboardItem> QADashboardItems { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<UserModel>()
@@ -32,6 +34,9 @@ namespace PlanningTool.NavExtension.Data
                 .ToTable("_tblEmailNotification");
             modelBuilder.Entity<ReminderNotification>()
                 .ToTable("_tblReminderNotification");
+            modelBuilder.Entity<QADashboardItem>()
+                .HasNoKey()
+                .ToView(null);
         }
     }
 }

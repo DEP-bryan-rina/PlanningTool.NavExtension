@@ -3,56 +3,56 @@
 ========================= */
 
 .navbar-nav .nav-link {
-    position: relative;
-    transition: all 0.25s ease-in-out;
-    padding: 8px 14px;
-    border-radius: 6px;
+	position: relative;
+	transition: all 0.25s ease-in-out;
+	padding: 8px 14px;
+	border-radius: 6px;
 }
 
-    /* Hover background + lift effect */
-    .navbar-nav .nav-link:hover {
-        background: linear-gradient(135deg, #0d6efd, #0a58ca);
-        color: #fff !important;
-        transform: translateY(-2px);
-        box-shadow: 0 6px 12px rgba(13, 110, 253, 0.25);
-    }
+	/* Hover background + lift effect */
+	.navbar-nav .nav-link:hover {
+		background: linear-gradient(135deg, #0d6efd, #0a58ca);
+		color: #fff !important;
+		transform: translateY(-2px);
+		box-shadow: 0 6px 12px rgba(13, 110, 253, 0.25);
+	}
 
-    /* Active state (current page) */
-    .navbar-nav .nav-link.active {
-        background: #0d6efd;
-        color: #fff !important;
-        border-radius: 6px;
-    }
+	/* Active state (current page) */
+	.navbar-nav .nav-link.active {
+		background: #0d6efd;
+		color: #fff !important;
+		border-radius: 6px;
+	}
 
 /* Dropdown items */
 .dropdown-menu .dropdown-item {
-    transition: all 0.2s ease-in-out;
-    border-radius: 6px;
-    margin: 2px 6px;
+	transition: all 0.2s ease-in-out;
+	border-radius: 6px;
+	margin: 2px 6px;
 }
 
-    /* Hover inside dropdown */
-    .dropdown-menu .dropdown-item:hover {
-        background: #0d6efd;
-        color: #fff;
-        transform: translateX(4px);
-    }
+	/* Hover inside dropdown */
+	.dropdown-menu .dropdown-item:hover {
+		background: #0d6efd;
+		color: #fff;
+		transform: translateX(4px);
+	}
 
 /* Dropdown animation */
 .dropdown-menu {
-    animation: fadeSlide 0.18s ease-in-out;
+	animation: fadeSlide 0.18s ease-in-out;
 }
 
 @keyframes fadeSlide {
-    from {
-        opacity: 0;
-        transform: translateY(6px);
-    }
+	from {
+		opacity: 0;
+		transform: translateY(6px);
+	}
 
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
 }
 
 /* ===========================
@@ -62,186 +62,241 @@
 
 /* Page background */
 .erp-page {
-    background: #f5f7fb;
-    font-family: "Segoe UI", Arial, sans-serif;
+	background: #f5f7fb;
+	font-family: "Segoe UI", Arial, sans-serif;
 }
 
 /* FORM CARD */
 .erp-form {
-    background: #ffffff;
-    border: 1px solid #e5e7eb;
-    border-radius: 12px;
-    padding: 18px;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+	background: #ffffff;
+	border: 1px solid #e5e7eb;
+	border-radius: 12px;
+	padding: 18px;
+	box-shadow: 0 2px 6px rgba(0,0,0,0.04);
 }
 
 /* LABEL */
 .erp-label {
-    font-size: 12px;
-    font-weight: 600;
-    color: #374151;
-    margin-bottom: 4px;
-    display: block;
+	font-size: 12px;
+	font-weight: 600;
+	color: #374151;
+	margin-bottom: 4px;
+	display: block;
 }
 
 /* INPUT */
 .erp-input {
-    width: 100%;
-    height: 34px;
-    border-radius: 8px;
-    border: 1px solid #d1d5db;
-    padding: 6px 10px;
-    font-size: 13px;
-    transition: 0.2s;
+	width: 100%;
+	height: 34px;
+	border-radius: 8px;
+	border: 1px solid #d1d5db;
+	padding: 6px 10px;
+	font-size: 13px;
+	transition: 0.2s;
 }
 
-    .erp-input:focus {
-        border-color: #2563eb;
-        outline: none;
-        box-shadow: 0 0 0 3px rgba(37,99,235,0.15);
-    }
+	.erp-input:focus {
+		border-color: #2563eb;
+		outline: none;
+		box-shadow: 0 0 0 3px rgba(37,99,235,0.15);
+	}
 
 /* TEXTAREA */
 .erp-textarea {
-    width: 100%;
-    min-height: 80px;
-    border-radius: 8px;
-    border: 1px solid #d1d5db;
-    padding: 8px;
-    font-size: 13px;
+	width: 100%;
+	min-height: 80px;
+	border-radius: 8px;
+	border: 1px solid #d1d5db;
+	padding: 8px;
+	font-size: 13px;
 }
 
 /* SELECT */
 .erp-select {
-    width: 100%;
-    height: 34px;
-    border-radius: 8px;
-    border: 1px solid #d1d5db;
+	width: 100%;
+	height: 34px;
+	border-radius: 8px;
+	border: 1px solid #d1d5db;
 }
 
 /* BUTTONS */
 .erp-btn {
-    border: none;
-    border-radius: 8px;
-    font-size: 13px;
-    font-weight: 600;
-    padding: 6px 14px;
-    cursor: pointer;
-    transition: 0.2s;
+	border: none;
+	border-radius: 8px;
+	font-size: 13px;
+	font-weight: 600;
+	padding: 6px 14px;
+	cursor: pointer;
+	transition: 0.2s;
 }
 
 .erp-btn-primary {
-    background: #2563eb;
-    color: white;
+	background: #2563eb;
+	color: white;
 }
 
-    .erp-btn-primary:hover {
-        background: #1d4ed8;
-    }
+	.erp-btn-primary:hover {
+		background: #1d4ed8;
+	}
 
 .erp-btn-success {
-    background: #16a34a;
-    color: white;
+	background: #16a34a;
+	color: white;
 }
 
-    .erp-btn-success:hover {
-        background: #15803d;
-    }
+	.erp-btn-success:hover {
+		background: #15803d;
+	}
 
 .erp-btn-warning {
-    background: #f59e0b;
-    color: white;
+	background: #f59e0b;
+	color: white;
 }
 
-    .erp-btn-warning:hover {
-        background: #d97706;
-    }
+	.erp-btn-warning:hover {
+		background: #d97706;
+	}
 
 .erp-btn-secondary {
-    background: #6b7280;
-    color: white;
+	background: #6b7280;
+	color: white;
 }
 
 /* TABLE */
 .erp-table {
-    width: 100%;
-    border-collapse: collapse;
-    background: white;
-    border-radius: 10px;
-    overflow: hidden;
+	width: 100%;
+	border-collapse: collapse;
+	background: white;
+	border-radius: 10px;
+	overflow: hidden;
 }
 
-    .erp-table thead th {
-        background: #f3f4f6;
-        font-size: 12px;
-        padding: 10px;
-        border-bottom: 1px solid #e5e7eb;
-    }
+	.erp-table thead th {
+		background: #f3f4f6;
+		font-size: 12px;
+		padding: 10px;
+		border-bottom: 1px solid #e5e7eb;
+	}
 
-    .erp-table tbody td {
-        font-size: 12px;
-        padding: 10px;
-        border-bottom: 1px solid #f1f1f1;
-    }
+	.erp-table tbody td {
+		font-size: 12px;
+		padding: 10px;
+		border-bottom: 1px solid #f1f1f1;
+	}
 
-    .erp-table tbody tr:hover {
-        background: #f9fafb;
-    }
+	.erp-table tbody tr:hover {
+		background: #f9fafb;
+	}
 
 /* BADGE */
 .erp-badge {
-    font-size: 11px;
-    padding: 4px 10px;
-    border-radius: 999px;
-    display: inline-block;
+	font-size: 11px;
+	padding: 4px 10px;
+	border-radius: 999px;
+	display: inline-block;
 }
 
 .erp-badge-success {
-    background: #16a34a;
-    color: white;
+	background: #16a34a;
+	color: white;
 }
 
 .erp-badge-info {
-    background: #2563eb;
-    color: white;
+	background: #2563eb;
+	color: white;
 }
 
 /* ===== Global Loader ===== */
 
 .loader-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(255,255,255,.98);
-    z-index: 99999;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    transition: opacity .4s ease;
+	position: fixed;
+	inset: 0;
+	background: rgba(255,255,255,.98);
+	z-index: 99999;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	transition: opacity .4s ease;
 }
 
 .loader-content {
-    text-align: center;
+	text-align: center;
 }
 
 .loader-gif {
-    width: 180px;
-    max-width: 100%;
+	width: 180px;
+	max-width: 100%;
 }
 
 .navbar-brand {
-    font-weight: 600;
+	font-weight: 600;
 }
 
 .dropdown-item.active {
-    background: #0d6efd;
-    color: #fff;
+	background: #0d6efd;
+	color: #fff;
 }
 
 main {
-    min-height: calc(100vh - 130px);
+	min-height: calc(100vh - 130px);
 }
 
 #btnTagPO:disabled {
-    opacity: .5;
-    cursor: not-allowed;
+	opacity: .5;
+	cursor: not-allowed;
+}
+
+.loader-overlay {
+	position: fixed;
+	inset: 0;
+	background: rgba(255, 255, 255, 0.92);
+	z-index: 9999;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.loader-container {
+	text-align: center;
+	padding: 25px 35px;
+}
+
+.loader-title {
+	font-size: 22px;
+	font-weight: 600;
+	color: #2c3e50;
+	margin-bottom: 15px;
+}
+
+.loader-icon {
+	margin: 15px 0;
+}
+
+	.loader-icon i {
+		font-size: 28px;
+		color: #28a745;
+		animation: spin 1.2s linear infinite;
+	}
+
+.loader-text {
+	font-size: 16px;
+	font-weight: 500;
+	color: #444;
+	margin-top: 10px;
+}
+
+.loader-subtext {
+	font-size: 12px;
+	color: #888;
+	margin-top: 8px;
+}
+
+@keyframes spin {
+	from {
+		transform: rotate(0deg);
+	}
+
+	to {
+		transform: rotate(360deg);
+	}
 }

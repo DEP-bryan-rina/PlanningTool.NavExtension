@@ -278,7 +278,7 @@ namespace PlanningTool.NavExtension.Pages.ImPex
                         {
                             changeRows.Add($@"
                             <tr>
-                                <td>Container ETA</td>
+                                <td>Dedon ETA</td>
                                 <td style='padding:2px 5px; text-align:left;'>: {oldETA:yyyy-MM-dd}</td>
                                 <td style='padding:2px 5px; text-align:left;'>: {existing._ptContainerETA:yyyy-MM-dd}</td>
                             </tr>");
@@ -342,7 +342,7 @@ namespace PlanningTool.NavExtension.Pages.ImPex
                                         </tr>
 
                                         <tr>
-                                            <th style=""text-align:left;"">Container ETA</th>
+                                            <th style=""text-align:left;"">Dedon ETA</th>
                                             <td>: {existing._ptContainerETA:yyyy-MM-dd}</td>
                                         </tr>
 
