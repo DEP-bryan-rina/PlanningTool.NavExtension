@@ -380,3 +380,22 @@ main {
 table th {
 	vertical-align: middle;
 }
+.loader-logo {
+	width: 32px;
+	height: 32px;
+	border-radius: 50%;
+	object-fit: cover; /* Keeps it perfectly circular */
+	display: inline-block;
+	animation: spinCCW 1s linear infinite;
+	transform-origin: center;
+}
+
+@keyframes spinCCW {
+	from {
+		transform: rotate(0deg);
+	}
+
+	to {
+		transform: rotate(-360deg);
+	}
+}
