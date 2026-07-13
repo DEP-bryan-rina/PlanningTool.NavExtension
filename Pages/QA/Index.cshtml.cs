@@ -23,59 +23,66 @@ namespace PlanningTool.NavExtension.Pages.QA
 
         public async Task OnGetAsync()
         {
-            Items = await _context
-    .Set<QADashboardItem>()
-    .FromSqlRaw("EXEC dbo._spGetQADashboard")
-    .ToListAsync();
-
-            // Totals
-            var totalReceived = Items.Sum(x => x.QtyReceived);
-            var totalGood = Items.Sum(x => x.QtyGood);
-            var totalReject = Items.Sum(x => x.QtyReject);
-            var totalRepair = Items.Sum(x => x.QtyRepair);
-
-            var totalFinishedInspection =
-                totalGood +
-                totalReject +
-                totalRepair;
-
-            // KPI Calculations
-            if (totalReceived > 0)
+            try
             {
-                DefectRate = decimal.Round(
-                    ((totalRepair + totalReject) / totalReceived) * 100,
-                    1);
+                Items = await _context
+                .Set<QADashboardItem>()
+                .FromSqlRaw("EXEC dbo._spGetQADashboard;")
+                .ToListAsync();
 
-                Completion = decimal.Round(
-                    (totalFinishedInspection / totalReceived) * 100,
-                    1);
+                // Totals
+                var totalReceived = Items.Sum(x => x.QtyReceived);
+                var totalGood = Items.Sum(x => x.QtyGood);
+                var totalReject = Items.Sum(x => x.QtyReject);
+                var totalRepair = Items.Sum(x => x.QtyRepair);
 
-                QualityRating = decimal.Round(
-                    100 - DefectRate,
-                    1);
+                var totalFinishedInspection =
+                    totalGood +
+                    totalReject +
+                    totalRepair;
+
+                // KPI Calculations
+                if (totalReceived > 0)
+                {
+                    DefectRate = decimal.Round(
+                        ((totalRepair + totalReject) / totalReceived) * 100,
+                        1);
+
+                    Completion = decimal.Round(
+                        (totalFinishedInspection / totalReceived) * 100,
+                        1);
+
+                    QualityRating = decimal.Round(
+                        100 - DefectRate,
+                        1);
+                }
+                else
+                {
+                    DefectRate = 0m;
+                    Completion = 0m;
+                    QualityRating = 0m;
+                }
+
+                // Lead Time (Days)
+                // Average days between Material Received and Inspection Completion
+                var completedItems = Items
+                    .Where(x =>
+                        x.DateReceived.HasValue &&
+                        x.InspectionCompletionDate.HasValue)
+                    .ToList();
+
+                LeadTime = completedItems.Any()
+                    ? decimal.Round(
+                        (decimal)completedItems.Average(x =>
+                            (x.InspectionCompletionDate!.Value -
+                             x.DateReceived!.Value).TotalDays),
+                        1)
+                    : 0m;
             }
-            else
+            catch (Exception ex)
             {
-                DefectRate = 0m;
-                Completion = 0m;
-                QualityRating = 0m;
+                TempData["ErrorMessage"] = "An error occurred: " + ex.Message;                
             }
-
-            // Lead Time (Days)
-            // Average days between Material Received and Inspection Completion
-            var completedItems = Items
-                .Where(x =>
-                    x.DateReceived.HasValue &&
-                    x.InspectionCompletionDate.HasValue)
-                .ToList();
-
-            LeadTime = completedItems.Any()
-                ? decimal.Round(
-                    (decimal)completedItems.Average(x =>
-                        (x.InspectionCompletionDate!.Value -
-                         x.DateReceived!.Value).TotalDays),
-                    1)
-                : 0m;        
         }
     }
 }
