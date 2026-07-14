@@ -33,24 +33,24 @@ namespace PlanningTool.NavExtension.Pages.ImPex
 
         public async Task<IActionResult> OnGetAsync(int? id)
         {
-            //var userId = User?.Identity?.Name;
+            var userId = User?.Identity?.Name;
 
-            //if (string.IsNullOrWhiteSpace(userId))
-            //{
-            //    return Unauthorized();
-            //}
+            if (string.IsNullOrWhiteSpace(userId))
+            {
+                return Unauthorized();
+            }
 
-            //userId = userId.ToUpperInvariant();
+            userId = userId.ToUpperInvariant();
 
-            //var userPermission = await _userPermissionService.GetUserPermissionAsync(userId);
+            var userPermission = await _userPermissionService.GetUserPermissionAsync(userId);
 
-            //if (userPermission == null || !userPermission.ImPex)
-            //{
-            //    return RedirectToPage("/AccessDenied", new
-            //    {
-            //        returnUrl = "/ImPex/Index"
-            //    });
-            //}
+            if (userPermission == null || !userPermission.ImPex)
+            {
+                return RedirectToPage("/AccessDenied", new
+                {
+                    returnUrl = "/ImPex/Index"
+                });
+            }
 
             this.ImpexList = _context.tblImPexCenter.ToList();
             ProcurementList = await _context.tblProcurementCenter.ToListAsync();

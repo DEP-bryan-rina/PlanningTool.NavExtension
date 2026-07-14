@@ -97,7 +97,8 @@
 					<textarea asp-for="Impex._ptRemarks" style="height: 115px"
 							  class="form-control erp-control"
 							  rows="5"
-							  placeholder="Remarks"></textarea>
+							  placeholder="Remarks">
+					</textarea>
 
 				</div>
 
@@ -182,12 +183,6 @@
 						<td>@item._ptCreatedDate</td>
 						<td>@item._ptModifiedBy</td>
 						<td>@item._ptModifiedDate</td>
-						@* <td>
-							@Html.Raw(string.Join(" ",
-								Model.ProcurementList
-									.Where(x => x._ptHBLNo == item._ptHBLNo && x._ptStatus != 0)
-									.Select(x => $"<span class='badge bg-primary me-1'>{x._ptDocNo}</span>")))
-						</td> *@
 						<td class="text-center">
 							@if (item._ptStatus == 1)
 							{
@@ -210,9 +205,10 @@
 								</span>
 							}
 						</td>
-					
+
 						<td class="text-center">
 							@{
+								// Bind the tagged documents for the current HBL No
 								var taggedDocs = string.Join(", ",
 									Model.ProcurementList
 										.Where(x => x._ptHBLNo == item._ptHBLNo && x._ptStatus != 0)
@@ -229,12 +225,12 @@
 								   title="Edit HBL"
 								   onclick="
 									if (@item._ptStatus == 1) {
-										if (confirm('Are you sure you want to edit this data?\n\n⚠ This HBL is already tagged with: @taggedDocs\n\nDo you want to continue?')) {
-										window.location.href='@editUrl';									
-										}
-									} 
+									if (confirm('Are you sure you want to edit this data?\n\n⚠ This HBL is already tagged with: @taggedDocs\n\nDo you want to continue?')) {
+									window.location.href='@editUrl';
+									}
+									}
 									else {
-										window.location.href='@editUrl';
+									window.location.href='@editUrl';
 									}
 									return false;">
 									<i class="fa-solid fa-pen-to-square"></i>
