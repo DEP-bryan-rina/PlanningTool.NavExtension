@@ -88,7 +88,8 @@
 			</div>
 			<small id="tagInfo" class="text-warning">
 				<i class="fas fa-info-circle me-1"></i>
-				Please select an HBL and check at least one Purchase Order.
+					Please select an HBL, check at least one Purchase Order, <br />
+					and enter a valid Partial Delivered quantity greater than 0.
 			</small>
 		</div>
 	</div>
@@ -171,7 +172,7 @@
 									   name="PartialDeliveredValues[@($"{item.IDDocType}|{item.IDDocNo}|{item.IDLineNo}|{item.ItemCode}")]"
 									   value="@item.ptPartialDelivered"
 									   max="@item.OutstandingQty"
-									   min="0"
+									   min="1"
 									   step="0.01"
 									   style="display:none; width:70px; padding:2px 4px; font-size:10px;" />
 
@@ -256,33 +257,53 @@
 
 		function toggleTagButton() {
 
-			const hasHBL = $('#impexDropdown').val();
-			const hasCheckedPO = $('.po-checkbox:checked').length > 0;
+			const hasHBL = !!$('#impexDropdown').val();
+			const checkedRows = $('.row-check:checked');
 
-			const enabled = hasHBL && hasCheckedPO;
+			let hasValidPartial = checkedRows.length > 0;
+
+			checkedRows.each(function () {
+
+				const value = parseFloat(
+					$(this).closest('tr').find('.pd-input').val()
+				);
+
+				if (isNaN(value) || value <= 0) {
+					hasValidPartial = false;
+					return false;
+				}
+			});
+
+			const enabled = hasHBL &&
+							checkedRows.length > 0 &&
+							hasValidPartial;
 
 			$('#btnTagPO').prop('disabled', !enabled);
-			$('#tagInfo').toggle(!enabled);
+
+			$('#tagInfo')
+				.text('Please select an HBL, check at least one Purchase Order, and enter a valid Partial Delivered quantity greater than 0.')
+				.toggle(!enabled);
 		}
 
-		// Disable Checkbox function
 		function updateSelectAllState() {
 
 			const enabledChecks = $('.row-check:not(:disabled)').filter(function () {
-
 				return (parseFloat($(this).data('balance')) || 0) > 0;
-
 			});
 
 			const checkedChecks = enabledChecks.filter(':checked');
 
 			$('#selectAll').prop({
-				checked: enabledChecks.length > 0 &&
-						 checkedChecks.length === enabledChecks.length,
+				checked:
+					enabledChecks.length > 0 &&
+					checkedChecks.length === enabledChecks.length,
 
-				indeterminate: checkedChecks.length > 0 &&
-							   checkedChecks.length < enabledChecks.length
+				indeterminate:
+					checkedChecks.length > 0 &&
+					checkedChecks.length < enabledChecks.length
 			});
+
+			toggleTagButton();
 		}
 
 		function populateHBLFields() {
@@ -292,14 +313,14 @@
 			$('#HBLNo').val(selected.data('hbl') || '');
 			$('#ContainerNo').val(selected.data('container') || '');
 			$('#ParamCETA').val(selected.data('eta') || '');
+
+			toggleTagButton();
 		}
 
 		$(document).ready(function () {
 
-			// Select2
 			$('#impexDropdown').select2();
 
-			// DataTable
 			const table = $('#tblProcurement').DataTable({
 				pageLength: 25,
 				scrollX: true,
@@ -315,7 +336,6 @@
 				minWidth: '300px'
 			});
 
-			// Restore search
 			const savedSearch =
 				sessionStorage.getItem('tblProcurementSearch');
 
@@ -333,7 +353,6 @@
 				);
 			});
 
-			// Select All
 			$('#selectAll').on('change', function () {
 
 				$('.row-check:not(:disabled)')
@@ -341,11 +360,9 @@
 					.trigger('change');
 			});
 
-			// Row Check
 			$(document).on('change', '.row-check', function () {
 
 				const row = $(this).closest('tr');
-
 				const balance =
 					parseFloat($(this).data('balance')) || 0;
 
@@ -354,6 +371,7 @@
 					row.find('.pd-input')
 						.val(balance)
 						.attr('max', balance)
+						.attr('min', 1)
 						.show();
 
 					row.find('.pd-text').hide();
@@ -371,36 +389,46 @@
 				}
 
 				updateSelectAllState();
-				toggleTagButton();
 			});
 
-			// Validate Partial Delivered
 			$(document).on('input', '.pd-input', function () {
 
 				const row = $(this).closest('tr');
 
-				const outstanding = parseFloat($(this).attr('max')) || 0;
-				const value = parseFloat($(this).val()) || 0;
+				const outstanding =
+					parseFloat($(this).attr('max')) || 0;
 
-				if (value > outstanding) {
-					alert('Partial Delivered cannot exceed Outstanding Quantity!');
-					$(this).val(outstanding);
+				const value =
+					parseFloat($(this).val());
+
+				if (isNaN(value) || value <= 0) {
+
 					row.addClass('table-danger');
+
+				} else if (value > outstanding) {
+
+					alert(
+						'Partial Delivered cannot exceed Outstanding Quantity!'
+					);
+
+					$(this).val(outstanding);
+
+					row.addClass('table-danger');
+
 				} else {
+
 					row.removeClass('table-danger');
 				}
-			});
 
-			// HBL Change
-			$('#impexDropdown').on('change', function () {
-
-				populateHBLFields();
 				toggleTagButton();
 			});
 
-			toggleTagButton();
-			populateHBLFields();
+			$('#impexDropdown').on('change', function () {
+				populateHBLFields();
+			});
 
+			populateHBLFields();
+			toggleTagButton();
 		});
 
 	</script>
