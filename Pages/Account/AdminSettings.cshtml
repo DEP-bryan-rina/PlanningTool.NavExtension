@@ -3,6 +3,12 @@
 @{
 	ViewData["Title"] = "Admin Settings";
 }
+<div>
+	Authenticated: @User.Identity?.IsAuthenticated
+	<br />
+	User: @User.Identity?.Name
+</div>
+
 <div class="accordion" id="emailNotificationAccordion">
 
 	<div class="accordion-item">
