@@ -3,77 +3,6 @@
 @{
 	ViewData["Title"] = "Procurement Control Center";
 }
-<script>
-	$(function () {
-
-		// Select All (ignore disabled checkboxes)
-		$("#selectAll").on("change", function () {
-			$(".row-check:not(:disabled)")
-				.prop("checked", this.checked)
-				.trigger("change");
-		});
-
-		// Row checkbox change
-		$(document).on("change", ".row-check", function () {
-
-			const enabledChecks = $(".row-check:not(:disabled)");
-
-			$("#selectAll").prop(
-				"checked",
-				enabledChecks.length > 0 &&
-				enabledChecks.length === enabledChecks.filter(":checked").length
-			);
-
-			const row = $(this).closest("tr");
-			const outstanding = parseFloat($(this).data("outstanding")) || 0;
-
-			if (this.checked) {
-				row.find(".pd-input")
-					.val(outstanding)
-					.attr("max", outstanding)
-					.show();
-
-				row.find(".pd-text").hide();
-				row.addClass("table-warning");
-			} else {
-				row.find(".pd-input").hide();
-				row.find(".pd-text").show();
-				row.removeClass("table-warning table-danger");
-			}
-		});
-
-		// Validate Partial Delivered
-		$(document).on("input", ".pd-input", function () {
-
-			const row = $(this).closest("tr");
-			const max = parseFloat($(this).attr("max")) || 0;
-			const value = parseFloat($(this).val()) || 0;
-
-			if (value > max) {
-				alert("Partial Delivered cannot exceed Outstanding Quantity!");
-				$(this).val(max);
-				row.addClass("table-danger");
-			} else {
-				row.removeClass("table-danger");
-			}
-		});
-
-		// Populate hidden fields from selected HBL
-		$("#impexDropdown").on("change", function () {
-
-			const selected = $(this).find(":selected");
-
-			$("#HBLNo").val(selected.data("hbl") || "");
-			$("#ContainerNo").val(selected.data("container") || "");
-			$("#ParamCETA").val(selected.data("eta") || "");
-		});
-
-		// Select2
-		$("#impexDropdown").select2();
-
-	});
-</script>
-
 <form method="post">
 	<div class="card border-0 shadow-sm erp-form">
 		<div class="card-header bg-white border-bottom">
@@ -156,7 +85,7 @@
 
 					</div>
 				</div>
-			</div>			
+			</div>
 			<small id="tagInfo" class="text-warning">
 				<i class="fas fa-info-circle me-1"></i>
 				Please select an HBL and check at least one Purchase Order.
@@ -197,6 +126,21 @@
 				{
 					@foreach (var item in Model.ProcurementList)
 					{
+
+						
+						var totalDelivered = Model.ProcurementList
+														.Where(x =>
+															x.IDDocType == item.IDDocType &&
+															x.IDDocNo == item.IDDocNo &&
+															x.VendorName == item.VendorName &&
+															x.ItemCode == item.ItemCode &&
+															x.ItemDescription == item.ItemDescription)
+														.Sum(x => x.ptPartialDelivered);
+
+						bool disableCheckbox =
+							totalDelivered >= item.OutstandingQty;
+						
+						
 						<tr>
 							<td>
 								<input type="checkbox"
@@ -205,7 +149,8 @@
 									   value="@($"{item.IDDocType}|{item.IDDocNo}|{item.IDLineNo}|{item.ItemCode}")"
 									   data-pd="@item.ptPartialDelivered"
 									   data-outstanding="@item.OutstandingQty"
-								@(!string.IsNullOrEmpty(item.ptHBLNo) && item.ptPartialDelivered == item.OutstandingQty ? "disabled" : "") />
+									   data-balance="@(item.OutstandingQty - item.ptPartialDelivered)"
+								@(totalDelivered == item.OutstandingQty ? "disabled" : "") />
 							</td>
 							<td>@item.IDDocNo</td>
 							<td>@item.VendorName</td>
@@ -216,6 +161,10 @@
 							@* <td>@item.ptBalanceQty</td> *@
 							<td>
 								<span class="pd-text">@item.ptPartialDelivered</span>
+
+								@{
+									var balanceQty = item.OutstandingQty - item.ptPartialDelivered;
+								}
 
 								<input type="number"
 									   class="form-control form-control-sm pd-input text-end"
@@ -301,67 +250,158 @@
 		</table>
 	</div>
 </form>
-
-
-@section Scripts {
+@section Scripts
+{
 	<script>
-		$(function () {
 
-			$('#impexDropdown').select2();
-
-            
-			const table = $('#tblProcurement').DataTable({
-					pageLength: 25,
-					scrollX: true,
-					scrollY: '60vh',
-					scrollCollapse: true,
-					paging: true,
-					autoWidth: false,
-					fixedHeader: true
-				});
-			$('.dataTables_filter input').css({
-			'width': '300px',
-			'min-width': '300px'
-			});
-
-				const savedSearch = sessionStorage.getItem('tblProcurementSearch');
-
-				if (savedSearch) {
-					table.search(savedSearch).draw();
-					$('.dataTables_filter input').val(savedSearch);
-				}
-
-				$('.dataTables_filter input').on('keyup', function () {
-					sessionStorage.setItem('tblProcurementSearch', this.value);
-			});
-
-		});
-
-		// Enable or disable the Tag button based on HBL selection and checked POs
 		function toggleTagButton() {
 
-			const hblSelected = $('#impexDropdown').val();
+			const hasHBL = $('#impexDropdown').val();
 			const hasCheckedPO = $('.po-checkbox:checked').length > 0;
 
-			const enabled = hblSelected && hasCheckedPO;
+			const enabled = hasHBL && hasCheckedPO;
 
 			$('#btnTagPO').prop('disabled', !enabled);
+			$('#tagInfo').toggle(!enabled);
+		}
 
-			if (enabled) {
-				$('#tagInfo').hide();
-			} else {
-				$('#tagInfo').show();
-			}
+		// Disable Checkbox function
+		function updateSelectAllState() {
+
+			const enabledChecks = $('.row-check:not(:disabled)').filter(function () {
+
+				return (parseFloat($(this).data('balance')) || 0) > 0;
+
+			});
+
+			const checkedChecks = enabledChecks.filter(':checked');
+
+			$('#selectAll').prop({
+				checked: enabledChecks.length > 0 &&
+						 checkedChecks.length === enabledChecks.length,
+
+				indeterminate: checkedChecks.length > 0 &&
+							   checkedChecks.length < enabledChecks.length
+			});
+		}
+
+		function populateHBLFields() {
+
+			const selected = $('#impexDropdown option:selected');
+
+			$('#HBLNo').val(selected.data('hbl') || '');
+			$('#ContainerNo').val(selected.data('container') || '');
+			$('#ParamCETA').val(selected.data('eta') || '');
 		}
 
 		$(document).ready(function () {
 
+			// Select2
+			$('#impexDropdown').select2();
+
+			// DataTable
+			const table = $('#tblProcurement').DataTable({
+				pageLength: 25,
+				scrollX: true,
+				scrollY: '60vh',
+				scrollCollapse: true,
+				paging: true,
+				autoWidth: false,
+				fixedHeader: true
+			});
+
+			$('.dataTables_filter input').css({
+				width: '300px',
+				minWidth: '300px'
+			});
+
+			// Restore search
+			const savedSearch =
+				sessionStorage.getItem('tblProcurementSearch');
+
+			if (savedSearch) {
+
+				table.search(savedSearch).draw();
+				$('.dataTables_filter input').val(savedSearch);
+			}
+
+			$('.dataTables_filter input').on('keyup', function () {
+
+				sessionStorage.setItem(
+					'tblProcurementSearch',
+					this.value
+				);
+			});
+
+			// Select All
+			$('#selectAll').on('change', function () {
+
+				$('.row-check:not(:disabled)')
+					.prop('checked', this.checked)
+					.trigger('change');
+			});
+
+			// Row Check
+			$(document).on('change', '.row-check', function () {
+
+				const row = $(this).closest('tr');
+
+				const balance =
+					parseFloat($(this).data('balance')) || 0;
+
+				if (this.checked) {
+
+					row.find('.pd-input')
+						.val(balance)
+						.attr('max', balance)
+						.show();
+
+					row.find('.pd-text').hide();
+
+					row.addClass('table-warning');
+
+				} else {
+
+					row.find('.pd-input').hide();
+					row.find('.pd-text').show();
+
+					row.removeClass(
+						'table-warning table-danger'
+					);
+				}
+
+				updateSelectAllState();
+				toggleTagButton();
+			});
+
+			// Validate Partial Delivered
+			$(document).on('input', '.pd-input', function () {
+
+				const row = $(this).closest('tr');
+
+				const outstanding = parseFloat($(this).attr('max')) || 0;
+				const value = parseFloat($(this).val()) || 0;
+
+				if (value > outstanding) {
+					alert('Partial Delivered cannot exceed Outstanding Quantity!');
+					$(this).val(outstanding);
+					row.addClass('table-danger');
+				} else {
+					row.removeClass('table-danger');
+				}
+			});
+
+			// HBL Change
+			$('#impexDropdown').on('change', function () {
+
+				populateHBLFields();
+				toggleTagButton();
+			});
+
 			toggleTagButton();
-
-			$('#impexDropdown').on('change', toggleTagButton);
-
-			$(document).on('change', '.po-checkbox', toggleTagButton);
+			populateHBLFields();
 
 		});
+
 	</script>
 }
