@@ -88,8 +88,7 @@
 			</div>
 			<small id="tagInfo" class="text-warning">
 				<i class="fas fa-info-circle me-1"></i>
-					Please select an HBL, check at least one Purchase Order, <br />
-					and enter a valid Partial Delivered quantity greater than 0.
+				Please select an HBL and check at least one Purchase Order.
 			</small>
 		</div>
 	</div>
@@ -113,7 +112,7 @@
 					@* <th style="width:120px;">Balance Qty</th> *@
 					<th style="width:140px;">Partial Delivered</th>
 					<th style="width:150px; text-align: center">HBL No</th>
-					<th style="width:150px;">Container No</th>
+					<th style="width:150px; text-align: center">Container No</th>
 					<th style="width:120px;">Dedon ETA</th>
 					<th style="width:180px;">Country of Origin</th>
 					<th style="width:250px;">Remarks</th>
@@ -140,7 +139,7 @@
 
 						bool disableCheckbox =
 							totalDelivered >= item.OutstandingQty;
-						
+
 						
 						<tr>
 							<td>
@@ -172,7 +171,7 @@
 									   name="PartialDeliveredValues[@($"{item.IDDocType}|{item.IDDocNo}|{item.IDLineNo}|{item.ItemCode}")]"
 									   value="@item.ptPartialDelivered"
 									   max="@item.OutstandingQty"
-									   min="1"
+									   min="0"
 									   step="0.01"
 									   style="display:none; width:70px; padding:2px 4px; font-size:10px;" />
 
@@ -180,7 +179,7 @@
 							<td class="text-center">
 								@if (!string.IsNullOrEmpty(item.ptHBLNo))
 								{
-									<span class="badge bg-primary">
+									<span class="badge bg-success text-dark">
 										@item.ptHBLNo
 									</span>
 								}
@@ -191,7 +190,7 @@
 									</span>
 								}
 							</td>
-							<td>@item.ptContainerNo</td>
+							<td class="text-center">@item.ptContainerNo</td>
 							<td>
 
 								@if (item.ptContainerETA.HasValue)
@@ -200,21 +199,21 @@
 
 									if (days < 0)
 									{
-										<span class="badge bg-danger">
+										<span class="badge bg-danger text-bg-dark">
 											<i class="fas fa-triangle-exclamation me-1"></i>
 											@item.ptContainerETA.Value.ToString("yyyy-MM-dd")
 										</span>
 									}
 									else if (days <= 14)
 									{
-										<span class="badge bg-success">
+										<span class="badge bg-success text-bg-dark">
 											<i class="fas fa-shipping-fast me-1"></i>
 											@item.ptContainerETA.Value.ToString("yyyy-MM-dd")
 										</span>
 									}
 									else
 									{
-										<span class="badge bg-secondary">
+										<span class="badge bg-secondary text-bg-dark">
 											<i class="fas fa-calendar-alt me-1"></i>
 											@item.ptContainerETA.Value.ToString("yyyy-MM-dd")
 										</span>
@@ -236,7 +235,7 @@
 											title="Untag"
 											onclick="return confirm('Are you sure you want to untag this PO @item.IDDocNo?');">
 
-										<i class="fa-solid fa-link-slash text-danger"></i>
+										<i class="fa-solid fa-link-slash text-success"></i>
 
 									</button>
 								}
@@ -257,53 +256,33 @@
 
 		function toggleTagButton() {
 
-			const hasHBL = !!$('#impexDropdown').val();
-			const checkedRows = $('.row-check:checked');
+			const hasHBL = $('#impexDropdown').val();
+			const hasCheckedPO = $('.po-checkbox:checked').length > 0;
 
-			let hasValidPartial = checkedRows.length > 0;
-
-			checkedRows.each(function () {
-
-				const value = parseFloat(
-					$(this).closest('tr').find('.pd-input').val()
-				);
-
-				if (isNaN(value) || value <= 0) {
-					hasValidPartial = false;
-					return false;
-				}
-			});
-
-			const enabled = hasHBL &&
-							checkedRows.length > 0 &&
-							hasValidPartial;
+			const enabled = hasHBL && hasCheckedPO;
 
 			$('#btnTagPO').prop('disabled', !enabled);
-
-			$('#tagInfo')
-				.text('Please select an HBL, check at least one Purchase Order, and enter a valid Partial Delivered quantity greater than 0.')
-				.toggle(!enabled);
+			$('#tagInfo').toggle(!enabled);
 		}
 
+		// Disable Checkbox function
 		function updateSelectAllState() {
 
 			const enabledChecks = $('.row-check:not(:disabled)').filter(function () {
+
 				return (parseFloat($(this).data('balance')) || 0) > 0;
+
 			});
 
 			const checkedChecks = enabledChecks.filter(':checked');
 
 			$('#selectAll').prop({
-				checked:
-					enabledChecks.length > 0 &&
-					checkedChecks.length === enabledChecks.length,
+				checked: enabledChecks.length > 0 &&
+						 checkedChecks.length === enabledChecks.length,
 
-				indeterminate:
-					checkedChecks.length > 0 &&
-					checkedChecks.length < enabledChecks.length
+				indeterminate: checkedChecks.length > 0 &&
+							   checkedChecks.length < enabledChecks.length
 			});
-
-			toggleTagButton();
 		}
 
 		function populateHBLFields() {
@@ -313,14 +292,14 @@
 			$('#HBLNo').val(selected.data('hbl') || '');
 			$('#ContainerNo').val(selected.data('container') || '');
 			$('#ParamCETA').val(selected.data('eta') || '');
-
-			toggleTagButton();
 		}
 
 		$(document).ready(function () {
 
+			// Select2
 			$('#impexDropdown').select2();
 
+			// DataTable
 			const table = $('#tblProcurement').DataTable({
 				pageLength: 25,
 				scrollX: true,
@@ -336,6 +315,7 @@
 				minWidth: '300px'
 			});
 
+			// Restore search
 			const savedSearch =
 				sessionStorage.getItem('tblProcurementSearch');
 
@@ -353,6 +333,7 @@
 				);
 			});
 
+			// Select All
 			$('#selectAll').on('change', function () {
 
 				$('.row-check:not(:disabled)')
@@ -360,9 +341,11 @@
 					.trigger('change');
 			});
 
+			// Row Check
 			$(document).on('change', '.row-check', function () {
 
 				const row = $(this).closest('tr');
+
 				const balance =
 					parseFloat($(this).data('balance')) || 0;
 
@@ -371,7 +354,6 @@
 					row.find('.pd-input')
 						.val(balance)
 						.attr('max', balance)
-						.attr('min', 1)
 						.show();
 
 					row.find('.pd-text').hide();
@@ -389,46 +371,36 @@
 				}
 
 				updateSelectAllState();
+				toggleTagButton();
 			});
 
+			// Validate Partial Delivered
 			$(document).on('input', '.pd-input', function () {
 
 				const row = $(this).closest('tr');
 
-				const outstanding =
-					parseFloat($(this).attr('max')) || 0;
+				const outstanding = parseFloat($(this).attr('max')) || 0;
+				const value = parseFloat($(this).val()) || 0;
 
-				const value =
-					parseFloat($(this).val());
-
-				if (isNaN(value) || value <= 0) {
-
-					row.addClass('table-danger');
-
-				} else if (value > outstanding) {
-
-					alert(
-						'Partial Delivered cannot exceed Outstanding Quantity!'
-					);
-
+				if (value > outstanding) {
+					alert('Partial Delivered cannot exceed Outstanding Quantity!');
 					$(this).val(outstanding);
-
 					row.addClass('table-danger');
-
 				} else {
-
 					row.removeClass('table-danger');
 				}
+			});
 
+			// HBL Change
+			$('#impexDropdown').on('change', function () {
+
+				populateHBLFields();
 				toggleTagButton();
 			});
 
-			$('#impexDropdown').on('change', function () {
-				populateHBLFields();
-			});
-
-			populateHBLFields();
 			toggleTagButton();
+			populateHBLFields();
+
 		});
 
 	</script>
