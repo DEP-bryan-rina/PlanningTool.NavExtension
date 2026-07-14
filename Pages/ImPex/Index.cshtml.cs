@@ -182,11 +182,6 @@ namespace PlanningTool.NavExtension.Pages.ImPex
                                     Should you encounter any issues or require further assistance, please do not hesitate to contact the IT Team.
                                 </p>
 
-                                <p>
-                                    Regards,<br />
-                                    ImPex Monitoring Team
-                                </p>
-
                                 <hr />
 
                                 <small>
@@ -367,12 +362,7 @@ namespace PlanningTool.NavExtension.Pages.ImPex
 
                                     <p>
                                         Should you encounter any issues or require further assistance, please do not hesitate to contact the IT Team.
-                                    </p>
-
-                                    <p>
-                                        Regards,<br />
-                                        ImPex Monitoring Team
-                                    </p>
+                                    </p>                                  
 
                                     <hr />
 

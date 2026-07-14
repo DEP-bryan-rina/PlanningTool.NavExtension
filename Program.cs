@@ -24,7 +24,7 @@ builder.Services.AddHostedService<ProcurementReminderHostedService>();
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(
-        builder.Configuration.GetConnectionString("DefaultConnection")));
+        builder.Configuration.GetConnectionString("LiveConnection")));
 
 // Use IIS Windows Authentication
 builder.Services.AddAuthentication(IISDefaults.AuthenticationScheme);

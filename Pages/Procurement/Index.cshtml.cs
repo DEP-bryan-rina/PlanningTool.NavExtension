@@ -25,7 +25,7 @@ namespace PlanningTool.NavExtension.Pages.Procurement
             _context = context;
             _emailService = emailService;
             _userPermissionService = userPermissionService;
-            this.conStr = config.GetConnectionString("DefaultConnection");
+            this.conStr = config.GetConnectionString("LiveConnection");
         }
         public List<ImPexCenterModel> ImpexList { get; set; } = new();
 
@@ -220,12 +220,7 @@ namespace PlanningTool.NavExtension.Pages.Procurement
                                 <p>
                                     Should you encounter any issues or require further assistance,
                                     please do not hesitate to contact the IT Team.
-                                </p>
-
-                                <p>
-                                    Regards,<br />
-                                    Procurement Monitoring Team
-                                </p>
+                                </p>                          
 
                                 <hr />
 
@@ -333,11 +328,6 @@ namespace PlanningTool.NavExtension.Pages.Procurement
                             <p>
                                 Should you encounter any issues or require further assistance,
                                 please do not hesitate to contact the IT Team.
-                            </p>
-
-                            <p>
-                                Regards,<br />
-                                Procurement Monitoring Team
                             </p>
 
                             <hr />
