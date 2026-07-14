@@ -112,7 +112,7 @@
 					@* <th style="width:120px;">Balance Qty</th> *@
 					<th style="width:140px;">Partial Delivered</th>
 					<th style="width:150px; text-align: center">HBL No</th>
-					<th style="width:150px;">Container No</th>
+					<th style="width:150px; text-align: center">Container No</th>
 					<th style="width:120px;">Dedon ETA</th>
 					<th style="width:180px;">Country of Origin</th>
 					<th style="width:250px;">Remarks</th>
@@ -179,7 +179,7 @@
 							<td class="text-center">
 								@if (!string.IsNullOrEmpty(item.ptHBLNo))
 								{
-									<span class="badge bg-primary">
+									<span class="badge bg-success text-dark">
 										@item.ptHBLNo
 									</span>
 								}
@@ -190,7 +190,7 @@
 									</span>
 								}
 							</td>
-							<td>@item.ptContainerNo</td>
+							<td class="text-center">@item.ptContainerNo</td>
 							<td>
 
 								@if (item.ptContainerETA.HasValue)
@@ -199,21 +199,21 @@
 
 									if (days < 0)
 									{
-										<span class="badge bg-danger">
+										<span class="badge bg-danger text-bg-dark">
 											<i class="fas fa-triangle-exclamation me-1"></i>
 											@item.ptContainerETA.Value.ToString("yyyy-MM-dd")
 										</span>
 									}
 									else if (days <= 14)
 									{
-										<span class="badge bg-success">
+										<span class="badge bg-success text-bg-dark">
 											<i class="fas fa-shipping-fast me-1"></i>
 											@item.ptContainerETA.Value.ToString("yyyy-MM-dd")
 										</span>
 									}
 									else
 									{
-										<span class="badge bg-secondary">
+										<span class="badge bg-secondary text-bg-dark">
 											<i class="fas fa-calendar-alt me-1"></i>
 											@item.ptContainerETA.Value.ToString("yyyy-MM-dd")
 										</span>
@@ -235,7 +235,7 @@
 											title="Untag"
 											onclick="return confirm('Are you sure you want to untag this PO @item.IDDocNo?');">
 
-										<i class="fa-solid fa-link-slash text-danger"></i>
+										<i class="fa-solid fa-link-slash text-success"></i>
 
 									</button>
 								}
