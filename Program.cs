@@ -28,7 +28,6 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 // Use IIS Windows Authentication
 builder.Services.AddAuthentication(IISDefaults.AuthenticationScheme);
-
 builder.Services.AddAuthorization();
 
 var app = builder.Build();

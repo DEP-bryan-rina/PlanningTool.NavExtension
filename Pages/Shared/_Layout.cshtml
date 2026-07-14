@@ -121,14 +121,7 @@
 									<i class="bi bi-cart-check me-2"></i>
 									Procurement Center
 								</a>
-							</li>@* 
-							<li>
-								<a class="dropdown-item @(currentPath.StartsWith("/Expiration") ? "active" : "")"
-								   asp-page="/Expiration/Index">
-									<i class="bi bi-calendar-x me-2"></i>
-									Expiration Monitoring Dashboard
-								</a>
-							</li> *@
+							</li>
 						}
 
 					</ul>
@@ -214,29 +207,33 @@
 
 	<!-- Toast script -->
 	<script>
-		document.addEventListener("DOMContentLoaded", function () {
+	document.addEventListener("DOMContentLoaded", function () {
 
 		// Toast Notifications
 		document.querySelectorAll(".show-toast").forEach(el => {
-		new bootstrap.Toast(el, {
-		delay: 3000
-		}).show();
+			new bootstrap.Toast(el, {
+				delay: 3000
+			}).show();
 		});
 
 		// Live Clock
 		function updateClock() {
-		const now = new Date();
+			const now = new Date();
 
-		const formatted =
-		now.toLocaleDateString("en-GB", {
-		day: "2-digit",
-		month: "short",
-		year: "numeric"
-		}) +
-		" " +
-		now.toLocaleTimeString();
+			const formatted =
+				now.toLocaleDateString("en-GB", {
+					day: "2-digit",
+					month: "short",
+					year: "numeric"
+				}) +
+				" " +
+				now.toLocaleTimeString();
 
-		document.getElementById("liveDate")?.replaceChildren(formatted);
+			const liveDate = document.getElementById("liveDate");
+
+			if (liveDate) {
+				liveDate.textContent = formatted;
+			}
 		}
 
 		updateClock();
@@ -245,48 +242,49 @@
 		// Show Loader on Navigation
 		document.addEventListener("click", function (e) {
 
-		const link = e.target.closest("a");
+			const link = e.target.closest("a");
 
-		if (
-		link &&
-		link.href &&
-		!link.href.includes("#") &&
-		!link.href.startsWith("javascript:") &&
-		link.target !== "_blank"
-		) {
-		const loader = document.getElementById("globalLoader");
+			if (
+				link &&
+				link.href &&
+				!link.href.includes("#") &&
+				!link.href.startsWith("javascript:") &&
+				link.target !== "_blank"
+			) {
+				const loader = document.getElementById("globalLoader");
 
-		if (loader) {
-		loader.style.display = "flex";
-		loader.style.opacity = "1";
-		}
-		}
+				if (loader) {
+					loader.style.display = "flex";
+					loader.style.opacity = "1";
+				}
+			}
 		});
+
+		// Refresh Button
+		$("#btnRefresh").on("click", function () {
+			location.reload();
 		});
 
-		// Hide Loader When Page Fully Loads
-		window.addEventListener("load", function () {
+	});
+
+	// Hide Loader When Page Fully Loads
+	window.addEventListener("load", function () {
 
 		const loader = document.getElementById("globalLoader");
 
 		if (!loader) return;
 
 		setTimeout(() => {
-		loader.style.opacity = "0";
 
-		setTimeout(() => {
-		loader.style.display = "none";
-		}, 300);
+			loader.style.opacity = "0";
+
+			setTimeout(() => {
+				loader.style.display = "none";
+			}, 300);
 
 		}, 200);
-		});
 
-		$(document).ready(function () {
-		$("#btnRefresh").click(function () {
-		location.reload();
-		});
-		});
-		
+	});
 	</script>
 
 	@await RenderSectionAsync("Scripts", required: false)

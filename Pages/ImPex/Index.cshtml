@@ -134,7 +134,7 @@
 			</button>
 		}
 
-	</div>	
+	</div>
 
 </form>
 <br />
@@ -145,17 +145,17 @@
 		<thead class="sticky-top bg-white table-bordered" style="font-size:0.75rem;">
 			<tr>
 				<th class="text-center">No</th>
-				<th>HBL No</th>				
+				<th>HBL No</th>
 				<th>Container No</th>
 				<th>Dedon ETA</th>
 				<th>Country Of Origin</th>
 				<th>Remarks</th>
 				<th>Created By</th>
-				<th>Date Created</th>				
+				<th>Date Created</th>
 				<th>Modified By</th>
 				<th>Date Modified</th>
 				@* <th>PO No Tagged</th> *@
-				<th class="text-center">Status</th>				
+				<th class="text-center">Status</th>
 				<th class="text-center">Action</th>
 			</tr>
 		</thead>
@@ -172,7 +172,7 @@
 				{
 					<tr>
 						<td class="text-center">@counter</td>
-						
+
 						<td>@item._ptHBLNo</td>
 						<td>@item._ptContainerNo</td>
 						<td>@item._ptContainerETA?.ToString("yyyy-MM-dd")</td>
@@ -210,18 +210,33 @@
 								</span>
 							}
 						</td>
-						
-
 					
-
 						<td class="text-center">
+							@{
+								var taggedDocs = string.Join(", ",
+									Model.ProcurementList
+										.Where(x => x._ptHBLNo == item._ptHBLNo && x._ptStatus != 0)
+										.Select(x => x._ptDocNo)
+										.Distinct());
+							}
+							@{
+								var editUrl = Url.Page("./Index", new { id = item.PK_ptImpexID });
+							}
+
 							@if (item._ptStatus != 2)
 							{
-								<a asp-page="./Index"
-								   asp-route-id="@item.PK_ptImpexID"
-								   class="text-secondary"
+								<a hrefass="text-secondary"
 								   title="Edit HBL"
-								   onclick="return confirmEdit(@item._ptStatus, '@item._ptHBLNo');">
+								   onclick="
+									if (@item._ptStatus == 1) {
+										if (confirm('Are you sure you want to edit this data?\n\n⚠ This HBL is already tagged with: @taggedDocs\n\nDo you want to continue?')) {
+										window.location.href='@editUrl';									
+										}
+									} 
+									else {
+										window.location.href='@editUrl';
+									}
+									return false;">
 									<i class="fa-solid fa-pen-to-square"></i>
 								</a>
 							}
@@ -232,7 +247,7 @@
 								</span>
 							}
 						</td>
-					</tr>		
+					</tr>
 
 					counter++;
 				}
@@ -289,22 +304,6 @@
 					.text('Unable to validate HBL No.')
 					.css('color', 'red');
 			}
-		}
-
-		function confirmEdit(status, hblNo) {
-
-			if (status !== 1)
-				return true;
-
-			const result = confirm(
-				`⚠ This HBL No is already TAGGED: ${hblNo}\n\nDo you want to continue editing?`
-			);
-
-			if (!result && typeof hideLoader === 'function') {
-				hideLoader();
-			}
-
-			return result;
 		}
 
 		$(document).ready(function () {
