@@ -35,7 +35,18 @@ namespace PlanningTool.NavExtension.Pages.ImPex
 
         public async Task<IActionResult> OnGetAsync(int? id)
         {
-            
+            var access = HttpContext.Session.GetString("ImPex");
+
+            if (string.IsNullOrEmpty(access))
+            {
+                return RedirectToPage("/Account/Login");
+            }
+
+            if (!bool.Parse(access))
+            {
+                return RedirectToPage("/AccessDenied");
+            }
+
             this.ImpexList = _context.tblImPexCenter.ToList();
             this.ProcurementList = await _context.tblProcurementCenter.ToListAsync();
 

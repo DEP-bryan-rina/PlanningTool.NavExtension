@@ -51,6 +51,17 @@ namespace PlanningTool.NavExtension.Pages.Procurement
 
         public async Task<IActionResult> OnGetAsync()
         {
+            var access = HttpContext.Session.GetString("Procurement");
+
+            if (string.IsNullOrEmpty(access))
+            {
+                return RedirectToPage("/Account/Login");
+            }
+
+            if (!bool.Parse(access))
+            {
+                return RedirectToPage("/AccessDenied");
+            }
 
             this.LoadImpex();
             this.LoadProcurementData(searchString);

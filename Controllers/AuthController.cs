@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace PlanningTool.NavExtension.Controllers;
 
+
 [ApiController]
 [Route("api/auth")]
 public class AuthController : ControllerBase

@@ -2,19 +2,23 @@ using Microsoft.AspNetCore.Authentication.Negotiate;
 using Microsoft.EntityFrameworkCore;
 using PlanningTool.NavExtension.Data;
 using PlanningTool.NavExtension.Services;
-using Microsoft.AspNetCore.Server.IISIntegration;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Configure Kestrel
+// Kestrel
 builder.WebHost.ConfigureKestrel((context, options) =>
 {
-    options.Configure(context.Configuration.GetSection("Kestrel"));
+    options.Configure(
+        context.Configuration.GetSection("Kestrel"));
 });
 
 // MVC / Razor Pages
-builder.Services.AddRazorPages();
 builder.Services.AddControllers();
+
+builder.Services.AddRazorPages(options =>
+{
+    options.Conventions.AllowAnonymousToPage("/Account/Login");
+});
 
 // Database
 builder.Services.AddDbContext<AppDbContext>(options =>
@@ -38,17 +42,22 @@ builder.Services
 
 builder.Services.AddAuthorization();
 
-// Application Services
+// Services
 builder.Services.AddScoped<EmailService>();
 builder.Services.AddScoped<ProcurementReminderService>();
 builder.Services.AddScoped<IUserPermissionService, UserPermissionService>();
 
-// Background Services
+// Hosted Services
 builder.Services.AddHostedService<ProcurementReminderHostedService>();
+
+builder.Services.AddRazorPages(options =>
+{
+    options.Conventions.AllowAnonymousToPage("/Account/Login");
+});
 
 var app = builder.Build();
 
-// Middleware Pipeline
+// Middleware
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
@@ -60,6 +69,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
 app.MapRazorPages()
    .RequireAuthorization();
 
