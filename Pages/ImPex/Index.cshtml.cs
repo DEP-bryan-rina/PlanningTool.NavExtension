@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -10,6 +11,7 @@ using System.Security;
 
 namespace PlanningTool.NavExtension.Pages.ImPex
 {
+    [Authorize]
     public class IndexModel : PageModel
     {
         private readonly AppDbContext _context;
@@ -33,27 +35,9 @@ namespace PlanningTool.NavExtension.Pages.ImPex
 
         public async Task<IActionResult> OnGetAsync(int? id)
         {
-            var userId = User?.Identity?.Name;
-
-            if (string.IsNullOrWhiteSpace(userId))
-            {
-                return Unauthorized();
-            }
-
-            userId = userId.ToUpperInvariant();
-
-            var userPermission = await _userPermissionService.GetUserPermissionAsync(userId);
-
-            if (userPermission == null || !userPermission.ImPex)
-            {
-                return RedirectToPage("/AccessDenied", new
-                {
-                    returnUrl = "/ImPex/Index"
-                });
-            }
-
+            
             this.ImpexList = _context.tblImPexCenter.ToList();
-            ProcurementList = await _context.tblProcurementCenter.ToListAsync();
+            this.ProcurementList = await _context.tblProcurementCenter.ToListAsync();
 
             this.LoadCountries();
 

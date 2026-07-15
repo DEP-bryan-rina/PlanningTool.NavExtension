@@ -3,11 +3,12 @@
 @{
 	ViewData["Title"] = "Admin Settings";
 }
-<div>
-	Authenticated: @User.Identity?.IsAuthenticated
-	<br />
-	User: @User.Identity?.Name
-</div>
+
+<h3>Windows Authentication Test</h3>
+
+<p>Authenticated: @User.Identity?.IsAuthenticated</p>
+
+<p>User: @User.Identity?.Name</p>
 
 <div class="accordion" id="emailNotificationAccordion">
 

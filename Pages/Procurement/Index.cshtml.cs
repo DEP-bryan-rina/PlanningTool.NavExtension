@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -10,6 +11,7 @@ using System.Data;
 
 namespace PlanningTool.NavExtension.Pages.Procurement
 {
+    [Authorize]
     public class IndexModel : PageModel
     {
         private readonly AppDbContext _context;
@@ -50,30 +52,11 @@ namespace PlanningTool.NavExtension.Pages.Procurement
         public async Task<IActionResult> OnGetAsync()
         {
 
-            var userId = User?.Identity?.Name;
-
-            if (string.IsNullOrWhiteSpace(userId))
-            {
-                return Unauthorized();
-            }
-
-            userId = userId.ToUpperInvariant();
-
-            var userPermission = await _userPermissionService.GetUserPermissionAsync(userId);
-
-            if (userPermission == null || !userPermission.Procurement)
-            {
-                return RedirectToPage("/AccessDenied", new
-                {
-                    returnUrl = "/Procurement/Index"
-                });
-            }
-
             this.LoadImpex();
             this.LoadProcurementData(searchString);
 
             return Page();
-        }        
+        }
 
         private string GetUser()
         {
@@ -82,7 +65,7 @@ namespace PlanningTool.NavExtension.Pages.Procurement
                 ? User.Identity.Name
                 : Environment.UserName;
 
-        }                
+        }
         public async Task<IActionResult> OnPostTagAsync(string HBLNo, List<string> SelectedRows)
         {
             try
@@ -413,7 +396,7 @@ namespace PlanningTool.NavExtension.Pages.Procurement
                     _ptContainerETA = x._ptContainerETA
                 })
                 .ToList();
-        }        
-        
+        }
+
     }
 }

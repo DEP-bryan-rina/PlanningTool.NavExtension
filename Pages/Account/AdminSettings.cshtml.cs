@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
@@ -6,6 +7,7 @@ using PlanningTool.NavExtension.Models;
 
 namespace PlanningTool.NavExtension.Pages.Account
 {
+    [Authorize]
     public class AdminSettingsModel : PageModel
     {
         private readonly AppDbContext _context;

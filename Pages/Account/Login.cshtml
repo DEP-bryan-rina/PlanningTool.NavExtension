@@ -1,0 +1,53 @@
+﻿@page
+@model PlanningTool.NavExtension.Pages.Account.LoginModel
+
+<div class="card">
+    <div class="card-body">
+        <h4>Signing in...</h4>
+        <p>Please wait while we authenticate your Windows account.</p>
+    </div>
+</div>
+
+
+<div id="globalLoader" class="loader-overlay">
+    <div class="loader-container">
+        <img src="~/logo.png" alt="logo" class="loader-logo" />
+
+        <div class="loader-text">
+			Singing in...
+        </div>
+
+        <div class="loader-subtext">
+            Please wait while we authenticate your Windows account.
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(function () {
+
+            fetch('/api/auth/windows-login/status')
+                .then(response => response.json())
+                .then(data => {
+
+                    if (data.authenticated) {
+                        window.location.href = '/Index';
+                        return;
+                    }
+
+                    return fetch('/api/auth/windows-login', {
+                        method: 'POST'
+                    });
+                })
+                .then(() => {
+                    window.location.href = '/Index';
+                })
+                .catch(error => {
+                    console.error('Windows login failed:', error);
+                });
+
+        });
+    </script>
+}
