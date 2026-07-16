@@ -8,9 +8,10 @@ namespace PlanningTool.NavExtension.Data
         // ✅ single recipient
 
         public async Task SendEmailAsync(
-            List<string> recipients,
-            string subject,
-            string body)
+        List<string> recipients,
+        string subject,
+        string body,
+        string fromName)
         {
             using var smtpClient = new SmtpClient("smtp.office365.com")
             {
@@ -23,18 +24,13 @@ namespace PlanningTool.NavExtension.Data
 
             using var mailMessage = new MailMessage
             {
-                From = new MailAddress(
-                    "no-reply@dedon.ph",
-                    "PT-NAVExtension"),
+                From = new MailAddress("no-reply@dedon.ph", fromName),
                 Subject = subject,
                 Body = body,
                 IsBodyHtml = true
             };
 
-            foreach (var email in recipients)
-            {
-                mailMessage.To.Add(email);
-            }
+            recipients.ForEach(mailMessage.To.Add);
 
             await smtpClient.SendMailAsync(mailMessage);
         }

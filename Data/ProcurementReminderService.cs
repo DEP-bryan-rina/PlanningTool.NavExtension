@@ -1,6 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using PlanningTool.NavExtension.Data;
 
+using PlanningTool.NavExtension.Constants;
+
 namespace PlanningTool.NavExtension.Services
 {
     public class ProcurementReminderService
@@ -173,7 +175,8 @@ namespace PlanningTool.NavExtension.Services
                     await _emailService.SendEmailAsync(
                         recipients,
                         subject,
-                        body);
+                        body,
+                        EmailModules.ShipmentNotification);
 
                     reminder.EmailStatus = "Sent";
                     reminder.SentDate = DateTime.Now;

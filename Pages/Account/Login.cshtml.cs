@@ -2,10 +2,11 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using PlanningTool.NavExtension.Services;
+using System.DirectoryServices.AccountManagement;
 
 namespace PlanningTool.NavExtension.Pages.Account
 {
-    [AllowAnonymous]
+    [Authorize]
     public class LoginModel : PageModel
     {
         private readonly IUserPermissionService _permissionService;
@@ -15,6 +16,28 @@ namespace PlanningTool.NavExtension.Pages.Account
             _permissionService = permissionService;
         }
 
+        public string UserName { get; set; }
+        public string FullName { get; set; }
+        public string Email { get; set; }
+
+        //public void OnGet()
+        //{
+        //    UserName = User.Identity?.Name;
+
+        //    var samAccountName = UserName.Split('\\')[1];
+
+        //    using var context = new PrincipalContext(ContextType.Domain);
+
+        //    var user = UserPrincipal.FindByIdentity(
+        //        context,
+        //        samAccountName);
+
+        //    if (user != null)
+        //    {
+        //        FullName = user.DisplayName;
+        //        Email = user.EmailAddress;
+        //    }
+        //}
         public async Task<IActionResult> OnGetAsync()
         {
             if (!User.Identity?.IsAuthenticated ?? true)

@@ -110,7 +110,8 @@
 									</button>
 
 									<a asp-page="./AdminSettings"
-									   class="btn btn-secondary">
+									   class="btn btn-outline-secondary px-4">
+										<i class="fas fa-times me-1"></i>
 										Cancel
 									</a>
 								}
@@ -121,8 +122,8 @@
 					</div>
 
 					<!-- Right Side: Table -->
-					<div class="col-md-9">                        
-						<table class="table table-bordered table-hover w-100">
+					<div class="col-md-9">
+						<table id="tblEmailNotifications" class="table table-bordered table-hover w-100">
 							<thead class="sticky-top bg-white table-bordered" style="font-size:0.75rem;">
 								<tr>
 									<th>Email Address</th>
@@ -208,12 +209,19 @@
 												<i class="fa fa-pencil small"></i>
 											</a>
 
-											<a asp-page-handler="Delete"
-											   asp-route-id="@item._PK_ptEmailNotification_ID"
-											   class="btn btn-danger btn-sm"
-											   onclick="return confirm('Are you sure you want to delete the record for @item._ptEmailAddress?')">
-												<i class="fa fa-trash small"></i>
-											</a>
+											<form method="post"
+												  asp-page-handler="Delete"
+												  style="display:inline;">
+												<input type="hidden"
+													   name="id"
+													   value="@item._PK_ptEmailNotification_ID" />
+
+												<button type="submit"
+														class="btn btn-danger btn-sm"
+														onclick="return confirm('Are you sure you want to delete the record for @item._ptEmailAddress?');">
+													<i class="fa fa-trash small"></i>
+												</button>
+											</form>
 										</td>
 									</tr>
 								}
@@ -225,8 +233,6 @@
 					</div>
 
 				</div>
-
-				
 
 			</div>
 		</div>
@@ -513,4 +519,35 @@
 		</div>
 
 	</div>
+
+}
+
+@section Scripts
+{
+	<style>
+		.dataTables_filter input {
+			width: 300px !important;
+		}
+
+		div.dataTables_scrollBody {
+			max-height: 25vh !important;
+		}
+	</style>
+
+	<script>
+		$(document).ready(function () {
+
+			$('#tblEmailNotifications').DataTable({
+				pageLength: 25,
+				scrollX: true,
+				scrollY: '60vh',
+				scrollCollapse: true,
+				paging: true,
+				autoWidth: false,
+				fixedHeader: true,
+				stateSave: true
+			});
+
+		});
+	</script>
 }

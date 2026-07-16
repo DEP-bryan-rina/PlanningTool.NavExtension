@@ -1,18 +1,30 @@
 ﻿@page
 @model PlanningTool.NavExtension.Pages.Account.LoginModel
 
-<div id="globalLoader" class="loader-overlay">
-    <div class="loader-container">
+<!-- Global Loader -->
 
-        ~/logo.png
+@* <div id="globalLoader" class="loader-overlay">
+	<div class="loader-container">
+		<img src="~/logo.png" alt="logo" class="loader-logo" />
 
-        <div class="loader-text">
-            Signing in...
-        </div>
+		<div class="loader-text">
+			Signing in...
+		</div>
 
-        <div class="loader-subtext">
-            Please wait while we authenticate your account.
-        </div>
+		<div class="loader-subtext">
+			Please wait while we authenticate your account.
+		</div>
 
-    </div>
+	</div>
+</div>
+ *@
+
+<div class="card p-3">
+
+    <h3>User Information</h3>
+
+    <p><b>Domain Account:</b> @Model.UserName</p>
+    <p><b>Full Name:</b> @Model.FullName</p>
+    <p><b>Email:</b> @Model.Email</p>
+
 </div>

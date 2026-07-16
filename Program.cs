@@ -14,11 +14,7 @@ builder.WebHost.ConfigureKestrel((context, options) =>
 
 // MVC / Razor Pages
 builder.Services.AddControllers();
-
-builder.Services.AddRazorPages(options =>
-{
-    options.Conventions.AllowAnonymousToPage("/Account/Login");
-});
+builder.Services.AddRazorPages();
 
 // Database
 builder.Services.AddDbContext<AppDbContext>(options =>
@@ -36,11 +32,13 @@ builder.Services.AddSession(options =>
 });
 
 // Windows Authentication
-builder.Services
-    .AddAuthentication(NegotiateDefaults.AuthenticationScheme)
+builder.Services.AddAuthentication(NegotiateDefaults.AuthenticationScheme)
     .AddNegotiate();
 
-builder.Services.AddAuthorization();
+builder.Services.AddAuthorization(options =>
+{
+    options.FallbackPolicy = options.DefaultPolicy;
+});
 
 // Services
 builder.Services.AddScoped<EmailService>();
@@ -50,14 +48,15 @@ builder.Services.AddScoped<IUserPermissionService, UserPermissionService>();
 // Hosted Services
 builder.Services.AddHostedService<ProcurementReminderHostedService>();
 
-builder.Services.AddRazorPages(options =>
-{
-    options.Conventions.AllowAnonymousToPage("/Account/Login");
-});
-
 var app = builder.Build();
 
 // Middleware
+if (!app.Environment.IsDevelopment())
+{
+    app.UseExceptionHandler("/Error");
+    app.UseHsts();
+}
+
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
@@ -72,8 +71,5 @@ app.MapControllers();
 
 app.MapRazorPages()
    .RequireAuthorization();
-
-app.MapGet("/", () =>
-    Results.Redirect("/Account/Login"));
 
 app.Run();

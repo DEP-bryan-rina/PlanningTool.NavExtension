@@ -1,15 +1,19 @@
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using PlanningTool.NavExtension.Data;
 using PlanningTool.NavExtension.Models;
+using PlanningTool.NavExtension.Services;
 
 public class IndexModel : PageModel
 {
     private readonly AppDbContext _context;
+    private readonly IUserPermissionService _permissionService;
 
-    public IndexModel(AppDbContext context)
+    public IndexModel(AppDbContext context, IUserPermissionService permissionService)
     {
         _context = context;
+        _permissionService = permissionService;
     }
     public int TotalProcurements { get; set; }
     public int OpenProcurements { get; set; }
@@ -24,38 +28,74 @@ public class IndexModel : PageModel
     public List<ImPexCenterModel> UpcomingContainers { get; set; } = new();
 
     public List<ImPexCenterModel> LatestShipments { get; set; } = new();
-
-    public async Task OnGetAsync()
+    public async Task<IActionResult> OnGetAsync()
     {
-        TotalProcurements = await _context.tblProcurementCenter.CountAsync();
+        if (!User.Identity?.IsAuthenticated ?? true)
+        {
+            return Challenge();
+        }
 
-        OpenProcurements = await _context.tblProcurementCenter
-            .CountAsync(x => (x._ptBalanceQty ?? 0) > 0);
+        var userId = User.Identity!.Name!.ToUpperInvariant();
 
-        CompletedProcurements = await _context.tblProcurementCenter
-            .CountAsync(x => (x._ptBalanceQty ?? 0) <= 0);
+        var permission =
+            await _permissionService.GetUserPermissionAsync(userId);
 
-        TotalOutstandingQty = await _context.tblProcurementCenter
-            .SumAsync(x => x._ptOutstandingQty ?? 0);
+        HttpContext.Session.SetString(
+            "ImPex",
+            permission.ImPex.ToString());
 
-        TotalContainers = await _context.tblImPexCenter
-            .CountAsync();
+        HttpContext.Session.SetString(
+            "Procurement",
+            permission.Procurement.ToString());
 
-        RecentProcurements = await _context.tblProcurementCenter
-            .OrderByDescending(x => x._ptModifiedDate)
-            .Take(5)
-            .ToListAsync();
+        HttpContext.Session.SetString(
+            "UserId",
+            userId);
 
-        UpcomingContainers = await _context.tblImPexCenter
-            .Where(x => x._ptContainerETA != null)
-            .OrderBy(x => x._ptContainerETA)
-            .Take(5)
-            .ToListAsync();
+        if (!permission.ImPex && !permission.Procurement)
+        {
+            return RedirectToPage("/AccessDenied");
+        }
 
-        LatestShipments = await _context.tblImPexCenter
-            .OrderByDescending(x => x._ptModifiedDate)
-            .Take(5)
-            .ToListAsync();
+        if (permission.ImPex)
+        {
+            return RedirectToPage("/ImPex/Index");
+        }
+
+        return RedirectToPage("/Procurement/Index");
     }
+    //public async Task OnGetAsync()
+    //{
+
+    //    TotalProcurements = await _context.tblProcurementCenter.CountAsync();
+
+    //    OpenProcurements = await _context.tblProcurementCenter
+    //        .CountAsync(x => (x._ptBalanceQty ?? 0) > 0);
+
+    //    CompletedProcurements = await _context.tblProcurementCenter
+    //        .CountAsync(x => (x._ptBalanceQty ?? 0) <= 0);
+
+    //    TotalOutstandingQty = await _context.tblProcurementCenter
+    //        .SumAsync(x => x._ptOutstandingQty ?? 0);
+
+    //    TotalContainers = await _context.tblImPexCenter
+    //        .CountAsync();
+
+    //    RecentProcurements = await _context.tblProcurementCenter
+    //        .OrderByDescending(x => x._ptModifiedDate)
+    //        .Take(5)
+    //        .ToListAsync();
+
+    //    UpcomingContainers = await _context.tblImPexCenter
+    //        .Where(x => x._ptContainerETA != null)
+    //        .OrderBy(x => x._ptContainerETA)
+    //        .Take(5)
+    //        .ToListAsync();
+
+    //    LatestShipments = await _context.tblImPexCenter
+    //        .OrderByDescending(x => x._ptModifiedDate)
+    //        .Take(5)
+    //        .ToListAsync();
+    //}
 
 }
