@@ -3,7 +3,8 @@
 @{
 	ViewData["Title"] = "Procurement Control Center";
 }
-<form method="post">
+<form method="post" class="erp-form">	
+
 	<div class="card border-0 shadow-sm erp-form">
 		<div class="card-header bg-white border-bottom">
 			<h5 class="mb-0 fw-semibold">
@@ -17,7 +18,7 @@
 				var hasHblData = Model.ImpexList?.Any(x => !string.IsNullOrWhiteSpace(x._ptHBLNo)) == true;
 			}
 
-			<div class="row mb-3">
+			<div class="row g-3">
 				<div class="col-12">
 
 					<div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
@@ -109,7 +110,7 @@
 	<input type="hidden" id="ParamCETA" name="ParamCETA">
 	<br />
 	@* Table display *@
-	<div class="table-responsive">
+	<div class="px-3">
 		<table id="tblProcurement" class="table table-hover w-100">
 			<thead class="sticky-top bg-white table-bordered" style="font-size:0.75rem;">
 				<tr class="data-row">
@@ -311,7 +312,7 @@
 			// Select2
 			$('#impexDropdown').select2();
 
-			// DataTable
+			// Dropdown and Seach
 			const table = $('#tblProcurement').DataTable({
 				pageLength: 25,
 				scrollX: true,
@@ -319,13 +320,34 @@
 				scrollCollapse: true,
 				paging: true,
 				autoWidth: false,
-				fixedHeader: true
+				fixedHeader: true,
+				stateSave: true
+			});
+			const $input = $('#tblProcurement_filter input');
+			const $select = $('<select id="columnFilter"></select>');
+
+			table.columns().every(function (i) {
+				const title = $(this.header()).text().trim();
+
+				if (title) {
+					$select.append(`<option value="${i}">${title}</option>`);
+				}
 			});
 
-			$('.dataTables_filter input').css({
-				width: '300px',
-				minWidth: '300px'
-			});
+			$('#tblProcurement_filter label')
+				.contents()
+				.filter((_, n) => n.nodeType === 3)
+				.remove();
+
+			$input
+				.attr('placeholder', 'Type to filter (F3)')
+				.after($select)
+				.on('input', function () {
+					table.columns().search('');
+					table.column($select.val()).search(this.value).draw();
+				});
+
+			$select.on('change', () => $input.trigger('input'));
 
 			// Restore search
 			const savedSearch =

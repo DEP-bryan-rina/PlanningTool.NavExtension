@@ -19,7 +19,7 @@ builder.Services.AddRazorPages();
 // Database
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(
-        builder.Configuration.GetConnectionString("LiveConnection")));
+        builder.Configuration.GetConnectionString("DevConnection")));
 
 // Session
 builder.Services.AddDistributedMemoryCache();

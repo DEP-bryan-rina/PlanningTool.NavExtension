@@ -47,12 +47,11 @@
 	<script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
 	<script src="https://cdn.datatables.net/1.13.8/js/dataTables.bootstrap5.min.js"></script>
 	<script src="https://cdn.datatables.net/fixedheader/3.4.1/js/dataTables.fixedHeader.min.js"></script>
-
-	
+		
 
 </head>
 
-<body class="d-flex flex-column min-vh-100">
+<body class="d-flex flex-column min-vh-100" style="overflow-x:hidden">
 	<!-- Global Loader -->
 
 	<div id="globalLoader" class="loader-overlay">
@@ -160,7 +159,7 @@
 	</nav>
 
 	<!-- ✅ MAIN CONTENT -->
-	<main class="container-fluid flex-fill py-4 mt-5">
+	<main class="">
 		@RenderBody()
 	</main>
 	<footer class="bg-dark text-light py-2 mt-auto">

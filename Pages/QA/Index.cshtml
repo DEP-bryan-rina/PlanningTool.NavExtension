@@ -169,20 +169,42 @@
     <script>
         $(function () {
 
+            // Dropdown and Seach
             const table = $('#tblQA').DataTable({
                 pageLength: 25,
                 scrollX: true,
-                scrollY: '600px',
+                scrollY: '60vh',
                 scrollCollapse: true,
-                stateSave: true,
+                paging: true,
                 autoWidth: false,
-                fixedHeader: true
+                fixedHeader: true,
+                stateSave: true
+            });
+            const $input = $('#tblQA_filter input');
+            const $select = $('<select id="columnFilter"></select>');
+
+            table.columns().every(function (i) {
+                const title = $(this.header()).text().trim();
+
+                if (title) {
+                    $select.append(`<option value="${i}">${title}</option>`);
+                }
             });
 
-            $('.dataTables_filter input').css({
-                width: '300px',
-                minWidth: '300px'
-            });
+            $('#tblQA_filter label')
+                .contents()
+                .filter((_, n) => n.nodeType === 3)
+                .remove();
+
+            $input
+                .attr('placeholder', 'Type to filter (F3)')
+                .after($select)
+                .on('input', function () {
+                    table.columns().search('');
+                    table.column($select.val()).search(this.value).draw();
+                });
+
+            $select.on('change', () => $input.trigger('input'));
 
             const savedSearch = sessionStorage.getItem('tblQASearch');
 

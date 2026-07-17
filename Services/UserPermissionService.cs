@@ -19,7 +19,7 @@ namespace PlanningTool.NavExtension.Services
                 var permission = new UserPermission();
 
                 // Simulate fetching user permissions from a data source
-                using SqlConnection con = new SqlConnection(_configuration.GetConnectionString("LiveConnection"));
+                using SqlConnection con = new SqlConnection(_configuration.GetConnectionString("DevConnection"));
 
 
                 string sql = @"

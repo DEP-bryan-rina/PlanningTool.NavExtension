@@ -7,7 +7,7 @@
 
 	<input type="hidden" asp-for="Impex.PK_ptImpexID" />
 
-	<div class="card border-0 shadow-sm">
+	<div class="card border-0 shadow-sm erp-form">
 		<div class="card-header bg-white border-bottom">
 			<h5 class="mb-0 fw-semibold">
 				<i class="fas fa-file-import text-primary me-2"></i>
@@ -331,18 +331,59 @@
 			// ====================
 			// DataTable
 			// ====================
-
+			
 			const table = $('#tblImPex').DataTable({
 				pageLength: 25,
 				scrollX: true,
-				stateSave: true,
+				scrollY: '60vh',
+				scrollCollapse: true,
+				paging: true,
 				autoWidth: false,
-				fixedHeader: true
+				fixedHeader: true,
+				stateSave: true
 			});
 
-			$('.dataTables_filter input').css({
-				width: '300px',
-				minWidth: '300px'
+			var $filter = $('#tblImPex_filter');
+			var $input = $filter.find('input');
+
+			var $select = $('<select>', { id: 'columnFilter' });
+
+			table.columns().every(function (index) {
+				var title = $(this.header()).text().trim();
+
+				if (title) {
+					$select.append(
+						$('<option>', {
+							value: index,
+							text: title
+						})
+					);
+				}
+			});
+
+			// Remove "Search:"
+			$filter.find('label').contents().filter(function () {
+				return this.nodeType === 3;
+			}).remove();
+
+			// NAV-style placeholder
+			$input.attr('placeholder', 'Type to filter (F3)');
+
+			// Textbox left, dropdown right
+			$input.after($select);
+
+			// Filter selected column
+			$input.on('input', function () {
+				table.columns().search('');
+
+				table
+					.column($select.val())
+					.search(this.value)
+					.draw();
+			});
+
+			$select.on('change', function () {
+				$input.trigger('input');
 			});
 
 			// ====================

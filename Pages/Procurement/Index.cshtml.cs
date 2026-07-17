@@ -28,7 +28,7 @@ namespace PlanningTool.NavExtension.Pages.Procurement
             _context = context;
             _emailService = emailService;
             _userPermissionService = userPermissionService;
-            this.conStr = config.GetConnectionString("LiveConnection");
+            this.conStr = config.GetConnectionString("DevConnection");
         }
         public List<ImPexCenterModel> ImpexList { get; set; } = new();
 
