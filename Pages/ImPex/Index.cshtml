@@ -3,254 +3,256 @@
 @{
 	ViewData["Title"] = "ImPex Control Center";
 }
-<form id="frmImpex" method="post" asp-page-handler="Save" class="erp-form">
+<div class="erp-form">
+	<form id="frmImpex" method="post" asp-page-handler="Save">
 
-	<input type="hidden" asp-for="Impex.PK_ptImpexID" />
+		<input type="hidden" asp-for="Impex.PK_ptImpexID" />
 
-	<div class="card border-0 shadow-sm erp-form">
-		<div class="card-header bg-white border-bottom">
-			<h5 class="mb-0 fw-semibold">
-				<i class="fas fa-file-import text-primary me-2"></i>
-				Shipment Information
-			</h5>
-		</div>
+		<div class="card border-0 shadow-sm erp-form">
+			<div class="card-header bg-white border-bottom">
+				<h5 class="mb-0 fw-semibold">
+					<i class="fas fa-file-import text-primary me-2"></i>
+					Shipment Information
+				</h5>
+			</div>
 
-		<div class="card-body">
-			<div class="row g-3">
-				<!-- Column 1 -->
-				<div class="col-lg-4">
+			<div class="card-body">
+				<div class="row g-3">
+					<!-- Column 1 -->
+					<div class="col-lg-4">
 
-					<div class="mb-3">
-						<label class="erp-label">
-							HBL No <span class="text-danger">*</span>
-						</label>
+						<div class="mb-3">
+							<label class="erp-label">
+								HBL No <span class="text-danger">*</span>
+							</label>
 
-						<input asp-for="Impex._ptHBLNo"
-							   id="HBLNo"
-							   class="form-control erp-control"
-							   placeholder="HBL Number"
-							   onblur="checkHblExists()"
-							   required />
+							<input asp-for="Impex._ptHBLNo"
+								   id="HBLNo"
+								   class="form-control erp-control erp-input"
+								   placeholder="HBL Number"
+								   onblur="checkHblExists()"
+								   required />
 
-						<small id="hblMessage"></small>
+							<small id="hblMessage"></small>
+						</div>
+
+						<div>
+							<label class="erp-label">
+								Dedon ETA <span class="text-danger">*</span>
+							</label>
+
+							<input asp-for="Impex._ptContainerETA"
+								   type="date"
+								   class="form-control erp-control erp-input"
+								   min="@DateTime.Today.ToString("yyyy-MM-dd")"
+								   required />
+						</div>
+
 					</div>
 
-					<div>
-						<label class="erp-label">
-							Dedon ETA <span class="text-danger">*</span>
-						</label>
+					<!-- Column 2 -->
+					<div class="col-lg-4">
 
-						<input asp-for="Impex._ptContainerETA"
-							   type="date"
-							   class="form-control erp-control"
-							   min="@DateTime.Today.ToString("yyyy-MM-dd")"
-							   required />
+						<div class="mb-3">
+							<label class="erp-label">
+								Container No <span class="text-danger">*</span>
+							</label>
+
+							<input asp-for="Impex._ptContainerNo"
+								   class="form-control erp-control erp-input"
+								   placeholder="Container Number"
+								   required />
+						</div>
+
+						<div>
+							<label class="erp-label">
+								Country of Origin <span class="text-danger">*</span>
+							</label>
+
+							<select asp-for="Impex._ptCountryOfOrigin"
+									class="form-select erp-control erp-dropdown"
+									required>
+								<option value="">Select Country...</option>
+
+								@foreach (var country in Model.CountryList)
+								{
+									<option value="@country.Value">
+										@country.Text
+									</option>
+								}
+							</select>
+
+							<span asp-validation-for="Impex._ptCountryOfOrigin"
+								  class="text-danger small"></span>
+						</div>
+
 					</div>
 
-				</div>
+					<!-- Column 3 -->
+					<div class="col-lg-4">
 
-				<!-- Column 2 -->
-				<div class="col-lg-4">
-
-					<div class="mb-3">
 						<label class="erp-label">
-							Container No <span class="text-danger">*</span>
+							Remarks
 						</label>
 
-						<input asp-for="Impex._ptContainerNo"
-							   class="form-control erp-control"
-							   placeholder="Container Number"
-							   required />
-					</div>
-
-					<div>
-						<label class="erp-label">
-							Country of Origin <span class="text-danger">*</span>
-						</label>
-
-						<select asp-for="Impex._ptCountryOfOrigin"
-								class="form-select erp-control"
-								required>
-							<option value="">Select Country...</option>
-
-							@foreach (var country in Model.CountryList)
-							{
-								<option value="@country.Value">
-									@country.Text
-								</option>
-							}
-						</select>
-
-						<span asp-validation-for="Impex._ptCountryOfOrigin"
-							  class="text-danger small"></span>
-					</div>
-
-				</div>
-
-				<!-- Column 3 -->
-				<div class="col-lg-4">
-
-					<label class="erp-label">
-						Remarks
-					</label>
-
-					<textarea asp-for="Impex._ptRemarks" style="height: 115px"
-							  class="form-control erp-control"
-							  rows="5"
-							  placeholder="Remarks">
+						<textarea asp-for="Impex._ptRemarks" style="height: 105px"
+								  class="form-control erp-control erp-textarea"
+								  rows="5"
+								  placeholder="Remarks">
 					</textarea>
+
+					</div>
 
 				</div>
 
 			</div>
+		</div>
+
+		<div class="mt-3">
+
+			@if (Model.Impex != null && Model.Impex.PK_ptImpexID > 0)
+			{
+				<button id="btnUpdate"
+						type="submit"
+						class="btn btn-success px-4 shadow-sm erp-btn"
+						style="display:none;">
+					<i class="fas fa-save me-1"></i>
+					Update
+				</button>
+
+				<a asp-page="./Index"
+				   class="btn btn-outline-secondary px-4">
+					<i class="fas fa-times me-1"></i>
+					Cancel
+				</a>
+			}
+			else
+			{
+				<button id="btnAdd"
+						type="submit"
+						class="btn btn-primary px-4 shadow-sm erp-btn">
+					<i class="fas fa-plus-circle me-1"></i>
+					Add New Record
+				</button>
+			}
 
 		</div>
-	</div>
 
-	<div class="mt-3">
+	</form>
+	<br />
+	<div class="table-responsive">
 
-		@if (Model.Impex != null && Model.Impex.PK_ptImpexID > 0)
-		{
-			<button id="btnUpdate"
-					type="submit"
-					class="btn btn-success px-4 shadow-sm"
-					style="display:none;">
-				<i class="fas fa-save me-1"></i>
-				Update
-			</button>
+		<table id="tblImPex" class="table table-hover w-100 ">
 
-			<a asp-page="./Index"
-			   class="btn btn-outline-secondary px-4">
-				<i class="fas fa-times me-1"></i>
-				Cancel
-			</a>
-		}
-		else
-		{
-			<button id="btnAdd"
-					type="submit"
-					class="btn btn-primary px-4 shadow-sm">
-				<i class="fas fa-plus-circle me-1"></i>
-				Add New Record
-			</button>
-		}
+			<thead class="sticky-top bg-white table-bordered" style="font-size:0.75rem;">
+				<tr>
+					<th class="text-center">No</th>
+					<th>HBL No</th>
+					<th>Container No</th>
+					<th>Dedon ETA</th>
+					<th>Country Of Origin</th>
+					<th>Remarks</th>
+					<th>Created By</th>
+					<th>Date Created</th>
+					<th>Modified By</th>
+					<th>Date Modified</th>
+					@* <th>PO No Tagged</th> *@
+					<th class="text-center">Status</th>
+					<th class="text-center">Action</th>
+				</tr>
+			</thead>
 
-	</div>
+			<tbody style="font-size:0.75rem;">
 
-</form>
-<br />
-<div class="table-responsive">
-
-	<table id="tblImPex" class="table table-hover w-100 ">
-
-		<thead class="sticky-top bg-white table-bordered" style="font-size:0.75rem;">
-			<tr>
-				<th class="text-center">No</th>
-				<th>HBL No</th>
-				<th>Container No</th>
-				<th>Dedon ETA</th>
-				<th>Country Of Origin</th>
-				<th>Remarks</th>
-				<th>Created By</th>
-				<th>Date Created</th>
-				<th>Modified By</th>
-				<th>Date Modified</th>
-				@* <th>PO No Tagged</th> *@
-				<th class="text-center">Status</th>
-				<th class="text-center">Action</th>
-			</tr>
-		</thead>
-
-		<tbody style="font-size:0.75rem;">
-
-			@{
-				int counter = 1;
-			}
-
-			@if (Model.ImpexList != null && Model.ImpexList.Any())
-			{
-				foreach (var item in Model.ImpexList)
-				{
-					<tr>
-						<td class="text-center">@counter</td>
-
-						<td>@item._ptHBLNo</td>
-						<td>@item._ptContainerNo</td>
-						<td>@item._ptContainerETA?.ToString("yyyy-MM-dd")</td>
-						<td>@item._ptCountryOfOrigin</td>
-						<td class="erp-truncate">@item._ptRemarks</td>
-						<td>@item._ptCreatedBy</td>
-						<td>@item._ptCreatedDate</td>
-						<td>@item._ptModifiedBy</td>
-						<td>@item._ptModifiedDate</td>
-						<td class="text-center">
-							@if (item._ptStatus == 1)
-							{
-								<span class="badge bg-primary text-dark">
-									<i class="fas fa-tag"></i> Tagged
-								</span>
-
-
-							}
-							else if (item._ptStatus == 2)
-							{
-								<span class="badge bg-success text-dark">
-									<i class="fas fa-check-circle"></i> Completed
-								</span>
-							}
-							else
-							{
-								<span class="badge bg-warning text-dark">
-									<i class="fas fa-clock"></i> For Tagging
-								</span>
-							}
-						</td>
-
-						<td class="text-center">
-							@{
-								// Bind the tagged documents for the current HBL No
-								var taggedDocs = string.Join(", ",
-									Model.ProcurementList
-										.Where(x => x._ptHBLNo == item._ptHBLNo && x._ptStatus != 0)
-										.Select(x => x._ptDocNo)
-										.Distinct());
-							}
-							@{
-								var editUrl = Url.Page("./Index", new { id = item.PK_ptImpexID });
-							}
-
-							@if (item._ptStatus != 2)
-							{
-								<a hrefass="text-secondary"
-								   title="Edit HBL"
-								   onclick="
-									if (@item._ptStatus == 1) {
-									if (confirm('Are you sure you want to edit this data?\n\n⚠ This HBL is already tagged with: @taggedDocs\n\nDo you want to continue?')) {
-									window.location.href='@editUrl';
-									}
-									}
-									else {
-									window.location.href='@editUrl';
-									}
-									return false;">
-									<i class="fa-solid fa-pen-to-square"></i>
-								</a>
-							}
-							else
-							{
-								<span class="text-success" title="Locked">
-									<i class="fa-solid fa-lock"></i>
-								</span>
-							}
-						</td>
-					</tr>
-
-					counter++;
+				@{
+					int counter = 1;
 				}
-			}
 
-		</tbody>
-	</table>
+				@if (Model.ImpexList != null && Model.ImpexList.Any())
+				{
+					foreach (var item in Model.ImpexList)
+					{
+						<tr>
+							<td class="text-center">@counter</td>
+
+							<td>@item._ptHBLNo</td>
+							<td>@item._ptContainerNo</td>
+							<td>@item._ptContainerETA?.ToString("yyyy-MM-dd")</td>
+							<td>@item._ptCountryOfOrigin</td>
+							<td class="erp-truncate">@item._ptRemarks</td>
+							<td>@item._ptCreatedBy</td>
+							<td>@item._ptCreatedDate</td>
+							<td>@item._ptModifiedBy</td>
+							<td>@item._ptModifiedDate</td>
+							<td class="text-center">
+								@if (item._ptStatus == 1)
+								{
+									<span class="badge bg-primary text-dark">
+										<i class="fas fa-tag"></i> Tagged
+									</span>
+
+
+								}
+								else if (item._ptStatus == 2)
+								{
+									<span class="badge bg-success text-dark">
+										<i class="fas fa-check-circle"></i> Completed
+									</span>
+								}
+								else
+								{
+									<span class="badge bg-warning text-dark">
+										<i class="fas fa-clock"></i> For Tagging
+									</span>
+								}
+							</td>
+
+							<td class="text-center">
+								@{
+									// Bind the tagged documents for the current HBL No
+									var taggedDocs = string.Join(", ",
+										Model.ProcurementList
+											.Where(x => x._ptHBLNo == item._ptHBLNo && x._ptStatus != 0)
+											.Select(x => x._ptDocNo)
+											.Distinct());
+								}
+								@{
+									var editUrl = Url.Page("./Index", new { id = item.PK_ptImpexID });
+								}
+
+								@if (item._ptStatus != 2)
+								{
+									<a hrefass="text-secondary"
+									   title="Edit HBL"
+									   onclick="
+										if (@item._ptStatus == 1) {
+										if (confirm('Are you sure you want to edit this data?\n\n⚠ This HBL is already tagged with: @taggedDocs\n\nDo you want to continue?')) {
+										window.location.href='@editUrl';
+										}
+										}
+										else {
+										window.location.href='@editUrl';
+										}
+										return false;">
+										<i class="fa-solid fa-pen-to-square"></i>
+									</a>
+								}
+								else
+								{
+									<span class="text-success" title="Locked">
+										<i class="fa-solid fa-lock"></i>
+									</span>
+								}
+							</td>
+						</tr>
+
+						counter++;
+					}
+				}
+
+			</tbody>
+		</table>
+	</div>
 </div>
 @section Scripts {
 	<script>
@@ -331,16 +333,27 @@
 			// ====================
 			// DataTable
 			// ====================
-			
+
+			function getTableHeight() {
+				return ($(window).height() * 0.6) + 'px';
+			}
+
 			const table = $('#tblImPex').DataTable({
 				pageLength: 25,
 				scrollX: true,
-				scrollY: '60vh',
+				scrollY: getTableHeight(),
 				scrollCollapse: true,
 				paging: true,
 				autoWidth: false,
 				fixedHeader: true,
-				stateSave: true
+				stateSave: true,
+				responsive: true
+			});
+
+			$(window).on('resize', function () {
+				table.settings()[0].oScroll.sY = getTableHeight();
+				table.columns.adjust().draw();
+				table.fixedHeader.adjust();
 			});
 
 			var $filter = $('#tblImPex_filter');

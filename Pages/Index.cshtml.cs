@@ -62,7 +62,7 @@ public class IndexModel : PageModel
             return RedirectToPage("/ImPex/Index");
         }
 
-        return RedirectToPage("/Procurement/Index");
+        return RedirectToPage("/Procurement/Tagging");
     }
     //public async Task OnGetAsync()
     //{

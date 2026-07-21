@@ -49,6 +49,7 @@ namespace PlanningTool.NavExtension.Pages.Procurement
         [BindProperty] public string HBLNo { get; set; }
         [BindProperty] public ImPexCenterModel Impex { get; set; }
         [BindProperty] public DateTime? ParamCETA { get; set; }
+        [BindProperty] public string SelectedRowsJson { get; set; }
 
         public async Task<IActionResult> OnGetAsync()
         {
@@ -161,8 +162,7 @@ namespace PlanningTool.NavExtension.Pages.Procurement
                     updatedCount++;
                 }
 
-                TempData["SuccessMessage"] =
-                    $"{updatedCount} record(s) updated successfully.";
+                TempData["SuccessMessage"] = $"{updatedCount} record(s) updated successfully.";
 
                 if (updatedCount > 0)
                 {

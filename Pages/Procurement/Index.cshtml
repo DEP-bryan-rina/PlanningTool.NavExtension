@@ -3,7 +3,9 @@
 @{
 	ViewData["Title"] = "Procurement Control Center";
 }
-<form method="post" class="erp-form">	
+
+
+<form method="post" class="erp-form">
 
 	<div class="card border-0 shadow-sm erp-form">
 		<div class="card-header bg-white border-bottom">
@@ -53,12 +55,19 @@
 										</select>
 									</div>
 
-									<button type="submit"
+									@* <button type="submit"
 											id="btnTagPO"
 											asp-page-handler="Tag"
 											class="btn btn-primary erp-btn">
 										<i class="fas fa-link me-2"></i>
 										Tag PO
+									</button> *@
+									<button id="btnTagPO"
+											class="btn btn-primary"
+											disabled>
+
+										Tag PO
+
 									</button>
 
 								</div>
@@ -262,58 +271,115 @@
 			</tbody>
 		</table>
 	</div>
+	<input type="hidden"
+		   id="SelectedRowsJson"
+		   name="SelectedRowsJson" />
 </form>
+
+
+
 @section Scripts
 {
 	<script>
+		const selectedRows = new Set();
+		const deliveryData = new Map();
+
+		let table;
+
+		const $impexDropdown = $('#impexDropdown');
+		const $btnTagPO = $('#btnTagPO');
+		const $tagInfo = $('#tagInfo');
+		const $selectAll = $('#selectAll');
 
 		function toggleTagButton() {
 
-			const hasHBL = $('#impexDropdown').val();
-			const hasCheckedPO = $('.po-checkbox:checked').length > 0;
+			const enabled =
+				!!$impexDropdown.val() &&
+				selectedRows.size > 0;
 
-			const enabled = hasHBL && hasCheckedPO;
-
-			$('#btnTagPO').prop('disabled', !enabled);
-			$('#tagInfo').toggle(!enabled);
-		}
-
-		// Disable Checkbox function
-		function updateSelectAllState() {
-
-			const enabledChecks = $('.row-check:not(:disabled)').filter(function () {
-
-				return (parseFloat($(this).data('balance')) || 0) > 0;
-
-			});
-
-			const checkedChecks = enabledChecks.filter(':checked');
-
-			$('#selectAll').prop({
-				checked: enabledChecks.length > 0 &&
-						 checkedChecks.length === enabledChecks.length,
-
-				indeterminate: checkedChecks.length > 0 &&
-							   checkedChecks.length < enabledChecks.length
-			});
+			$btnTagPO.prop('disabled', !enabled);
+			$tagInfo.toggle(!enabled);
 		}
 
 		function populateHBLFields() {
 
-			const selected = $('#impexDropdown option:selected');
+			const $selected = $impexDropdown.find(':selected');
 
-			$('#HBLNo').val(selected.data('hbl') || '');
-			$('#ContainerNo').val(selected.data('container') || '');
-			$('#ParamCETA').val(selected.data('eta') || '');
+			$('#HBLNo').val($selected.data('hbl') || '');
+			$('#ContainerNo').val($selected.data('container') || '');
+			$('#ParamCETA').val($selected.data('eta') || '');
 		}
 
-		$(document).ready(function () {
+		function updateSelectAllState() {
 
-			// Select2
-			$('#impexDropdown').select2();
+			const $checks = table
+				.rows({ search: 'applied' })
+				.nodes()
+				.to$()
+				.find('.row-check:not(:disabled)');
 
-			// Dropdown and Seach
-			const table = $('#tblProcurement').DataTable({
+			const checked = $checks.filter(':checked').length;
+			const total = $checks.length;
+
+			$selectAll.prop({
+				checked: total > 0 && checked === total,
+				indeterminate: checked > 0 && checked < total
+			});
+		}
+
+		function restoreSelections() {
+
+			$('.row-check').each(function () {
+
+				const $check = $(this);
+				const row = $check.closest('tr');
+				const id = $check.val();
+
+				if (selectedRows.has(id)) {
+
+					const balance =
+						parseFloat($check.data('balance')) || 0;
+
+					const savedQty =
+						deliveryData.has(id)
+							? deliveryData.get(id).qty
+							: balance;
+
+					$check.prop('checked', true);
+
+					row.find('.pd-input')
+						.val(savedQty)
+						.attr('max', balance)
+						.show();
+
+					row.find('.pd-text').hide();
+
+					row
+						.addClass('table-warning')
+						.removeClass('table-danger');
+
+				} else {
+
+					$check.prop('checked', false);
+
+					row.find('.pd-input').hide();
+					row.find('.pd-text').show();
+
+					row.removeClass(
+						'table-warning table-danger'
+					);
+				}
+			});
+
+			updateSelectAllState();
+			toggleTagButton();
+		}
+
+		$(function () {
+
+			$impexDropdown.select2();
+
+			table = $('#tblProcurement').DataTable({
 				pageLength: 25,
 				scrollX: true,
 				scrollY: '60vh',
@@ -323,43 +389,63 @@
 				fixedHeader: true,
 				stateSave: true
 			});
-			const $input = $('#tblProcurement_filter input');
-			const $select = $('<select id="columnFilter"></select>');
 
-			table.columns().every(function (i) {
-				const title = $(this.header()).text().trim();
+			table.on('draw', restoreSelections);
+
+			// Column Filter
+
+			const $searchInput =
+				$('#tblProcurement_filter input');
+
+			const $columnFilter =
+				$('<select id="columnFilter"></select>');
+
+			table.columns().every(function (index) {
+
+				const title =
+					$(this.header()).text().trim();
 
 				if (title) {
-					$select.append(`<option value="${i}">${title}</option>`);
+					$columnFilter.append(
+						`<option value="${index}">${title}</option>`
+					);
 				}
 			});
 
 			$('#tblProcurement_filter label')
 				.contents()
-				.filter((_, n) => n.nodeType === 3)
+				.filter((_, node) => node.nodeType === 3)
 				.remove();
 
-			$input
+			$searchInput
 				.attr('placeholder', 'Type to filter (F3)')
-				.after($select)
+				.after($columnFilter)
 				.on('input', function () {
+
 					table.columns().search('');
-					table.column($select.val()).search(this.value).draw();
+
+					table
+						.column($columnFilter.val())
+						.search(this.value)
+						.draw();
 				});
 
-			$select.on('change', () => $input.trigger('input'));
+			$columnFilter.on('change', () => {
+				$searchInput.trigger('input');
+			});
 
-			// Restore search
+			// Restore Search
+
 			const savedSearch =
 				sessionStorage.getItem('tblProcurementSearch');
 
 			if (savedSearch) {
 
 				table.search(savedSearch).draw();
-				$('.dataTables_filter input').val(savedSearch);
+				$searchInput.val(savedSearch);
 			}
 
-			$('.dataTables_filter input').on('keyup', function () {
+			$searchInput.on('keyup', function () {
 
 				sessionStorage.setItem(
 					'tblProcurementSearch',
@@ -368,25 +454,42 @@
 			});
 
 			// Select All
-			$('#selectAll').on('change', function () {
 
-				$('.row-check:not(:disabled)')
+			$selectAll.on('change', function () {
+
+				table.rows({ search: 'applied' })
+					.nodes()
+					.to$()
+					.find('.row-check:not(:disabled)')
 					.prop('checked', this.checked)
 					.trigger('change');
 			});
 
-			// Row Check
+			// Row Selection
+
 			$(document).on('change', '.row-check', function () {
 
-				const row = $(this).closest('tr');
+				const $check = $(this);
+				const row = $check.closest('tr');
 
+				const id = $check.val();
 				const balance =
-					parseFloat($(this).data('balance')) || 0;
+					parseFloat($check.data('balance')) || 0;
+
+				const qtyInput =
+					row.find('.pd-input');
 
 				if (this.checked) {
 
-					row.find('.pd-input')
-						.val(balance)
+					selectedRows.add(id);
+
+					const savedQty =
+						deliveryData.has(id)
+							? deliveryData.get(id).qty
+							: balance;
+
+					qtyInput
+						.val(savedQty)
 						.attr('max', balance)
 						.show();
 
@@ -394,9 +497,18 @@
 
 					row.addClass('table-warning');
 
+					deliveryData.set(id, {
+						id: id,
+						qty: savedQty
+					});
+
 				} else {
 
-					row.find('.pd-input').hide();
+					selectedRows.delete(id);
+					deliveryData.delete(id);
+
+					qtyInput.hide();
+
 					row.find('.pd-text').show();
 
 					row.removeClass(
@@ -408,34 +520,64 @@
 				toggleTagButton();
 			});
 
-			// Validate Partial Delivered
+			// Partial Delivered Validation
+
 			$(document).on('input', '.pd-input', function () {
 
-				const row = $(this).closest('tr');
+				const $input = $(this);
+				const row = $input.closest('tr');
 
-				const outstanding = parseFloat($(this).attr('max')) || 0;
-				const value = parseFloat($(this).val()) || 0;
+				const id =
+					row.find('.row-check').val();
 
-				if (value > outstanding) {
-					alert('Partial Delivered cannot exceed Outstanding Quantity!');
-					$(this).val(outstanding);
+				const max =
+					Number($input.attr('max')) || 0;
+
+				const value =
+					Number($input.val()) || 0;
+
+				if (value > max) {
+
+					alert(
+						'Partial Delivered cannot exceed Outstanding Quantity!'
+					);
+
+					$input.val(max);
+
 					row.addClass('table-danger');
+
 				} else {
+
 					row.removeClass('table-danger');
 				}
+
+				deliveryData.set(id, {
+					id: id,
+					qty: Number($input.val())
+				});
 			});
 
 			// HBL Change
-			$('#impexDropdown').on('change', function () {
+
+			$impexDropdown.on('change', function () {
 
 				populateHBLFields();
 				toggleTagButton();
 			});
 
-			toggleTagButton();
+			// Initial Load
+
+			restoreSelections();
 			populateHBLFields();
-
+			toggleTagButton();
 		});
+			$('form').on('submit', function () {
 
+		$('#SelectedRowsJson').val(
+			JSON.stringify(
+				Array.from(deliveryData.values())
+			)
+		);
+	});
 	</script>
 }

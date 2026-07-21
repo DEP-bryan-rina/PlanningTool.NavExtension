@@ -42,7 +42,7 @@
 									</label>
 
 									<input asp-for="EmailNotification._ptEmailAddress"
-										   class="form-control"
+										   class="form-control erp-input"
 										   type="email"
 										   required />
 
@@ -87,7 +87,7 @@
 									</label>
 
 									<select asp-for="EmailNotification._ptUserType"
-											class="form-select"
+											class="form-select erp-dropdown"
 											required>
 										<option value="">-- Select --</option>
 										<option value="Admin">Admin</option>
@@ -99,18 +99,18 @@
 
 								@if (Model.EmailNotification._PK_ptEmailNotification_ID == 0)
 								{
-									<button type="submit" class="btn btn-primary">
+									<button type="submit" class="btn btn-primary erp-btn">
 										Add New
 									</button>
 								}
 								else
 								{
-									<button type="submit" class="btn btn-success">
+									<button type="submit" class="btn btn-success erp-btn">
 										Update
 									</button>
 
 									<a asp-page="./AdminSettings"
-									   class="btn btn-outline-secondary px-4">
+									   class="btn btn-outline-secondary px-4 erp-btn">
 										<i class="fas fa-times me-1"></i>
 										Cancel
 									</a>

@@ -97,8 +97,9 @@ main {
 	display: block;
 }
 
-/* INPUT */
-.erp-input {
+/* INPUT / DROPDOWN */
+.erp-input,
+.erp-dropdown {
 	width: 100%;
 	height: 34px;
 	border-radius: 8px;
@@ -413,35 +414,60 @@ table th {
 		transform: rotate(-360deg);
 	}
 }
-#tblProcurement_filter input,
-#columnFilter {
-	height: 31px;
-	font-size: 13px;
-	border: 1px solid #c8c8c8;
+/*/* DataTables Filter */
+#tblProcurement_filter {
+	float: right !important;
+	display: flex;
+	align-items: center;
+	margin-bottom: 8px;
 }
 
-#tblProcurement_filter input {
-	width: 180px;
-	margin: 0 !important;
-	border-right: 0;
-	border-radius: 2px 0 0 2px;
-}
+	/* Search Input & Dropdown */
+	#tblProcurement_filter input,
+	#columnFilter {
+		height: 31px;
+		font-size: 13px;
+		border: 1px solid #c8c8c8;
+		box-sizing: border-box;
+		transition: none;
+	}
 
+	/* Search Input */
+	#tblProcurement_filter input {
+		width: 180px;
+		margin: 0 !important;
+		border-right: 0;
+		border-radius: 2px 0 0 2px;
+	}
+
+/* Column Filter */
 #columnFilter {
 	width: 170px;
-	padding: 0 6px;
+	padding: 0 0px;
 	background: #fff;
 	border-radius: 0 2px 2px 0;
 	cursor: pointer;
 }
 
+	/* Remove Hover & Focus Effects */
+	#tblProcurement_filter input:hover,
 	#tblProcurement_filter input:focus,
+	#columnFilter:hover,
 	#columnFilter:focus {
+		background: #fff;
+		border-color: #c8c8c8;
 		outline: none;
-		border-color: #0078d4;
+		box-shadow: none;
 	}
-
-/* Keep DataTable horizontal scroll */
-.dataTables_scroll {
-	overflow-x: auto;
+#tblProcurement_wrapper .dataTables_length,
+#tblProcurement_wrapper .dataTables_filter {
+	margin-bottom: 10px;
 }
+#tblProcurement_wrapper .dataTables_length {
+	padding-top: 15px;
+}
+
+#tblProcurement_wrapper .dataTables_filter {
+	padding-top: 15px;
+}
+

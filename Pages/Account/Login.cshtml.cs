@@ -72,7 +72,7 @@ namespace PlanningTool.NavExtension.Pages.Account
                 return RedirectToPage("/ImPex/Index");
             }
 
-            return RedirectToPage("/Procurement/Index");
+            return RedirectToPage("/Procurement/Tagging");
         }
     }
 }

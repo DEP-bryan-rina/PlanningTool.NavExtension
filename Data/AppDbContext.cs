@@ -22,6 +22,8 @@ namespace PlanningTool.NavExtension.Data
 
         public DbSet<QADashboardItem> QADashboardItems { get; set; }
 
+        public DbSet<TagProcurementRequest> TagProcurementRequests { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<UserModel>()
