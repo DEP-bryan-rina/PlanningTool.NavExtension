@@ -369,6 +369,42 @@ namespace PlanningTool.NavExtension.Pages.Procurement
 
             return RedirectToPage();
         }
+        public async Task<IActionResult> OnPostTaggedUpdate(string TaggedUpdateJson)
+        {
+            if (string.IsNullOrWhiteSpace(TaggedUpdateJson))
+            {
+                TempData["ErrorMessage"] = "No record selected.";
+                return RedirectToPage();
+            }
 
+            var updates = JsonSerializer.Deserialize<List<TaggedUpdateModel>>(TaggedUpdateJson);
+
+            if (updates != null)
+            {
+                foreach (var item in updates)
+                {
+                    var record = _context.GetTaggedItems
+                        .FirstOrDefault(x => x.PK_ptProcID == item.ID);
+
+                    if (record != null)
+                    {
+                        record._ptPartialDelivered = item.PartialDelivered;
+
+                        record._ptBalanceQty =
+                            record._ptOutstandingQty - item.PartialDelivered;
+
+                        record._ptModifiedBy = GetUser();
+                        record._ptModifiedDate = DateTime.Now;
+                    }
+                }
+
+                await _context.SaveChangesAsync();
+            }
+
+            TempData["SuccessMessage"] = "Tagged records updated successfully.";
+            TempData["ActiveTab"] = "#tagged";
+
+            return RedirectToPage();
+        }
     }
 }

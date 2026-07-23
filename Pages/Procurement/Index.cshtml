@@ -2,128 +2,30 @@
 @model PlanningTool.NavExtension.Pages.Procurement.IndexModel
 @{
 	ViewData["Title"] = "Procurement Control Center";
+	var activeTab = TempData["ActiveTab"]?.ToString() ?? "#withoutstandingqty";
 }
+
 <div class="erp-form">
-	<div class="card border-0 shadow-sm">
-		<div class="card-header bg-white border-bottom">
-			<h5 class="mb-0 fw-semibold">
-				<i class="fas fa-tag text-primary me-2"></i>
-				Procurement Shipment Tagging
-			</h5>
-		</div>
-
-		<div class="card-body">
-			@{
-				var hasHblData = Model.ImpexList?.Any(x => !string.IsNullOrWhiteSpace(x._ptHBLNo)) == true;
-			}
-
-			<div class="row g-3">
-				<div class="col-12">
-
-					<div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
-
-						<!-- HBL Section -->
-						<div>
-							@if (hasHblData)
-							{
-								<div class="d-flex align-items-end gap-2">
-
-									<div>
-										<label class="erp-label mb-1">
-											HBL No <span class="text-danger">*</span>
-										</label>
-
-										<select id="impexDropdown"
-												name="ImpexID"
-												class="form-select erp-control"
-												style="min-width:300px;"
-												required>
-											<option value="">Select HBL No...</option>
-
-											@foreach (var item in Model.ImpexList)
-											{
-												<option value="@item.PK_ptImpexID"
-														data-hbl="@item._ptHBLNo"
-														data-container="@item._ptContainerNo"
-														data-eta="@item._ptContainerETA?.ToString("yyyy-MM-dd")"
-														data-origin="@item._ptCountryOfOrigin">
-													@item._ptHBLNo
-												</option>
-											}
-										</select>
-									</div>
-									<button id="btnTagPO"
-											type="button"
-											class="btn btn-sm btn-primary erp-btn"
-											disabled>
-										<i class="fas fa-link me-1"></i>
-										Tag Selected PO
-									</button>
-
-
-								</div>
-
-								<small id="tagInfo" class="text-muted d-block mt-2">
-									<i class="fas fa-info-circle me-1"></i>
-									Select an HBL and one or more POs to continue.
-								</small>
-							}
-							else
-							{
-								<div class="alert alert-warning mb-0">
-									<i class="fas fa-info-circle me-2"></i>
-									No HBL Number is currently available. Please inform the ImPex Team to create a new Shipment Information record.
-								</div>
-							}
-						</div>
-
-						<!-- ETA Legend -->
-						<div class="d-flex align-items-center gap-2 small">
-							<span class="fw-semibold">
-								ETA Legend
-							</span>
-
-							<span class="badge bg-danger">
-								<i class="fas fa-triangle-exclamation me-1"></i>
-								Overdue
-							</span>
-
-							<span class="badge bg-success">
-								<i class="fas fa-shipping-fast me-1"></i>
-								≤ 14 Days
-							</span>
-
-							<span class="badge bg-secondary">
-								<i class="fas fa-calendar-alt me-1"></i>
-								&gt; 14 Days
-							</span>
-						</div>
-
-					</div>
-
-				</div>
-			</div>
-		</div>
-	</div>
-	<br />
 	<div class="d-flex justify-content-between align-items-center mb-3">
 
 		<ul class="nav nav-tabs w-100" id="expirationTab" role="tablist">
 
 			<li class="nav-item">
-				<button class="nav-link active"
+				<button class="nav-link @(activeTab == "#withoutstandingqty" ? "active" : "")"
 						data-bs-toggle="tab"
 						data-bs-target="#withoutstandingqty">
 					PO Outstanding Qty
 				</button>
+
 			</li>
 
 			<li class="nav-item">
-				<button class="nav-link"
+				<button class="nav-link @(activeTab == "#tagged" ? "active" : "")"
 						data-bs-toggle="tab"
 						data-bs-target="#tagged">
 					Tagged POs
 				</button>
+
 			</li>
 		</ul>
 
@@ -131,157 +33,301 @@
 	<div class="tab-content mt-3">
 
 		<!-- withoutstandingqty -->
-		<div class="tab-pane fade show active" id="withoutstandingqty">
+		<div class="tab-pane fade @(activeTab == "#withoutstandingqty" ? "show active" : "")" id="withoutstandingqty">
 
-			<form method="post" >
-				<table id="tblOutstanding" class="table table-hover w-100">
-					<thead class="sticky-top bg-white table-bordered" style="font-size:0.80rem;">
-						<tr class="data-row">
-							<th style="width:40px;"><input type="checkbox" id="selectAll" /></th>
+			<div class="card-body">
+				@{
+					var hasHblData = Model.ImpexList?.Any(x => !string.IsNullOrWhiteSpace(x._ptHBLNo)) == true;
+				}
 
-							<th style="width:120px; text-align:left; display:none">Doc Type</th>
-							<th style="width:120px; text-align:left">PO No</th>
-							<th style="width:120px; text-align:left; display:none">Line No</th>
-							<th style="width:220px; text-align:left">Vendor</th>
-							<th style="width:120px; text-align:left">Item Code</th>
-							<th style="width:300px; text-align:left">Description</th>
-							<th style="width:120px; text-align:right">PO Outstanding Qty</th>
-							<th style="width:140px; text-align:right">Tagged Qty</th>
-							<th style="width:120px; text-align:right">Balance For Tagging</th>							
-							<th style="width:300px; text-align:left">HBL No</th>
-						</tr>
-					</thead>
+				<div class="row g-3">
+					<div class="col-12">
 
-					<tbody style="font-size:0.80rem;">
+						<div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
 
-						@if (Model.ProcurementList != null && Model.ProcurementList.Any())
+							<!-- HBL Section -->
+							<div>
+								@if (hasHblData)
+								{
+									<div class="d-flex align-items-end gap-2">
+
+										<div>
+											<label class="erp-label mb-1">
+												HBL No <span class="text-danger">*</span>
+											</label>
+
+											<select id="impexDropdown"
+													name="ImpexID"
+													class="form-select erp-control"
+													style="min-width:300px;"
+													required>
+												<option value="">Select HBL No...</option>
+
+												@foreach (var item in Model.ImpexList)
+												{
+													<option value="@item.PK_ptImpexID"
+															data-hbl="@item._ptHBLNo"
+															data-container="@item._ptContainerNo"
+															data-eta="@item._ptContainerETA?.ToString("yyyy-MM-dd")"
+															data-origin="@item._ptCountryOfOrigin">
+														@item._ptHBLNo
+													</option>
+												}
+											</select>
+										</div>
+										<button id="btnTagPO"
+												type="button"
+												class="btn btn-sm btn-primary erp-btn"
+												disabled>
+											<i class="fas fa-link me-1"></i>
+											Tag Selected PO
+										</button>
+
+										
+
+									</div>
+
+									<small id="tagInfo" class="text-muted d-block mt-2">
+										<i class="fas fa-info-circle me-1"></i>
+										Select an HBL and one or more POs to continue.
+									</small>
+								}
+								else
+								{
+									<div class="alert alert-warning mb-0">
+										<i class="fas fa-info-circle me-2"></i>
+										No HBL Number is currently available. Please inform the ImPex Team to create a new Shipment Information record.
+									</div>
+								}
+							</div>
+							<div class="d-flex align-items-center gap-2 small">
+								<button type="button"
+										id="btnEEOutstanding"
+										class="btn btn-primary btn-sm">
+									<i class="fas fa-file-excel"></i>
+									Export Excel
+								</button>
+							</div>
+						</div>
+
+					</div>
+				</div>
+			</div>
+			<br />
+			<table id="tblOutstanding" class="table table-hover w-100">
+				<thead class="sticky-top bg-white table-bordered" style="font-size:0.80rem;">
+					<tr class="data-row">
+						<th style="width:40px;"><input type="checkbox" id="selectAllOutstanding" /></th>
+
+						<th style="width:120px; text-align:left; display:none">Doc Type</th>
+						<th style="width:120px; text-align:left">PO No</th>
+						<th style="width:120px; text-align:left; display:none">Line No</th>
+						<th style="width:220px; text-align:left">Vendor</th>
+						<th style="width:120px; text-align:left">Item Code</th>
+						<th style="width:300px; text-align:left">Description</th>
+						<th style="width:120px; text-align:right">PO Outstanding Qty</th>
+						<th style="width:140px; text-align:right">Tagged Qty</th>
+						<th style="width:120px; text-align:right">Balance For Tagging</th>
+						<th style="width:300px; text-align:left">HBL No</th>
+					</tr>
+				</thead>
+
+				<tbody>
+
+					@if (Model.ProcurementList != null && Model.ProcurementList.Any())
+					{
+						@foreach (var item in Model.ProcurementList)
 						{
-							@foreach (var item in Model.ProcurementList)
-							{
-								<tr>
-									<td>
-										<input type="checkbox"
-											   class="row-check po-check"
-											   data-doctype="@item.IDDocType"
-											   data-docno="@item.IDDocNo"
-											   data-line="@item.IDLineNo"
-											   data-item="@item.ItemCode"
-											   data-vendor="@item.VendorName"
-											   data-description="@item.ItemDescription"
-											   data-outstanding="@item.OutstandingQty"
-											   data-partialqty="@item.ptPartialDelivered"
-											   data-balanceqty="@item.ptBalanceQty"
-										@((item.ptBalanceQty == 0 && !string.IsNullOrWhiteSpace(item.ptHBLNo)) ? "disabled" : "") />
+							<tr style="font-size: 0.8em">
+								<td>
+									<input type="checkbox"
+										   class="row-check po-check"
+										   data-doctype="@item.IDDocType"
+										   data-docno="@item.IDDocNo"
+										   data-line="@item.IDLineNo"
+										   data-item="@item.ItemCode"
+										   data-vendor="@item.VendorName"
+										   data-description="@item.ItemDescription"
+										   data-outstanding="@item.OutstandingQty"
+										   data-partialqty="@item.ptPartialDelivered"
+										   data-balanceqty="@item.ptBalanceQty"
+									@((item.ptBalanceQty == 0 && !string.IsNullOrWhiteSpace(item.ptHBLNo)) ? "disabled" : "") />
 
-									</td>
-									<td style="display:none;">@item.IDDocType</td>
-									<td>@item.IDDocNo</td>
-									<td style="display:none;">@item.IDLineNo</td>
-									<td>@item.VendorName</td>
-									<td>@item.ItemCode</td>
-									<td>@item.ItemDescription</td>
-									<td class="text-end">@item.OutstandingQty</td>
-									<td class="text-end">@item.ptPartialDelivered</td>
-									<td class="text-end">@item.ptBalanceQty</td>	
-									<td>@item.ptHBLNo</td>
-								</tr>
-							}
+								</td>
+								<td style="display:none;">@item.IDDocType</td>
+								<td>@item.IDDocNo</td>
+								<td style="display:none;">@item.IDLineNo</td>
+								<td>@item.VendorName</td>
+								<td>@item.ItemCode</td>
+								<td>@item.ItemDescription</td>
+								<td class="text-end">@item.OutstandingQty</td>
+								<td class="text-end">@item.ptPartialDelivered</td>
+								<td class="text-end">@item.ptBalanceQty</td>
+								<td>@item.ptHBLNo</td>
+							</tr>
 						}
+					}
 
-					</tbody>
-				</table>
-				
-			</form>
+				</tbody>
+			</table>
 
 		</div>
 
 	</div>
 
 	<!-- tagged -->
+	<div class="tab-pane fade @(activeTab == "#tagged" ? "show active" : "")" id="tagged">
+		<div class="row g-3">
+			<div class="col-12">
+				<div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
+					<div class="d-flex gap-2">
+						<form method="post" asp-page-handler="Untag" id="frmUntag" class="m-0">
+							<input type="hidden"
+								   id="UntagIDs"
+								   name="UntagIDs" />
 
-	<div class="tab-pane fade" id="tagged">		
-		<form method="post" asp-page-handler="Untag" id="frmUntag">			
-			<table id="tblTagged" class="table table-hover w-100">
-				<thead class="sticky-top bg-white table-bordered" style="font-size:0.80rem;">
-					<tr class="data-row">
-						<th style="width:40px;"><input type="checkbox" id="selectAll" /></th>
+							<button type="submit"
+									id="btnUntag"
+									class="btn btn-danger btn-sm">
+								<i class="fas fa-unlink"></i>
+								Untag Selected
+							</button>
+						</form>
 
-						<th style="text-align:left; display:none">Doc Type</th>
-						<th style="text-align:left">PO No</th>
-						<th style="text-align:left; display:none">Line No</th>
-						<th style="text-align:left">Vendor</th>
-						<th style="text-align:left">Item Code</th>
-						<th style="text-align:left">Description</th>
-						<th style="text-align:right">PO Outstanding Qty</th>
-						<th style="text-align:right">Tagged Qty</th>
-						<th style="text-align:right">Balance For Tagging</th>
-						<th style="text-align:left">HBL No</th>
-						<th style="text-align:left">Container No</th>
-						<th style="text-align:left">Dedon ETA</th>
-						<th style="text-align:left">Country of Origin</th>
-						<th style="width:220px; text-align:left">Remarks</th>
-					</tr>
-				</thead>
+						<form method="post" asp-page-handler="TaggedUpdate" id="frmTaggedUpdate" class="m-0">
+							<input type="hidden" id="TaggedUpdateJson" name="TaggedUpdateJson" />
 
-				<tbody style="font-size:0.80rem;">
 
-					@if (Model.ProcurementTagged != null && Model.ProcurementTagged.Any())
+							<button type="submit"
+									id="btnTaggedUpdate"
+									class="btn btn-success btn-sm">
+								<i class="fas fa-save"></i>
+								Update Record
+							</button>
+						</form>
+
+					</div>
+
+					<!-- ETA Legend -->
+					<div class="d-flex align-items-center gap-2 small">
+
+						<span class="fw-semibold">
+							ETA Legend
+						</span>
+
+						<span class="badge bg-danger">
+							<i class="fas fa-triangle-exclamation me-1"></i>
+							Overdue
+						</span>
+
+						<span class="badge bg-success">
+							<i class="fas fa-shipping-fast me-1"></i>
+							≤ 14 Days
+						</span>
+
+						<span class="badge bg-secondary">
+							<i class="fas fa-calendar-alt me-1"></i>
+							&gt; 14 Days
+						</span>
+						<button type="button"
+								id="btnEETagged"
+								class="btn btn-primary btn-sm">
+							<i class="fas fa-file-excel"></i>
+							Export Excel
+						</button>
+					</div>
+
+				</div>
+
+			</div>
+		</div>
+		<br />
+		<table id="tblTagged" class="table table-hover w-100">
+			<thead class="sticky-top bg-white table-bordered" style="font-size:0.80rem;">
+				<tr class="data-row">
+					<th style="width:40px;"><input type="checkbox" id="selectAllTagged" /></th>
+					<th style="text-align:left; display:none">Doc Type</th>
+					<th style="text-align:left">PO No</th>
+					<th style="text-align:left; display:none">Line No</th>
+					<th style="text-align:left">Vendor</th>
+					<th style="text-align:left">Item Code</th>
+					<th style="text-align:left">Description</th>
+					<th style="text-align:right">PO Outstanding Qty</th>
+					<th style="text-align:right">Tagged Qty</th>
+					<th style="text-align:right">Balance For Tagging</th>
+					<th style="text-align:left">HBL No</th>
+					<th style="text-align:left">Container No</th>
+					<th style="text-align:left">Dedon ETA</th>
+					<th style="text-align:left">Country of Origin</th>
+					<th style="width:220px; text-align:left">Remarks</th>
+				</tr>
+			</thead>
+
+			<tbody>
+
+				@if (Model.ProcurementTagged != null && Model.ProcurementTagged.Any())
+				{
+					@foreach (var item in Model.ProcurementTagged)
 					{
-						@foreach (var item in Model.ProcurementTagged)
-						{
-							<tr>
-								<td>
-									<input type="checkbox"
-										   class="row-check po-check"
-										   data-id="@item.PK_ptProcID"
-										   data-doctype="@item._ptDocType"
-										   data-docno="@item._ptDocNo"
-										   data-line="@item._ptLineNo"
-										   data-item="@item._ptItemCode" />
+						<tr style="font-size: 0.8em">
+							<td>
+								<input type="checkbox"
+									   class="rowtag-check"
+									   data-id="@item.PK_ptProcID"
+									   data-doctype="@item._ptDocType"
+									   data-docno="@item._ptDocNo"
+									   data-line="@item._ptLineNo"
+									   data-item="@item._ptItemCode" />
 
-								</td>
-								<td style="display:none;">@item._ptDocType</td>
-								<td>@item._ptDocNo</td>
-								<td style="display:none;">@item._ptLineNo</td>
-								<td>@item._ptVendorName</td>
-								<td>@item._ptItemCode</td>
-								<td>@item._ptItemDescription</td>
-								<td class="text-end">@item._ptOutstandingQty</td>
-								<td class="text-end">@item._ptPartialDelivered</td>								
-								<td class="text-end">@item._ptBalanceQty</td>
-								<td>
-									<span class="hbl-no">@item._ptHBLNo</span>
-								</td>
-								<td>@item._ptContainerNo</td>
-								<td>@item._ptContainerETA?.ToString("yyyy-MM-dd")</td>
-								<td>@item._ptCountryOfOrigin</td>
-								<td>@item._ptRemarks</td>
-							</tr>
-						}
+							</td>
+							<td style="display:none;">@item._ptDocType</td>
+							<td>@item._ptDocNo</td>
+							<td style="display:none;">@item._ptLineNo</td>
+							<td>@item._ptVendorName</td>
+							<td>@item._ptItemCode</td>
+							<td>@item._ptItemDescription</td>
+							<td class="text-end">@item._ptOutstandingQty</td>
+
+							<td class="text-end partial-cell"
+								data-default="@item._ptPartialDelivered"
+								data-max="@item._ptOutstandingQty">
+								@item._ptPartialDelivered
+
+							</td>
+
+
+							<td class="text-end">@item._ptBalanceQty</td>
+							<td>
+								<span class="hbl-no">@item._ptHBLNo</span>
+							</td>
+							<td>@item._ptContainerNo</td>
+							<td>
+								@if (item._ptContainerETA.HasValue)
+								{
+									<span class="eta-date"
+										  data-eta="@item._ptContainerETA.Value.ToString("yyyy-MM-dd")">
+										@item._ptContainerETA.Value.ToString("yyyy-MM-dd")
+									</span>
+								}
+							</td>
+
+							<td>@item._ptCountryOfOrigin</td>
+							<td>@item._ptRemarks</td>
+						</tr>
 					}
+				}
 
-				</tbody>
-			</table>	
+			</tbody>
+		</table>
+
 		
-			<input type="hidden"
-				   id="UntagIDs"
-				   name="UntagIDs" />
-
-			<button type="submit"
-					id="btnUntag"
-					class="btn btn-danger btn-sm">
-				<i class="fas fa-unlink"></i>
-				Untag Selected
-			</button>
-
-		</form>
-
 	</div>
 
 </div>
 
 <form id="frmProcurement" method="post">
 	<input type="hidden" id="SelectedRowsJson" name="SelectedRowsJson" />
+
 	@* Modal Popup Confirmation *@
 	<div class="modal fade" id="tagModal" tabindex="-1">
 		<div class="modal-dialog modal-xl modal-dialog-scrollable">
@@ -367,11 +413,6 @@
 					</div>
 					<!-- For Tagging -->
 					<div class="card border">
-
-						<div class="card-header bg-white fw-semibold">
-							For Tagging
-						</div>
-
 						<div class="card-body p-0">
 
 							<table id="tblSelected"
@@ -386,8 +427,8 @@
 										<th style="width:150px;" class="text-end">
 											PO Oustanding Qty
 										</th>
-										<th style="width:100px;" class="text-end">
-											Tagged Qty
+										<th style="width:150px;" class="text-end">
+											Quantity Tagged
 										</th>
 										<th style="width:150px;" class="text-end">
 											Balance For Tagging
@@ -427,385 +468,535 @@
 		</div>
 	</div>
 </form>
-<input type="hidden" id="ActiveTab" value="@TempData["ActiveTab"]" />
 
 @section Scripts
 {
 	<script>
 
-		let selectedPO = [];
-		let selectedUntagIDs = [];
+			let selectedPO = [];
+			let selectedUntagIDs = [];
 
-		const $impexDropdown = $('#impexDropdown');
-		const $btnTagPO = $('#btnTagPO');
+			const $impexDropdown = $('#impexDropdown');
+			const $btnTagPO = $('#btnTagPO');
 
-		/* ==============================
-		   Utilities
-		============================== */
+			/* ==============================
+			   Utilities
+			============================== */
 
-		function getTableHeight() {
-			return `${$(window).height() * 0.6}px`;
-		}
+			function getTableHeight() {
+				return `${$(window).height() * 0.6}px`;
+			}
 
-		function activateTab(target) {
-			bootstrap.Tab
-				.getOrCreateInstance(
-					document.querySelector(`[data-bs-target="${target}"]`)
-				)
-				.show();
-		}
+			function toggleTagButton() {
+				$btnTagPO.prop(
+					'disabled',
+					selectedPO.length === 0 || !$impexDropdown.val()
+				);
+			}
 
-		function toggleTagButton() {
-			$btnTagPO.prop(
-				'disabled',
-				selectedPO.length === 0 || !$impexDropdown.val()
-			);
-		}
+			function populateHBLFields() {
 
-		function populateHBLFields() {
+				const $selected = $('#impexDropdown option:selected');
 
-			const $selected = $('#impexDropdown option:selected');
+				$('#modalHBL').val($selected.data('hbl') || '');
+				$('#modalContainer').val($selected.data('container') || '');
+				$('#modalCountryOfOrigin').val($selected.data('origin') || '');
+				$('#modalDedonETA').val($selected.data('eta') || '');
+			}
 
-			$('#modalHBL').val($selected.data('hbl') || '');
-			$('#modalContainer').val($selected.data('container') || '');
-			$('#modalCountryOfOrigin').val($selected.data('origin') || '');
-			$('#modalDedonETA').val($selected.data('eta') || '');
-		}
+			/* ==============================
+			   HBL Coloring
+			============================== */
 
-		/* ==============================
-		   HBL Coloring
-		============================== */
+			function colorDuplicateHBL() {
 
-		function colorDuplicateHBL() {
+				const counts = {};
+				const colorMap = {};
 
-			const counts = {};
-			const colorMap = {};
+				const randomPastelColor = () =>
+					`rgb(
+						${127 + Math.floor(Math.random() * 128)},
+						${127 + Math.floor(Math.random() * 128)},
+						${127 + Math.floor(Math.random() * 128)}
+					)`;
 
-			const randomPastelColor = () =>
-				`rgb(
-					${127 + Math.floor(Math.random() * 128)},
-					${127 + Math.floor(Math.random() * 128)},
-					${127 + Math.floor(Math.random() * 128)}
-				)`;
+				$('.hbl-no').each(function () {
 
-			$('.hbl-no').each(function () {
+					const hbl = $(this).text().trim();
 
-				const hbl = $(this).text().trim();
+					if (hbl) {
+						counts[hbl] = (counts[hbl] || 0) + 1;
+					}
+				});
 
-				if (hbl) {
-					counts[hbl] = (counts[hbl] || 0) + 1;
-				}
+				$('.hbl-no').each(function () {
+
+					const hbl = $(this).text().trim();
+
+					if (counts[hbl] <= 1) return;
+
+					if (!colorMap[hbl]) {
+						colorMap[hbl] = randomPastelColor();
+					}
+
+					$(this).css({
+						backgroundColor: colorMap[hbl],
+						padding: '3px 8px',
+						borderRadius: '4px',
+						fontSize: '0.8em'
+					});
+				});
+			}
+
+			/* ==============================
+			   DataTables
+			============================== */
+
+			function createDataTable(selector) {
+
+				return $(selector).DataTable({
+					pageLength: 25,
+					paging: true,
+					scrollX: true,
+					scrollY: getTableHeight(),
+					scrollCollapse: true,
+					autoWidth: false,
+					fixedHeader: true,
+					responsive: true
+				});
+			}
+
+			function addColumnFilter(table, tableId) {
+
+				const $filter = $(`${tableId}_filter`);
+				const $searchInput = $filter.find('input');
+				const $columnFilter = $('<select class="columnFilter"></select>');
+
+				$filter.find('label')
+					.contents()
+					.filter((_, node) => node.nodeType === 3)
+					.remove();
+
+				$searchInput.attr(
+					'placeholder',
+					'Type to filter (F3)'
+				);
+
+				table.columns().every(function (index) {
+
+					const title = $(this.header()).text().trim();
+
+					if (!title) return;
+
+					$columnFilter.append(
+						`<option value="${index}">${title}</option>`
+					);
+				});
+
+				$searchInput.after($columnFilter);
+
+				const filterData = () => {
+
+					table.columns().search('');
+
+					table
+						.column(+$columnFilter.val())
+						.search($searchInput.val())
+						.draw();
+				};
+
+				$searchInput.on('input', filterData);
+				$columnFilter.on('change', filterData);
+			}
+
+			/* ==============================
+			   Page Load
+			============================== */
+
+			$(function () {
+
+				$impexDropdown.select2();
+
+				const outstandingTable =
+					createDataTable('#tblOutstanding');
+
+				const taggedTable =
+					createDataTable('#tblTagged');
+
+				addColumnFilter(
+					outstandingTable,
+					'#tblOutstanding'
+				);
+
+				addColumnFilter(
+					taggedTable,
+					'#tblTagged'
+				);
+
+				colorDuplicateHBL();
+
+				taggedTable.on('draw', colorDuplicateHBL);
+
+				$(window).on('resize', () => {
+
+					$.fn.dataTable
+						.tables({ visible: true, api: true })
+						.columns.adjust();
+				});
+
 			});
 
-			$('.hbl-no').each(function () {
+			/* ==============================
+			   Untagging
+			============================== */
 
-				const hbl = $(this).text().trim();
+			$(document).on(
+				'change',
+				'#tblTagged .rowtag-check',
+				function () {
 
-				if (counts[hbl] <= 1) return;
+					const id = $(this).data('id');
 
-				if (!colorMap[hbl]) {
-					colorMap[hbl] = randomPastelColor();
+					if (this.checked) {
+						selectedUntagIDs.push(id);
+					} else {
+						selectedUntagIDs =
+							selectedUntagIDs.filter(
+								x => x !== id
+							);
+					}
+				}
+			);
+
+			$('#btnUntag').on('click', function (e) {
+
+				if (!selectedUntagIDs.length) {
+
+					alert(
+						'Please select record(s) to untag.'
+					);
+
+					e.preventDefault();
+					return;
+				}
+
+				if (
+					!confirm(
+						`Are you sure you want to untag ${selectedUntagIDs.length} record(s)?`
+					)
+				) {
+					e.preventDefault();
+					return;
+				}
+
+				$('#UntagIDs').val(
+					selectedUntagIDs.join(',')
+				);
+			});
+
+			/* ==============================
+			   Row Selection
+			============================== */
+
+			$('#selectAllOutstanding').on('change', function () {
+
+				$('.row-check:not(:disabled)')
+					.prop('checked', this.checked)
+					.trigger('change');
+			});
+			$('#selectAllTagged').on('change', function () {
+
+				$('.rowtag-check:not(:disabled)')
+					.prop('checked', this.checked)
+					.trigger('change');
+			});
+
+			$(document).on(
+				'change',
+				'.row-check',
+				function () {
+
+					const $checkbox = $(this);
+					const $row = $checkbox.closest('tr');
+
+					const item = {
+						IDDocType: $checkbox.data('doctype'),
+						IDDocNo: $checkbox.data('docno'),
+						IDLineNo: $checkbox.data('line'),
+						ItemCode: $checkbox.data('item'),
+						ItemDescription: $checkbox.data('description'),
+						VendorName: $row.find('td:eq(4)').text().trim(),
+						ptOutstandingQty: Number($checkbox.data('outstanding')),
+						ptPartialQty: Number($checkbox.data('partialqty')),
+						ptBalanceQty: Number($checkbox.data('balanceqty'))
+					};
+
+					if (this.checked) {
+
+						selectedPO.push(item);
+
+					} else {
+
+						selectedPO = selectedPO.filter(x =>
+							!(
+								x.IDDocNo === item.IDDocNo &&
+								x.IDLineNo === item.IDLineNo &&
+								x.ItemCode === item.ItemCode
+							)
+						);
+					}
+
+					toggleTagButton();
+				}
+			);
+
+			$impexDropdown.on('change', function () {
+				populateHBLFields();
+				toggleTagButton();
+			});
+
+			/* ==============================
+			   Modal
+			============================== */
+
+			$('#btnTagPO').on('click', function () {
+
+				const $tbody =
+					$('#tblSelected tbody').empty();
+
+					selectedPO.forEach(item => {
+
+					$tbody.append(`
+						<tr
+							data-doctype="${item.IDDocType}"
+							data-docno="${item.IDDocNo}"
+							data-line="${item.IDLineNo}"
+							data-item="${item.ItemCode}">
+
+							<td>${item.IDDocNo}</td>
+							<td>${item.VendorName}</td>
+							<td>${item.ItemCode}</td>
+							<td>${item.ItemDescription}</td>							
+							<td class="text-end">
+								${item.ptOutstandingQty}
+							</td>
+							<td class="text-end">
+								${item.ptPartialQty}
+							</td>
+							<td>
+								  <input type="number"
+								   class="form-control form-control-sm pd text-end"
+								   value="${item.ptBalanceQty}"
+								   min="1"
+								   max="${item.ptOutstandingQty}"
+								   step="0.01"
+								   required
+								   data-balance="${item.ptBalanceQty}">
+							</td>
+
+						</tr>
+					`);
+				});
+
+				populateHBLFields();
+
+				$('#tagModal').modal('show');
+			});
+
+			/* ==============================
+			   Save Payload
+			============================== */
+
+			$('#btnProceed').on('click', function () {
+
+				const payload = [];
+
+				$('#tblSelected tbody tr').each(function () {
+
+					payload.push({
+
+						ptHBLNo: $('#modalHBL').val() || '',
+						ptContainerNo: $('#modalContainer').val() || '',
+
+						IDDocType: Number($(this).data('doctype')),
+						IDDocNo: String($(this).data('docno')),
+						IDLineNo: Number($(this).data('line')),
+
+						ItemCode: String($(this).data('item')),
+						ItemDescription:
+							$(this).find('td:eq(3)').text().trim(),
+
+						ptPartialDelivered:
+							Number($(this).find('.pd').val() || 0),
+
+						ptContainerETA:
+							$('#modalDedonETA').val(),
+
+						ptRemarks:
+							$('#modalRemarks').val() || ''
+					});
+				});
+
+				$('#SelectedRowsJson')
+					.val(JSON.stringify(payload));
+
+			});
+
+			/* ==============================
+			   Apply CSS Color
+			============================== */
+			$('.eta-date').each(function () {
+
+				const etaValue = $(this).data('eta');
+
+				if (!etaValue) return;
+
+				const etaDate = new Date(etaValue);
+				const today = new Date();
+
+				today.setHours(0, 0, 0, 0);
+				etaDate.setHours(0, 0, 0, 0);
+
+				const days = Math.ceil(
+					(etaDate - today) / (1000 * 60 * 60 * 24)
+				);
+
+				let color;
+
+				if (days < 0) {
+					color = '#dc3545'; // Overdue
+				}
+				else if (days <= 14) {
+					color = '#198754'; // <=14 Days
+				}
+				else {
+					color = '#6c757d'; // >14 Days
 				}
 
 				$(this).css({
-					backgroundColor: colorMap[hbl],
+					backgroundColor: color,
+					color: '#fff',
 					padding: '3px 8px',
-					borderRadius: '4px'
+					borderRadius: '4px',
+					fontWeight: '600',
+					fontSize: '0.8em',
+					display: 'inline-block'
 				});
-			});
-		}
 
-		/* ==============================
-		   DataTables
-		============================== */
-
-		function createDataTable(selector) {
-
-			return $(selector).DataTable({
-				pageLength: 25,
-				paging: true,
-				scrollX: true,
-				scrollY: getTableHeight(),
-				scrollCollapse: true,
-				autoWidth: false,
-				fixedHeader: true,
-				responsive: true
-			});
-		}
-
-		function addColumnFilter(table, tableId) {
-
-			const $filter = $(`${tableId}_filter`);
-			const $searchInput = $filter.find('input');
-			const $columnFilter = $('<select class="columnFilter"></select>');
-
-			$filter.find('label')
-				.contents()
-				.filter((_, node) => node.nodeType === 3)
-				.remove();
-
-			$searchInput.attr(
-				'placeholder',
-				'Type to filter (F3)'
-			);
-
-			table.columns().every(function (index) {
-
-				const title = $(this.header()).text().trim();
-
-				if (!title) return;
-
-				$columnFilter.append(
-					`<option value="${index}">${title}</option>`
-				);
 			});
 
-			$searchInput.after($columnFilter);
+	$(document).on('change', '.rowtag-check', function () {
 
-			const filterData = () => {
+			const $row = $(this).closest('tr');
+			const $cell = $row.find('.partial-cell');
 
-				table.columns().search('');
-
-				table
-					.column(+$columnFilter.val())
-					.search($searchInput.val())
-					.draw();
-			};
-
-			$searchInput.on('input', filterData);
-			$columnFilter.on('change', filterData);
-		}
-
-		/* ==============================
-		   Page Load
-		============================== */
-
-		$(function () {
-
-			$impexDropdown.select2();
-
-			const outstandingTable =
-				createDataTable('#tblOutstanding');
-
-			const taggedTable =
-				createDataTable('#tblTagged');
-
-			addColumnFilter(
-				outstandingTable,
-				'#tblOutstanding'
-			);
-
-			addColumnFilter(
-				taggedTable,
-				'#tblTagged'
-			);
-
-			colorDuplicateHBL();
-
-			taggedTable.on('draw', colorDuplicateHBL);
-
-			$(window).on('resize', () => {
-
-				$.fn.dataTable
-					.tables({ visible: true, api: true })
-					.columns.adjust();
-			});
-
-		});
-
-		/* ==============================
-		   Untagging
-		============================== */
-
-		$(document).on(
-			'change',
-			'#tblTagged .row-check',
-			function () {
-
-				const id = $(this).data('id');
-
-				if (this.checked) {
-					selectedUntagIDs.push(id);
-				} else {
-					selectedUntagIDs =
-						selectedUntagIDs.filter(
-							x => x !== id
-						);
-				}
-			}
-		);
-
-		$('#btnUntag').on('click', function (e) {
-
-			if (!selectedUntagIDs.length) {
-
-				alert(
-					'Please select record(s) to untag.'
-				);
-
-				e.preventDefault();
+			if (!$cell.length) {
+				console.log('partial-cell not found');
 				return;
 			}
 
-			if (
-				!confirm(
-					`Are you sure you want to untag ${selectedUntagIDs.length} record(s)?`
-				)
-			) {
-				e.preventDefault();
-				return;
-			}
+			const defaultValue = $cell.data('default') ?? 0;
+			const maxQty = $cell.data('max') ?? 0;
 
-			$('#UntagIDs').val(
-				selectedUntagIDs.join(',')
-			);
-		});
 
-		/* ==============================
-		   Row Selection
-		============================== */
+			if (this.checked) {
 
-		$('#selectAll').on('change', function () {
-
-			$('.row-check:not(:disabled)')
-				.prop('checked', this.checked)
-				.trigger('change');
-		});
-
-		$(document).on(
-			'change',
-			'.row-check',
-			function () {
-
-				const $checkbox = $(this);
-				const $row = $checkbox.closest('tr');
-
-				const item = {
-					IDDocType: $checkbox.data('doctype'),
-					IDDocNo: $checkbox.data('docno'),
-					IDLineNo: $checkbox.data('line'),
-					ItemCode: $checkbox.data('item'),
-					ItemDescription: $checkbox.data('description'),
-					VendorName: $row.find('td:eq(4)').text().trim(),
-					ptOutstandingQty: Number($checkbox.data('outstanding')),
-					ptPartialQty: Number($checkbox.data('partialqty')),
-					ptBalanceQty: Number($checkbox.data('balanceqty'))
-				};
-
-				if (this.checked) {
-
-					selectedPO.push(item);
-
-				} else {
-
-					selectedPO = selectedPO.filter(x =>
-						!(
-							x.IDDocNo === item.IDDocNo &&
-							x.IDLineNo === item.IDLineNo &&
-							x.ItemCode === item.ItemCode
-						)
-					);
-				}
-
-				toggleTagButton();
-			}
-		);
-
-		$impexDropdown.on('change', function () {
-			populateHBLFields();
-			toggleTagButton();
-		});
-
-		/* ==============================
-		   Modal
-		============================== */
-
-		$('#btnTagPO').on('click', function () {
-
-			const $tbody =
-				$('#tblSelected tbody').empty();
-
-				selectedPO.forEach(item => {
-					
-				$tbody.append(`
-					<tr
-						data-doctype="${item.IDDocType}"
-						data-docno="${item.IDDocNo}"
-						data-line="${item.IDLineNo}"
-						data-item="${item.ItemCode}">
-
-						<td>${item.IDDocNo}</td>
-						<td>${item.VendorName}</td>
-						<td>${item.ItemCode}</td>
-						<td>${item.ItemDescription}</td>
-
-						<td class="text-end">
-							${item.ptOutstandingQty}
-						</td>
-
-						<td class="text-end">
-							${item.ptPartialQty}
-						</td>
-
-						<td>
-							  <input type="number"
-							   class="form-control form-control-sm pd text-end"
-							   value="${item.ptBalanceQty}"
-							   min="1"
-							   max="${item.ptOutstandingQty}"
-							   step="0.01"
-							   required
-							   data-balance="${item.ptBalanceQty}">
-						</td>
-
-					</tr>
+				$cell.html(`
+					<input type="number"
+						   class="form-control form-control-sm text-end partial-input"
+						   value="${defaultValue}"
+						   min="0"
+						   max="${maxQty}"
+						   step="0.01"
+						   required>
 				`);
-			});
 
-			populateHBLFields();
+			}
+			else {
 
-			$('#tagModal').modal('show');
+				$cell
+					.html(defaultValue)
+					.data('value', defaultValue);
+
+			}
+
 		});
 
-		/* ==============================
-		   Save Payload
-		============================== */
 
-		$('#btnProceed').on('click', function () {
+		$(document).on('input', '.partial-input', function () {
 
-			const payload = [];
+			const max = Number($(this).attr('max'));
+			let value = Number($(this).val());
 
-			$('#tblSelected tbody tr').each(function () {
 
-				payload.push({
+			if (value > max) {
+				$(this).val(max);
+			}
 
-					ptHBLNo: $('#modalHBL').val() || '',
-					ptContainerNo: $('#modalContainer').val() || '',
 
-					IDDocType: Number($(this).data('doctype')),
-					IDDocNo: String($(this).data('docno')),
-					IDLineNo: Number($(this).data('line')),
+			if (value < 0 || isNaN(value)) {
+				$(this).val(0);
+			}
 
-					ItemCode: String($(this).data('item')),
-					ItemDescription:
-						$(this).find('td:eq(3)').text().trim(),
+		});
 
-					ptPartialDelivered:
-						Number($(this).find('.pd').val() || 0),
 
-					ptContainerETA:
-						$('#modalDedonETA').val(),
 
-					ptRemarks:
-						$('#modalRemarks').val() || ''
-				});
+		$('#btnTaggedUpdate').on('click', function (e) {
+
+			const updateList = [];
+
+			$('.rowtag-check').each(function () {
+
+				if ($(this).is(':checked')) {
+
+					const $row = $(this).closest('tr');
+
+					updateList.push({
+						ID: Number($(this).data('id')),
+						PartialDelivered: Number(
+							$row.find('.partial-input').val() ||
+							$row.find('.partial-cell').data('value') ||
+							0
+						)
+					});
+				}
+
 			});
 
-			$('#SelectedRowsJson')
-				.val(JSON.stringify(payload));
+			console.log("Selected:", updateList);
 
-			activateTab('#tagged');
+			if (updateList.length === 0) {
+
+				e.preventDefault();
+
+				alert('Please select at least one record.');
+
+				return false;
+			}
+
+
+			$('#TaggedUpdateJson').val(
+				JSON.stringify(updateList)
+			);
+
 		});
+		
+		$('button[data-bs-toggle="tab"]').on('shown.bs.tab', function () {
+
+				setTimeout(function(){
+
+					$.fn.dataTable
+						.tables({
+							visible:true,
+							api:true
+						})
+						.columns
+						.adjust();
+
+				},300);
+
+			});			
 
 	</script>
 }

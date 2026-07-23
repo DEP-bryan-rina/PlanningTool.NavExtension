@@ -144,8 +144,8 @@
 
 		<table id="tblImpexCenter" class="table table-hover w-100 ">
 
-			<thead class="sticky-top bg-white table-bordered" style="font-size:0.75rem;">
-				<tr>
+			<thead class="sticky-top bg-white table-bordered">
+				<tr style="font-size: 0.8em">
 					<th class="text-center">No</th>
 					<th>HBL No</th>
 					<th>Container No</th>
@@ -162,7 +162,7 @@
 				</tr>
 			</thead>
 
-			<tbody style="font-size:0.75rem;">
+			<tbody>
 
 				@{
 					int counter = 1;
@@ -172,7 +172,7 @@
 				{
 					foreach (var item in Model.ImpexList)
 					{
-						<tr>
+						<tr style="font-size: 0.8em">
 							<td class="text-center">@counter</td>
 
 							<td>@item._ptHBLNo</td>
@@ -185,26 +185,38 @@
 							<td>@item._ptModifiedBy</td>
 							<td>@item._ptModifiedDate</td>
 							<td class="text-center">
-								@if (item._ptStatus == 1)
-								{
-									<span class="badge bg-primary text-dark">
-										<i class="fas fa-tag"></i> Tagged
-									</span>
+								@{
+									string statusText;
+									string statusIcon;
+									string statusColor;
 
+									switch (item._ptStatus)
+									{
+										case 1:
+											statusText = "Tagged";
+											statusIcon = "fa-tag";
+											statusColor = "bg-primary";
+											break;
 
+										case 2:
+											statusText = "Completed";
+											statusIcon = "fa-check-circle";
+											statusColor = "bg-success";
+											break;
+
+										default:
+											statusText = "For Tagging";
+											statusIcon = "fa-clock";
+											statusColor = "bg-warning";
+											break;
+									}
 								}
-								else if (item._ptStatus == 2)
-								{
-									<span class="badge bg-success text-dark">
-										<i class="fas fa-check-circle"></i> Completed
-									</span>
-								}
-								else
-								{
-									<span class="badge bg-warning text-dark">
-										<i class="fas fa-clock"></i> For Tagging
-									</span>
-								}
+
+								<span class="badge @statusColor text-dark status-badge">
+									<i class="fas @statusIcon me-1"></i>
+									@statusText
+								</span>
+
 							</td>
 
 							<td class="text-center">
@@ -432,6 +444,48 @@
 				checkHblExists
 			);
 
+			/* ==============================
+		   Apply CSS Color
+		============================== */
+		$('.eta-date').each(function () {
+
+			const etaValue = $(this).data('eta');
+
+			if (!etaValue) return;
+
+			const etaDate = new Date(etaValue);
+			const today = new Date();
+
+			today.setHours(0, 0, 0, 0);
+			etaDate.setHours(0, 0, 0, 0);
+
+			const days = Math.ceil(
+				(etaDate - today) / (1000 * 60 * 60 * 24)
+			);
+
+			let color;
+
+			if (days < 0) {
+				color = '#dc3545'; // Overdue
+			}
+			else if (days <= 14) {
+				color = '#198754'; // <=14 Days
+			}
+			else {
+				color = '#6c757d'; // >14 Days
+			}
+
+			$(this).css({
+				backgroundColor: color,
+				color: '#fff',
+				padding: '3px 8px',
+				borderRadius: '4px',
+				fontWeight: '600',
+				fontSize: '0.8em',
+				display: 'inline-block'
+			});
+
+			});
 		});
 	</script>
 }
