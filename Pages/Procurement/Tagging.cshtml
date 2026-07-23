@@ -15,7 +15,7 @@
 
 			<div class="card-body">
 				@{
-					var hasHblData = Model.ImpexList?.Any(x => !string.IsNullOrWhiteSpace(x._ptHBLNo)) == true;
+					var hasHblData = Model.ImpexList?.Any() == true;
 				}
 
 				<div class="row g-3">
@@ -41,15 +41,17 @@
 													required>
 												<option value="">Select HBL No...</option>
 
-												@foreach (var item in Model.ImpexList.Where(x => !string.IsNullOrWhiteSpace(x._ptHBLNo)))
+												@foreach (var item in Model.ImpexList)
 												{
 													<option value="@item.PK_ptImpexID"
 															data-hbl="@item._ptHBLNo"
 															data-container="@item._ptContainerNo"
-															data-eta="@item._ptContainerETA?.ToString("yyyy-MM-dd HH:mm:ss")">
-														@item._ptHBLNo
+															data-eta="@item._ptContainerETA?.ToString("yyyy-MM-dd")">
+														@(string.IsNullOrWhiteSpace(item._ptHBLNo)
+															? "[No HBL]"
+															: item._ptHBLNo)
 													</option>
-												}
+												}												
 											</select>
 										</div>
 										<button id="btnTagPO"
@@ -105,8 +107,42 @@
 				</div>
 			</div>
 		</div>
+		@* <table id="tblPurchaseLine" class="table table-striped table-bordered w-100">
+			<thead>
+				<tr>
+					<th>PO No</th>
+					<th>Vendor</th>
+					<th>Item Code</th>
+					<th>Description</th>
+					<th class="text-end">Outstanding Qty</th>
+					<th class="text-center">Action</th>
+				</tr>
+			</thead>
+			<tbody>
+				@foreach (var item in Model.PurchaseLineList)
+				{
+					<tr>
+						<td>@item.IDDocNo</td>
+						<td>@item.VendorName</td>
+						<td>@item.ItemCode</td>
+						<td>@item.ItemDescription</td>
+						<td class="text-end">@item.OutstandingQty</td>
+						<td class="text-center">
+							<button type="button"
+									class="btn btn-primary btn-sm btn-select"
+									data-doctype="@item.IDDocType"
+									data-docno="@item.IDDocNo"
+									data-line="@item.IDLineNo"
+									data-item="@item.ItemCode">
+								Select
+							</button>
+						</td>
+					</tr>
+				}
+			</tbody>
+		</table> *@
 
-		<table id="tblProcurement" class="table table-hover w-100">
+		<table id="tblDataTable" class="table table-hover w-100">
 			<thead class="sticky-top bg-white table-bordered" style="font-size:0.75rem;">
 				<tr class="data-row">
 					<th style="width:40px;"><input type="checkbox" id="selectAll" /></th>
@@ -248,7 +284,6 @@
 								data-bs-dismiss="modal">
 						</button>
 					</div>
-
 					<div class="modal-body">
 
 						<!-- Shipment Information -->
@@ -326,16 +361,18 @@
 											<th style="width:120px;">Item Code</th>
 											<th>Description</th>
 											<th style="width:120px;" class="text-end">
-												Outstanding
+												PO Outstanding Qty
 											</th>
 											<th style="width:150px;" class="text-end">
-												Expected Qty
+												Tagged Qty
 											</th>
+											
 										</tr>
 
 									</thead>
 
 									<tbody style="font-size:0.80rem;">
+
 									</tbody>
 
 								</table>
@@ -410,7 +447,7 @@
 				return ($(window).height() * 0.6) + 'px';
 			}
 
-			const table = $('#tblProcurement').DataTable({
+			const table = $('#tblDataTable').DataTable({
 				pageLength: 25,
 				scrollX: true,
 				scrollY: getTableHeight(),
@@ -418,7 +455,7 @@
 				paging: true,
 				autoWidth: false,
 				fixedHeader: true,
-				stateSave: true,
+				stateSave: false,
 				responsive: true
 
 			});
@@ -433,7 +470,7 @@
 			// Column Filter
 			// ==============================
 
-			const $filter = $('#tblProcurement_filter');
+			const $filter = $('#tblDataTable_filter');
 			const $searchInput = $filter.find('input');
 
 			const $columnFilter = $('<select>', {

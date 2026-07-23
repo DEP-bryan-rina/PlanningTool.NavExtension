@@ -1,7 +1,9 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
 
 namespace PlanningTool.NavExtension.Models
 {
+    
     public class ProcurementCenterModel
     {
         [Key]
@@ -22,8 +24,9 @@ namespace PlanningTool.NavExtension.Models
         public decimal? _ptPartialDelivered { get; set; }
         public decimal? _ptBalanceQty { get; set; }
 
-        public DateTime? _ptContainerETA { get; set; }
+        public string? _ptCountryOfOrigin { get; set; }
 
+        public DateTime? _ptContainerETA { get; set; }
         public string? _ptCreatedBy { get; set; }
         public DateTime? _ptCreatedDate { get; set; }
 

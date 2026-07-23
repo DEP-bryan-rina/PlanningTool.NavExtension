@@ -142,7 +142,7 @@
 	<br />
 	<div class="table-responsive">
 
-		<table id="tblImPex" class="table table-hover w-100 ">
+		<table id="tblImpexCenter" class="table table-hover w-100 ">
 
 			<thead class="sticky-top bg-white table-bordered" style="font-size:0.75rem;">
 				<tr>
@@ -256,6 +256,65 @@
 </div>
 @section Scripts {
 	<script>
+		let impexTable;
+
+		function getTableHeight() {
+			return ($(window).height() * 0.6) + 'px';
+		}
+
+		function createDataTable(selector) {
+			return $(selector).DataTable({
+				pageLength: 25,
+				paging: true,
+				scrollX: true,
+				scrollY: getTableHeight(),
+				scrollCollapse: true,
+				autoWidth: false,
+				fixedHeader: true,
+				responsive: true
+			});
+		}
+
+		function addColumnFilter(table, tableId) {
+
+			const $filter = $(`${tableId}_filter`);
+			const $searchInput = $filter.find('input');
+			const $columnFilter = $('<select class="columnFilter"></select>');
+
+			// Remove "Search:"
+			$filter.find('label')
+				.contents()
+				.filter((_, node) => node.nodeType === 3)
+				.remove();
+
+			$searchInput.attr('placeholder', 'Type to filter (F3)');
+
+			table.columns().every(function (index) {
+
+				const title = $(this.header()).text().trim();
+
+				if (title) {
+					$columnFilter.append(
+						`<option value="${index}">${title}</option>`
+					);
+				}
+			});
+
+			$searchInput.after($columnFilter);
+
+			const filterData = () => {
+
+				table.columns().search('');
+
+				table
+					.column(Number($columnFilter.val()))
+					.search($searchInput.val())
+					.draw();
+			};
+
+			$searchInput.on('input', filterData);
+			$columnFilter.on('change', filterData);
+		}
 
 		async function checkHblExists() {
 
@@ -277,22 +336,13 @@
 
 				const exists = await response.json();
 
-				if (exists) {
+				$msg
+					.text(exists
+						? '⚠ HBL No already exists.'
+						: '✓ HBL No available.')
+					.css('color', exists ? 'red' : 'green');
 
-					$msg
-						.text('⚠ HBL No already exists.')
-						.css('color', 'red');
-
-					$btnAdd.prop('disabled', true);
-
-				} else {
-
-					$msg
-						.text('✓ HBL No available.')
-						.css('color', 'green');
-
-					$btnAdd.prop('disabled', false);
-				}
+				$btnAdd.prop('disabled', exists);
 
 			} catch (error) {
 
@@ -304,7 +354,27 @@
 			}
 		}
 
+
 		$(document).ready(function () {
+
+			// ====================
+			// DataTable
+			// ====================
+
+			impexTable = createDataTable('#tblImpexCenter');
+
+			addColumnFilter(
+				impexTable,
+				'#tblImpexCenter'
+			);
+
+
+			// ====================
+			// Select2
+			// ====================
+
+			$('#countryOfOrigin').select2();
+
 
 			// ====================
 			// Track Form Changes
@@ -317,121 +387,51 @@
 				'input, select, textarea',
 				function () {
 
-					const currentData = $('#frmImpex').serialize();
+					const changed =
+						$('#frmImpex').serialize() !== originalData;
 
-					$('#btnUpdate')
-						.toggle(currentData !== originalData);
+					$('#btnUpdate').toggle(changed);
 				}
 			);
 
-			// ====================
-			// Select2
-			// ====================
-
-			$('#countryOfOrigin').select2();
-
-			// ====================
-			// DataTable
-			// ====================
-
-			function getTableHeight() {
-				return ($(window).height() * 0.6) + 'px';
-			}
-
-			const table = $('#tblImPex').DataTable({
-				pageLength: 25,
-				scrollX: true,
-				scrollY: getTableHeight(),
-				scrollCollapse: true,
-				paging: true,
-				autoWidth: false,
-				fixedHeader: true,
-				stateSave: true,
-				responsive: true
-			});
-
-			$(window).on('resize', function () {
-				table.settings()[0].oScroll.sY = getTableHeight();
-				table.columns.adjust().draw();
-				table.fixedHeader.adjust();
-			});
-
-			var $filter = $('#tblImPex_filter');
-			var $input = $filter.find('input');
-
-			var $select = $('<select>', { id: 'columnFilter' });
-
-			table.columns().every(function (index) {
-				var title = $(this.header()).text().trim();
-
-				if (title) {
-					$select.append(
-						$('<option>', {
-							value: index,
-							text: title
-						})
-					);
-				}
-			});
-
-			// Remove "Search:"
-			$filter.find('label').contents().filter(function () {
-				return this.nodeType === 3;
-			}).remove();
-
-			// NAV-style placeholder
-			$input.attr('placeholder', 'Type to filter (F3)');
-
-			// Textbox left, dropdown right
-			$input.after($select);
-
-			// Filter selected column
-			$input.on('input', function () {
-				table.columns().search('');
-
-				table
-					.column($select.val())
-					.search(this.value)
-					.draw();
-			});
-
-			$select.on('change', function () {
-				$input.trigger('input');
-			});
 
 			// ====================
 			// Restore Search
 			// ====================
 
+			const storageKey = 'tblImPexSearch';
+			const $searchBox = $('.dataTables_filter input');
+
 			const savedSearch =
-				sessionStorage.getItem('tblImPexSearch');
+				sessionStorage.getItem(storageKey);
 
 			if (savedSearch) {
 
-				table.search(savedSearch).draw();
+				impexTable
+					.search(savedSearch)
+					.draw();
 
-				$('.dataTables_filter input')
-					.val(savedSearch);
+				$searchBox.val(savedSearch);
 			}
 
-			$('.dataTables_filter input').on(
-				'keyup',
-				function () {
+			$searchBox.on('keyup', function () {
 
-					sessionStorage.setItem(
-						'tblImPexSearch',
-						this.value
-					);
-				}
-			);
+				sessionStorage.setItem(
+					storageKey,
+					this.value
+				);
+			});
+
 
 			// ====================
 			// HBL Validation
 			// ====================
 
-			$('#HBLNo').on('blur', checkHblExists);
+			$('#HBLNo').on(
+				'blur',
+				checkHblExists
+			);
 
 		});
-
 	</script>
 }

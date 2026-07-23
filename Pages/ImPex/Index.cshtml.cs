@@ -49,7 +49,7 @@ namespace PlanningTool.NavExtension.Pages.ImPex
             }
 
             this.ImpexList = _context.tblImPexCenter.ToList();
-            this.ProcurementList = await _context.tblProcurementCenter.ToListAsync();
+            ProcurementList = await _context.GetTaggedItems.ToListAsync();
 
             this.LoadCountries();
 
@@ -175,7 +175,7 @@ namespace PlanningTool.NavExtension.Pages.ImPex
                             </tr>
                             <tr>
                                 <th style='text-align:left;'>Status</th>
-                                <td>: Created</td>
+                                <td>: New</td>
                             </tr>
                         </table>
 
@@ -255,7 +255,7 @@ namespace PlanningTool.NavExtension.Pages.ImPex
                         var oldRemarks = existing._ptRemarks;
                         var oldCOO = existing._ptCountryOfOrigin;
 
-
+                        // ✅ UPDATE EXISTING RECORD
                         existing._ptHBLNo = Impex._ptHBLNo;
                         existing._ptContainerNo = Impex._ptContainerNo;
                         existing._ptContainerETA = Impex._ptContainerETA;
@@ -265,22 +265,27 @@ namespace PlanningTool.NavExtension.Pages.ImPex
                         existing._ptModifiedDate = DateTime.Now;
 
 
-                        var procurementRecords = _context.tblProcurementCenter
-                                .Where(x => x._ptHBLNo == oldHBL)
-                                .ToList();
+                        // ✅ Update tagged procurement records
+                        var procurementRecords = _context.GetTaggedItems
+                            .Where(x => x._ptHBLNo == Impex._ptHBLNo
+                                     && x._ptStatus == 1)
+                            .ToList();
 
                         foreach (var record in procurementRecords)
                         {
                             record._ptHBLNo = Impex._ptHBLNo;
-                            record._ptContainerETA = Impex._ptContainerETA;
                             record._ptContainerNo = Impex._ptContainerNo;
+                            record._ptContainerETA = Impex._ptContainerETA;
+                            record._ptCountryOfOrigin = Impex._ptCountryOfOrigin;
 
                             record._ptModifiedBy = GetUser();
                             record._ptModifiedDate = DateTime.Now;
-                        }
 
+                            _context.Entry(record).State = EntityState.Modified;
+                        }                   
                         _context.SaveChanges();
                         TempData["SuccessMessage"] = "BHL No: " + Impex._ptHBLNo + " updated successfully!";
+
 
                         // ✅ DETECT CHANGES
                         var changeRows = new List<string>();
@@ -330,7 +335,7 @@ namespace PlanningTool.NavExtension.Pages.ImPex
                             <table border='1'
                                     cellpadding='4'
                                     cellspacing='0'
-                                    style='border-collapse:collapse; width:50%;'>
+                                    style='border-collapse:collapse; width:80%;'>
 
                                 <thead>
                                     <tr>

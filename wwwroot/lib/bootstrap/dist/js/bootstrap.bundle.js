@@ -261,7 +261,7 @@
     const emulatedDuration = getTransitionDurationFromElement(transitionElement) + durationPadding;
     let called = false;
     const handler = ({
-      target
+    target
     }) => {
       if (target !== transitionElement) {
         return;

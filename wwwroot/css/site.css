@@ -414,60 +414,57 @@ table th {
 		transform: rotate(-360deg);
 	}
 }
-/*/* DataTables Filter */
-#tblProcurement_filter {
+/* ========================================
+   DataTables Filter
+======================================== */
+.dataTables_filter {
 	float: right !important;
 	display: flex;
 	align-items: center;
 	margin-bottom: 8px;
+	padding-top: 15px;
 }
 
-	/* Search Input & Dropdown */
-	#tblProcurement_filter input,
-	#columnFilter {
-		height: 31px;
-		font-size: 13px;
-		border: 1px solid #c8c8c8;
-		box-sizing: border-box;
-		transition: none;
-	}
+.dataTables_length {
+	padding-top: 15px;
+}
 
-	/* Search Input */
-	#tblProcurement_filter input {
-		width: 180px;
-		margin: 0 !important;
-		border-right: 0;
-		border-radius: 2px 0 0 2px;
-	}
-
-/* Column Filter */
-#columnFilter {
-	width: 170px;
-	padding: 0 0px;
+/* ========================================
+   Search Input & Column Filter
+======================================== */
+.dataTables_filter input,
+.columnFilter {
+	height: 31px;
+	font-size: 13px;
+	border: 1px solid #c8c8c8;
+	box-sizing: border-box;
 	background: #fff;
-	border-radius: 0 2px 2px 0;
-	cursor: pointer;
 }
 
-	/* Remove Hover & Focus Effects */
-	#tblProcurement_filter input:hover,
-	#tblProcurement_filter input:focus,
-	#columnFilter:hover,
-	#columnFilter:focus {
+/* Search Box */
+.dataTables_filter input {
+	width: 180px;
+	margin: 0 !important;
+	border-right: 0;
+	border-radius: 2px 0 0 2px;
+}
+
+/* Dropdown */
+.columnFilter {
+	width: 170px;
+	padding: 0;
+	cursor: pointer;
+	border-radius: 0 2px 2px 0;
+}
+
+	/* Remove Hover/Focus Effects */
+	.dataTables_filter input:hover,
+	.dataTables_filter input:focus,
+	.columnFilter:hover,
+	.columnFilter:focus {
 		background: #fff;
 		border-color: #c8c8c8;
 		outline: none;
 		box-shadow: none;
 	}
-#tblProcurement_wrapper .dataTables_length,
-#tblProcurement_wrapper .dataTables_filter {
-	margin-bottom: 10px;
-}
-#tblProcurement_wrapper .dataTables_length {
-	padding-top: 15px;
-}
-
-#tblProcurement_wrapper .dataTables_filter {
-	padding-top: 15px;
-}
 

@@ -3,11 +3,8 @@
 @{
 	ViewData["Title"] = "Procurement Control Center";
 }
-
-
-<form method="post" class="erp-form">
-
-	<div class="card border-0 shadow-sm erp-form">
+<div class="erp-form">
+	<div class="card border-0 shadow-sm">
 		<div class="card-header bg-white border-bottom">
 			<h5 class="mb-0 fw-semibold">
 				<i class="fas fa-tag text-primary me-2"></i>
@@ -43,32 +40,26 @@
 												required>
 											<option value="">Select HBL No...</option>
 
-											@foreach (var item in Model.ImpexList.Where(x => !string.IsNullOrWhiteSpace(x._ptHBLNo)))
+											@foreach (var item in Model.ImpexList)
 											{
 												<option value="@item.PK_ptImpexID"
 														data-hbl="@item._ptHBLNo"
 														data-container="@item._ptContainerNo"
-														data-eta="@item._ptContainerETA?.ToString("yyyy-MM-dd HH:mm:ss")">
+														data-eta="@item._ptContainerETA?.ToString("yyyy-MM-dd")"
+														data-origin="@item._ptCountryOfOrigin">
 													@item._ptHBLNo
 												</option>
 											}
 										</select>
 									</div>
-
-									@* <button type="submit"
-											id="btnTagPO"
-											asp-page-handler="Tag"
-											class="btn btn-primary erp-btn">
-										<i class="fas fa-link me-2"></i>
-										Tag PO
-									</button> *@
 									<button id="btnTagPO"
-											class="btn btn-primary"
+											type="button"
+											class="btn btn-sm btn-primary erp-btn"
 											disabled>
-
-										Tag PO
-
+										<i class="fas fa-link me-1"></i>
+										Tag Selected PO
 									</button>
+
 
 								</div>
 
@@ -114,470 +105,708 @@
 			</div>
 		</div>
 	</div>
-	<input type="hidden" id="HBLNo" name="HBLNo">
-	<input type="hidden" id="ContainerNo" name="ContainerNo">
-	<input type="hidden" id="ParamCETA" name="ParamCETA">
 	<br />
-	@* Table display *@
-	<div class="px-3">
-		<table id="tblProcurement" class="table table-hover w-100">
-			<thead class="sticky-top bg-white table-bordered" style="font-size:0.75rem;">
-				<tr class="data-row">
-					<th style="width:40px;"><input type="checkbox" id="selectAll" /></th>
-					<th style="width:120px; text-align:left">PO No</th>
-					<th style="width:220px; text-align:left">Vendor</th>
-					<th style="width:120px; text-align:left">Item Code</th>
-					<th style="width:300px; text-align:left">Description</th>
-					<th style="width:120px; text-align:left">Outstanding Qty</th>
+	<div class="d-flex justify-content-between align-items-center mb-3">
 
-					@* Procurement Table *@
-					@* <th style="width:120px;">Balance Qty</th> *@
-					<th style="width:140px; text-align:left">Expected Qty</th>
-					<th style="width:150px; text-align:center">HBL No</th>
-					<th style="width:150px; text-align:center">Container No</th>
-					<th style="width:120px; text-align:left">Dedon ETA</th>
-					<th style="width:180px; text-align:left">Country of Origin</th>
-					<th style="width:250px; text-align:left">Remarks</th>
-					<th style="width:120px;" class="text-center">Action</th>
-				</tr>
-			</thead>
+		<ul class="nav nav-tabs w-100" id="expirationTab" role="tablist">
 
-			<tbody style="font-size:0.75rem;">
+			<li class="nav-item">
+				<button class="nav-link active"
+						data-bs-toggle="tab"
+						data-bs-target="#withoutstandingqty">
+					PO Outstanding Qty
+				</button>
+			</li>
 
-				@if (Model.ProcurementList != null && Model.ProcurementList.Any())
-				{
-					@foreach (var item in Model.ProcurementList)
-					{
+			<li class="nav-item">
+				<button class="nav-link"
+						data-bs-toggle="tab"
+						data-bs-target="#tagged">
+					Tagged POs
+				</button>
+			</li>
+		</ul>
 
-						
-						var totalDelivered = Model.ProcurementList
-														.Where(x =>
-															x.IDDocType == item.IDDocType &&
-															x.IDDocNo == item.IDDocNo &&
-															x.VendorName == item.VendorName &&
-															x.ItemCode == item.ItemCode &&
-															x.ItemDescription == item.ItemDescription)
-														.Sum(x => x.ptPartialDelivered);
-
-						bool disableCheckbox =
-							totalDelivered >= item.OutstandingQty;
-
-						
-						<tr>
-							<td>
-								<input type="checkbox"
-									   class="row-check po-checkbox"
-									   name="SelectedRows"
-									   value="@($"{item.IDDocType}|{item.IDDocNo}|{item.IDLineNo}|{item.ItemCode}")"
-									   data-pd="@item.ptPartialDelivered"
-									   data-outstanding="@item.OutstandingQty"
-									   data-balance="@(item.OutstandingQty - item.ptPartialDelivered)"
-								@(totalDelivered == item.OutstandingQty ? "disabled" : "") />
-							</td>
-							<td>@item.IDDocNo</td>
-							<td>@item.VendorName</td>
-							<td>@item.ItemCode</td>
-							<td>@item.ItemDescription</td>
-							<td>@item.OutstandingQty</td>
-							@* Display Information from Procurement Table *@
-							@* <td>@item.ptBalanceQty</td> *@
-							<td>
-								<span class="pd-text">@item.ptPartialDelivered</span>
-
-								@{
-									var balanceQty = item.OutstandingQty - item.ptPartialDelivered;
-								}
-
-								<input type="number"
-									   class="form-control form-control-sm pd-input text-end"
-									   name="PartialDeliveredValues[@($"{item.IDDocType}|{item.IDDocNo}|{item.IDLineNo}|{item.ItemCode}")]"
-									   value="@item.ptPartialDelivered"
-									   max="@item.OutstandingQty"
-									   min="0"
-									   step="0.01"
-									   style="display:none; width:70px; padding:2px 4px; font-size:10px;" />
-
-							</td>
-							<td class="text-center">
-								@if (!string.IsNullOrEmpty(item.ptHBLNo))
-								{
-									<span class="badge bg-primary text-dark">
-										@item.ptHBLNo
-									</span>
-								}
-								else
-								{
-									<span class="badge bg-warning text-dark">
-										For Tagging
-									</span>
-								}
-							</td>
-							<td class="text-center">@item.ptContainerNo</td>
-							<td>
-
-								@if (item.ptContainerETA.HasValue)
-								{
-									var days = (item.ptContainerETA.Value.Date - DateTime.Today).Days;
-
-									if (days < 0)
-									{
-										<span class="badge bg-danger text-bg-dark">
-											<i class="fas fa-triangle-exclamation me-1"></i>
-											@item.ptContainerETA.Value.ToString("yyyy-MM-dd")
-										</span>
-									}
-									else if (days <= 14)
-									{
-										<span class="badge bg-success text-bg-dark">
-											<i class="fas fa-shipping-fast me-1"></i>
-											@item.ptContainerETA.Value.ToString("yyyy-MM-dd")
-										</span>
-									}
-									else
-									{
-										<span class="badge bg-secondary text-bg-dark">
-											<i class="fas fa-calendar-alt me-1"></i>
-											@item.ptContainerETA.Value.ToString("yyyy-MM-dd")
-										</span>
-									}
-								}
-
-							</td>
-							<td>@item.ptCountryOfOrigin</td>
-							<td>@item.ptRemarks</td>
-							<td class="text-center">
-								@if (!string.IsNullOrEmpty(item.ptHBLNo))
-								{
-									<button type="submit"
-											asp-page-handler="Untag"
-											name="action"
-											value="untag|@($"{item.IDDocType}|{item.IDDocNo}|{item.IDLineNo}|{item.ItemCode}|{item.ptHBLNo}|{item.ptContainerETA}")"
-											formnovalidate
-											style="border:none; background:none; cursor:pointer;"
-											title="Untag"
-											onclick="return confirm('Are you sure you want to untag this PO @item.IDDocNo?');">
-
-										<i class="fa-solid fa-link-slash text-success"></i>
-
-									</button>
-								}
-							</td>
-						</tr>
-
-					}
-				}
-
-				
-			</tbody>
-		</table>
 	</div>
-	<input type="hidden"
-		   id="SelectedRowsJson"
-		   name="SelectedRowsJson" />
+	<div class="tab-content mt-3">
+
+		<!-- withoutstandingqty -->
+		<div class="tab-pane fade show active" id="withoutstandingqty">
+
+			<form method="post" >
+				<table id="tblOutstanding" class="table table-hover w-100">
+					<thead class="sticky-top bg-white table-bordered" style="font-size:0.80rem;">
+						<tr class="data-row">
+							<th style="width:40px;"><input type="checkbox" id="selectAll" /></th>
+
+							<th style="width:120px; text-align:left; display:none">Doc Type</th>
+							<th style="width:120px; text-align:left">PO No</th>
+							<th style="width:120px; text-align:left; display:none">Line No</th>
+							<th style="width:220px; text-align:left">Vendor</th>
+							<th style="width:120px; text-align:left">Item Code</th>
+							<th style="width:300px; text-align:left">Description</th>
+							<th style="width:120px; text-align:right">PO Outstanding Qty</th>
+							<th style="width:140px; text-align:right">Tagged Qty</th>
+							<th style="width:120px; text-align:right">Balance For Tagging</th>							
+							<th style="width:300px; text-align:left">HBL No</th>
+						</tr>
+					</thead>
+
+					<tbody style="font-size:0.80rem;">
+
+						@if (Model.ProcurementList != null && Model.ProcurementList.Any())
+						{
+							@foreach (var item in Model.ProcurementList)
+							{
+								<tr>
+									<td>
+										<input type="checkbox"
+											   class="row-check po-check"
+											   data-doctype="@item.IDDocType"
+											   data-docno="@item.IDDocNo"
+											   data-line="@item.IDLineNo"
+											   data-item="@item.ItemCode"
+											   data-vendor="@item.VendorName"
+											   data-description="@item.ItemDescription"
+											   data-outstanding="@item.OutstandingQty"
+											   data-partialqty="@item.ptPartialDelivered"
+											   data-balanceqty="@item.ptBalanceQty"
+										@((item.ptBalanceQty == 0 && !string.IsNullOrWhiteSpace(item.ptHBLNo)) ? "disabled" : "") />
+
+									</td>
+									<td style="display:none;">@item.IDDocType</td>
+									<td>@item.IDDocNo</td>
+									<td style="display:none;">@item.IDLineNo</td>
+									<td>@item.VendorName</td>
+									<td>@item.ItemCode</td>
+									<td>@item.ItemDescription</td>
+									<td class="text-end">@item.OutstandingQty</td>
+									<td class="text-end">@item.ptPartialDelivered</td>
+									<td class="text-end">@item.ptBalanceQty</td>	
+									<td>@item.ptHBLNo</td>
+								</tr>
+							}
+						}
+
+					</tbody>
+				</table>
+				
+			</form>
+
+		</div>
+
+	</div>
+
+	<!-- tagged -->
+
+	<div class="tab-pane fade" id="tagged">		
+		<form method="post" asp-page-handler="Untag" id="frmUntag">			
+			<table id="tblTagged" class="table table-hover w-100">
+				<thead class="sticky-top bg-white table-bordered" style="font-size:0.80rem;">
+					<tr class="data-row">
+						<th style="width:40px;"><input type="checkbox" id="selectAll" /></th>
+
+						<th style="text-align:left; display:none">Doc Type</th>
+						<th style="text-align:left">PO No</th>
+						<th style="text-align:left; display:none">Line No</th>
+						<th style="text-align:left">Vendor</th>
+						<th style="text-align:left">Item Code</th>
+						<th style="text-align:left">Description</th>
+						<th style="text-align:right">PO Outstanding Qty</th>
+						<th style="text-align:right">Tagged Qty</th>
+						<th style="text-align:right">Balance For Tagging</th>
+						<th style="text-align:left">HBL No</th>
+						<th style="text-align:left">Container No</th>
+						<th style="text-align:left">Dedon ETA</th>
+						<th style="text-align:left">Country of Origin</th>
+						<th style="width:220px; text-align:left">Remarks</th>
+					</tr>
+				</thead>
+
+				<tbody style="font-size:0.80rem;">
+
+					@if (Model.ProcurementTagged != null && Model.ProcurementTagged.Any())
+					{
+						@foreach (var item in Model.ProcurementTagged)
+						{
+							<tr>
+								<td>
+									<input type="checkbox"
+										   class="row-check po-check"
+										   data-id="@item.PK_ptProcID"
+										   data-doctype="@item._ptDocType"
+										   data-docno="@item._ptDocNo"
+										   data-line="@item._ptLineNo"
+										   data-item="@item._ptItemCode" />
+
+								</td>
+								<td style="display:none;">@item._ptDocType</td>
+								<td>@item._ptDocNo</td>
+								<td style="display:none;">@item._ptLineNo</td>
+								<td>@item._ptVendorName</td>
+								<td>@item._ptItemCode</td>
+								<td>@item._ptItemDescription</td>
+								<td class="text-end">@item._ptOutstandingQty</td>
+								<td class="text-end">@item._ptPartialDelivered</td>								
+								<td class="text-end">@item._ptBalanceQty</td>
+								<td>
+									<span class="hbl-no">@item._ptHBLNo</span>
+								</td>
+								<td>@item._ptContainerNo</td>
+								<td>@item._ptContainerETA?.ToString("yyyy-MM-dd")</td>
+								<td>@item._ptCountryOfOrigin</td>
+								<td>@item._ptRemarks</td>
+							</tr>
+						}
+					}
+
+				</tbody>
+			</table>	
+		
+			<input type="hidden"
+				   id="UntagIDs"
+				   name="UntagIDs" />
+
+			<button type="submit"
+					id="btnUntag"
+					class="btn btn-danger btn-sm">
+				<i class="fas fa-unlink"></i>
+				Untag Selected
+			</button>
+
+		</form>
+
+	</div>
+
+</div>
+
+<form id="frmProcurement" method="post">
+	<input type="hidden" id="SelectedRowsJson" name="SelectedRowsJson" />
+	@* Modal Popup Confirmation *@
+	<div class="modal fade" id="tagModal" tabindex="-1">
+		<div class="modal-dialog modal-xl modal-dialog-scrollable">
+			<div class="modal-content shadow-sm border-0">
+
+				<!-- Header -->
+				<div class="modal-header bg-light border-bottom">
+					<h5 class="modal-title fw-semibold">
+						<i class="fas fa-tag text-primary me-2"></i>
+						Procurement Shipment Tagging
+					</h5>
+
+					<button type="button"
+							class="btn-close"
+							data-bs-dismiss="modal">
+					</button>
+				</div>
+				<div class="modal-body">
+
+					<!-- Shipment Information -->
+					<div class="card border mb-3">
+						<div class="card-header bg-white fw-semibold">
+							Shipment Information
+						</div>
+
+						<div class="card-body">
+
+							<div class="row g-3">
+
+								<div class="col-md-3">
+									<label class="form-label small fw-semibold">
+										HBL No
+									</label>
+
+									<input id="modalHBL" name="HBLNo"
+										   class="form-control form-control-sm bg-light"
+										   readonly />
+								</div>
+
+								<div class="col-md-3">
+									<label class="form-label small fw-semibold">
+										Container No
+									</label>
+
+									<input id="modalContainer" name="ContainerNo"
+										   class="form-control form-control-sm bg-light"
+										   readonly />
+								</div>
+
+								<div class="col-md-3">
+									<label class="form-label small fw-semibold">
+										Country Of Origin
+									</label>
+
+									<input id="modalCountryOfOrigin" name="CountryOfOrigin"
+										   class="form-control form-control-sm bg-light"
+										   readonly />
+								</div>
+								<div class="col-md-3">
+									<label class="form-label small fw-semibold">
+										Dedon ETA
+									</label>
+
+									<input id="modalDedonETA" name="ParamCETA"
+										   class="form-control form-control-sm bg-light"
+										   readonly />
+								</div>
+
+								<div class="col-md-12">
+									<label class="form-label small fw-semibold">
+										Remarks
+									</label>
+
+									<textarea id="modalRemarks"
+											  class="form-control form-control-sm"
+											  rows="3"
+											  placeholder="Enter shipment remarks..."></textarea>
+								</div>
+
+							</div>
+
+						</div>
+					</div>
+					<!-- For Tagging -->
+					<div class="card border">
+
+						<div class="card-header bg-white fw-semibold">
+							For Tagging
+						</div>
+
+						<div class="card-body p-0">
+
+							<table id="tblSelected"
+								   class="table table-sm table-hover table-bordered mb-0 align-middle">
+
+								<thead class="table-light">
+									<tr style="font-size:0.80rem;">
+										<th style="width:140px;">PO No</th>
+										<th style="width:200px;">Vendor</th>
+										<th style="width:100px;">Item Code</th>
+										<th style="width:300px;">Description</th>
+										<th style="width:150px;" class="text-end">
+											PO Oustanding Qty
+										</th>
+										<th style="width:100px;" class="text-end">
+											Tagged Qty
+										</th>
+										<th style="width:150px;" class="text-end">
+											Balance For Tagging
+										</th>
+									</tr>
+
+								</thead>
+
+								<tbody style="font-size:0.80rem;">
+								</tbody>
+
+							</table>
+
+						</div>
+
+					</div>
+
+				</div>
+
+				<!-- Footer -->
+				<div class="modal-footer bg-light">
+
+					<button type="button" class="btn btn-primary erp-btn"
+							data-bs-dismiss="modal">
+						Cancel
+					</button>
+
+					<button id="btnProceed" type="submit" asp-page-handler="Tag"
+							class="btn btn-success erp-btn">
+						<i class="fas fa-save me-1"></i>
+						Proceed
+					</button>
+
+				</div>
+
+			</div>
+		</div>
+	</div>
 </form>
-
-
+<input type="hidden" id="ActiveTab" value="@TempData["ActiveTab"]" />
 
 @section Scripts
 {
 	<script>
-		const selectedRows = new Set();
-		const deliveryData = new Map();
 
-		let table;
+		let selectedPO = [];
+		let selectedUntagIDs = [];
 
 		const $impexDropdown = $('#impexDropdown');
 		const $btnTagPO = $('#btnTagPO');
-		const $tagInfo = $('#tagInfo');
-		const $selectAll = $('#selectAll');
+
+		/* ==============================
+		   Utilities
+		============================== */
+
+		function getTableHeight() {
+			return `${$(window).height() * 0.6}px`;
+		}
+
+		function activateTab(target) {
+			bootstrap.Tab
+				.getOrCreateInstance(
+					document.querySelector(`[data-bs-target="${target}"]`)
+				)
+				.show();
+		}
 
 		function toggleTagButton() {
-
-			const enabled =
-				!!$impexDropdown.val() &&
-				selectedRows.size > 0;
-
-			$btnTagPO.prop('disabled', !enabled);
-			$tagInfo.toggle(!enabled);
+			$btnTagPO.prop(
+				'disabled',
+				selectedPO.length === 0 || !$impexDropdown.val()
+			);
 		}
 
 		function populateHBLFields() {
 
-			const $selected = $impexDropdown.find(':selected');
+			const $selected = $('#impexDropdown option:selected');
 
-			$('#HBLNo').val($selected.data('hbl') || '');
-			$('#ContainerNo').val($selected.data('container') || '');
-			$('#ParamCETA').val($selected.data('eta') || '');
+			$('#modalHBL').val($selected.data('hbl') || '');
+			$('#modalContainer').val($selected.data('container') || '');
+			$('#modalCountryOfOrigin').val($selected.data('origin') || '');
+			$('#modalDedonETA').val($selected.data('eta') || '');
 		}
 
-		function updateSelectAllState() {
+		/* ==============================
+		   HBL Coloring
+		============================== */
 
-			const $checks = table
-				.rows({ search: 'applied' })
-				.nodes()
-				.to$()
-				.find('.row-check:not(:disabled)');
+		function colorDuplicateHBL() {
 
-			const checked = $checks.filter(':checked').length;
-			const total = $checks.length;
+			const counts = {};
+			const colorMap = {};
 
-			$selectAll.prop({
-				checked: total > 0 && checked === total,
-				indeterminate: checked > 0 && checked < total
-			});
-		}
+			const randomPastelColor = () =>
+				`rgb(
+					${127 + Math.floor(Math.random() * 128)},
+					${127 + Math.floor(Math.random() * 128)},
+					${127 + Math.floor(Math.random() * 128)}
+				)`;
 
-		function restoreSelections() {
+			$('.hbl-no').each(function () {
 
-			$('.row-check').each(function () {
+				const hbl = $(this).text().trim();
 
-				const $check = $(this);
-				const row = $check.closest('tr');
-				const id = $check.val();
-
-				if (selectedRows.has(id)) {
-
-					const balance =
-						parseFloat($check.data('balance')) || 0;
-
-					const savedQty =
-						deliveryData.has(id)
-							? deliveryData.get(id).qty
-							: balance;
-
-					$check.prop('checked', true);
-
-					row.find('.pd-input')
-						.val(savedQty)
-						.attr('max', balance)
-						.show();
-
-					row.find('.pd-text').hide();
-
-					row
-						.addClass('table-warning')
-						.removeClass('table-danger');
-
-				} else {
-
-					$check.prop('checked', false);
-
-					row.find('.pd-input').hide();
-					row.find('.pd-text').show();
-
-					row.removeClass(
-						'table-warning table-danger'
-					);
+				if (hbl) {
+					counts[hbl] = (counts[hbl] || 0) + 1;
 				}
 			});
 
-			updateSelectAllState();
-			toggleTagButton();
+			$('.hbl-no').each(function () {
+
+				const hbl = $(this).text().trim();
+
+				if (counts[hbl] <= 1) return;
+
+				if (!colorMap[hbl]) {
+					colorMap[hbl] = randomPastelColor();
+				}
+
+				$(this).css({
+					backgroundColor: colorMap[hbl],
+					padding: '3px 8px',
+					borderRadius: '4px'
+				});
+			});
 		}
+
+		/* ==============================
+		   DataTables
+		============================== */
+
+		function createDataTable(selector) {
+
+			return $(selector).DataTable({
+				pageLength: 25,
+				paging: true,
+				scrollX: true,
+				scrollY: getTableHeight(),
+				scrollCollapse: true,
+				autoWidth: false,
+				fixedHeader: true,
+				responsive: true
+			});
+		}
+
+		function addColumnFilter(table, tableId) {
+
+			const $filter = $(`${tableId}_filter`);
+			const $searchInput = $filter.find('input');
+			const $columnFilter = $('<select class="columnFilter"></select>');
+
+			$filter.find('label')
+				.contents()
+				.filter((_, node) => node.nodeType === 3)
+				.remove();
+
+			$searchInput.attr(
+				'placeholder',
+				'Type to filter (F3)'
+			);
+
+			table.columns().every(function (index) {
+
+				const title = $(this.header()).text().trim();
+
+				if (!title) return;
+
+				$columnFilter.append(
+					`<option value="${index}">${title}</option>`
+				);
+			});
+
+			$searchInput.after($columnFilter);
+
+			const filterData = () => {
+
+				table.columns().search('');
+
+				table
+					.column(+$columnFilter.val())
+					.search($searchInput.val())
+					.draw();
+			};
+
+			$searchInput.on('input', filterData);
+			$columnFilter.on('change', filterData);
+		}
+
+		/* ==============================
+		   Page Load
+		============================== */
 
 		$(function () {
 
 			$impexDropdown.select2();
 
-			table = $('#tblProcurement').DataTable({
-				pageLength: 25,
-				scrollX: true,
-				scrollY: '60vh',
-				scrollCollapse: true,
-				paging: true,
-				autoWidth: false,
-				fixedHeader: true,
-				stateSave: true
+			const outstandingTable =
+				createDataTable('#tblOutstanding');
+
+			const taggedTable =
+				createDataTable('#tblTagged');
+
+			addColumnFilter(
+				outstandingTable,
+				'#tblOutstanding'
+			);
+
+			addColumnFilter(
+				taggedTable,
+				'#tblTagged'
+			);
+
+			colorDuplicateHBL();
+
+			taggedTable.on('draw', colorDuplicateHBL);
+
+			$(window).on('resize', () => {
+
+				$.fn.dataTable
+					.tables({ visible: true, api: true })
+					.columns.adjust();
 			});
 
-			table.on('draw', restoreSelections);
+		});
 
-			// Column Filter
+		/* ==============================
+		   Untagging
+		============================== */
 
-			const $searchInput =
-				$('#tblProcurement_filter input');
+		$(document).on(
+			'change',
+			'#tblTagged .row-check',
+			function () {
 
-			const $columnFilter =
-				$('<select id="columnFilter"></select>');
+				const id = $(this).data('id');
 
-			table.columns().every(function (index) {
-
-				const title =
-					$(this.header()).text().trim();
-
-				if (title) {
-					$columnFilter.append(
-						`<option value="${index}">${title}</option>`
-					);
+				if (this.checked) {
+					selectedUntagIDs.push(id);
+				} else {
+					selectedUntagIDs =
+						selectedUntagIDs.filter(
+							x => x !== id
+						);
 				}
-			});
+			}
+		);
 
-			$('#tblProcurement_filter label')
-				.contents()
-				.filter((_, node) => node.nodeType === 3)
-				.remove();
+		$('#btnUntag').on('click', function (e) {
 
-			$searchInput
-				.attr('placeholder', 'Type to filter (F3)')
-				.after($columnFilter)
-				.on('input', function () {
+			if (!selectedUntagIDs.length) {
 
-					table.columns().search('');
+				alert(
+					'Please select record(s) to untag.'
+				);
 
-					table
-						.column($columnFilter.val())
-						.search(this.value)
-						.draw();
-				});
-
-			$columnFilter.on('change', () => {
-				$searchInput.trigger('input');
-			});
-
-			// Restore Search
-
-			const savedSearch =
-				sessionStorage.getItem('tblProcurementSearch');
-
-			if (savedSearch) {
-
-				table.search(savedSearch).draw();
-				$searchInput.val(savedSearch);
+				e.preventDefault();
+				return;
 			}
 
-			$searchInput.on('keyup', function () {
+			if (
+				!confirm(
+					`Are you sure you want to untag ${selectedUntagIDs.length} record(s)?`
+				)
+			) {
+				e.preventDefault();
+				return;
+			}
 
-				sessionStorage.setItem(
-					'tblProcurementSearch',
-					this.value
-				);
-			});
+			$('#UntagIDs').val(
+				selectedUntagIDs.join(',')
+			);
+		});
 
-			// Select All
+		/* ==============================
+		   Row Selection
+		============================== */
 
-			$selectAll.on('change', function () {
+		$('#selectAll').on('change', function () {
 
-				table.rows({ search: 'applied' })
-					.nodes()
-					.to$()
-					.find('.row-check:not(:disabled)')
-					.prop('checked', this.checked)
-					.trigger('change');
-			});
+			$('.row-check:not(:disabled)')
+				.prop('checked', this.checked)
+				.trigger('change');
+		});
 
-			// Row Selection
+		$(document).on(
+			'change',
+			'.row-check',
+			function () {
 
-			$(document).on('change', '.row-check', function () {
+				const $checkbox = $(this);
+				const $row = $checkbox.closest('tr');
 
-				const $check = $(this);
-				const row = $check.closest('tr');
-
-				const id = $check.val();
-				const balance =
-					parseFloat($check.data('balance')) || 0;
-
-				const qtyInput =
-					row.find('.pd-input');
+				const item = {
+					IDDocType: $checkbox.data('doctype'),
+					IDDocNo: $checkbox.data('docno'),
+					IDLineNo: $checkbox.data('line'),
+					ItemCode: $checkbox.data('item'),
+					ItemDescription: $checkbox.data('description'),
+					VendorName: $row.find('td:eq(4)').text().trim(),
+					ptOutstandingQty: Number($checkbox.data('outstanding')),
+					ptPartialQty: Number($checkbox.data('partialqty')),
+					ptBalanceQty: Number($checkbox.data('balanceqty'))
+				};
 
 				if (this.checked) {
 
-					selectedRows.add(id);
-
-					const savedQty =
-						deliveryData.has(id)
-							? deliveryData.get(id).qty
-							: balance;
-
-					qtyInput
-						.val(savedQty)
-						.attr('max', balance)
-						.show();
-
-					row.find('.pd-text').hide();
-
-					row.addClass('table-warning');
-
-					deliveryData.set(id, {
-						id: id,
-						qty: savedQty
-					});
+					selectedPO.push(item);
 
 				} else {
 
-					selectedRows.delete(id);
-					deliveryData.delete(id);
-
-					qtyInput.hide();
-
-					row.find('.pd-text').show();
-
-					row.removeClass(
-						'table-warning table-danger'
+					selectedPO = selectedPO.filter(x =>
+						!(
+							x.IDDocNo === item.IDDocNo &&
+							x.IDLineNo === item.IDLineNo &&
+							x.ItemCode === item.ItemCode
+						)
 					);
 				}
 
-				updateSelectAllState();
 				toggleTagButton();
-			});
+			}
+		);
 
-			// Partial Delivered Validation
-
-			$(document).on('input', '.pd-input', function () {
-
-				const $input = $(this);
-				const row = $input.closest('tr');
-
-				const id =
-					row.find('.row-check').val();
-
-				const max =
-					Number($input.attr('max')) || 0;
-
-				const value =
-					Number($input.val()) || 0;
-
-				if (value > max) {
-
-					alert(
-						'Partial Delivered cannot exceed Outstanding Quantity!'
-					);
-
-					$input.val(max);
-
-					row.addClass('table-danger');
-
-				} else {
-
-					row.removeClass('table-danger');
-				}
-
-				deliveryData.set(id, {
-					id: id,
-					qty: Number($input.val())
-				});
-			});
-
-			// HBL Change
-
-			$impexDropdown.on('change', function () {
-
-				populateHBLFields();
-				toggleTagButton();
-			});
-
-			// Initial Load
-
-			restoreSelections();
+		$impexDropdown.on('change', function () {
 			populateHBLFields();
 			toggleTagButton();
 		});
-			$('form').on('submit', function () {
 
-		$('#SelectedRowsJson').val(
-			JSON.stringify(
-				Array.from(deliveryData.values())
-			)
-		);
-	});
+		/* ==============================
+		   Modal
+		============================== */
+
+		$('#btnTagPO').on('click', function () {
+
+			const $tbody =
+				$('#tblSelected tbody').empty();
+
+				selectedPO.forEach(item => {
+					
+				$tbody.append(`
+					<tr
+						data-doctype="${item.IDDocType}"
+						data-docno="${item.IDDocNo}"
+						data-line="${item.IDLineNo}"
+						data-item="${item.ItemCode}">
+
+						<td>${item.IDDocNo}</td>
+						<td>${item.VendorName}</td>
+						<td>${item.ItemCode}</td>
+						<td>${item.ItemDescription}</td>
+
+						<td class="text-end">
+							${item.ptOutstandingQty}
+						</td>
+
+						<td class="text-end">
+							${item.ptPartialQty}
+						</td>
+
+						<td>
+							  <input type="number"
+							   class="form-control form-control-sm pd text-end"
+							   value="${item.ptBalanceQty}"
+							   min="1"
+							   max="${item.ptOutstandingQty}"
+							   step="0.01"
+							   required
+							   data-balance="${item.ptBalanceQty}">
+						</td>
+
+					</tr>
+				`);
+			});
+
+			populateHBLFields();
+
+			$('#tagModal').modal('show');
+		});
+
+		/* ==============================
+		   Save Payload
+		============================== */
+
+		$('#btnProceed').on('click', function () {
+
+			const payload = [];
+
+			$('#tblSelected tbody tr').each(function () {
+
+				payload.push({
+
+					ptHBLNo: $('#modalHBL').val() || '',
+					ptContainerNo: $('#modalContainer').val() || '',
+
+					IDDocType: Number($(this).data('doctype')),
+					IDDocNo: String($(this).data('docno')),
+					IDLineNo: Number($(this).data('line')),
+
+					ItemCode: String($(this).data('item')),
+					ItemDescription:
+						$(this).find('td:eq(3)').text().trim(),
+
+					ptPartialDelivered:
+						Number($(this).find('.pd').val() || 0),
+
+					ptContainerETA:
+						$('#modalDedonETA').val(),
+
+					ptRemarks:
+						$('#modalRemarks').val() || ''
+				});
+			});
+
+			$('#SelectedRowsJson')
+				.val(JSON.stringify(payload));
+
+			activateTab('#tagged');
+		});
+
 	</script>
 }
+

@@ -31,6 +31,7 @@
 	<!-- DataTables -->
 	<link rel="stylesheet" href="https://cdn.datatables.net/1.13.8/css/dataTables.bootstrap5.min.css">
 	<link rel="stylesheet" href="https://cdn.datatables.net/fixedheader/3.4.1/css/fixedHeader.bootstrap5.min.css">
+	<link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.2/css/buttons.bootstrap5.min.css">
 
 	<link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
 
@@ -43,11 +44,26 @@
 	<!-- Select2 -->
 	<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0/dist/js/select2.min.js"></script>
 
+		
 	<!-- DataTables -->
 	<script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
 	<script src="https://cdn.datatables.net/1.13.8/js/dataTables.bootstrap5.min.js"></script>
+
+	<!-- FixedHeader -->
 	<script src="https://cdn.datatables.net/fixedheader/3.4.1/js/dataTables.fixedHeader.min.js"></script>
-		
+
+	<!-- Buttons -->
+	<script src="https://cdn.datatables.net/buttons/2.4.2/js/dataTables.buttons.min.js"></script>
+	<script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.bootstrap5.min.js"></script>
+
+	<!-- JSZip -->
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+
+	<!-- Excel Export -->
+	<script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.html5.min.js"></script>
+
+	<!-- Print -->
+	<script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.print.min.js"></script>
 
 </head>
 
@@ -117,7 +133,7 @@
 								{
 									Visible = permission?.Procurement == true,
 									Path = "/Procurement",
-									Page = "/Procurement/Tagging",
+									Page = "/Procurement/Index",
 									Icon = "bi-cart-check",
 									Text = "Procurement Center"
 								}

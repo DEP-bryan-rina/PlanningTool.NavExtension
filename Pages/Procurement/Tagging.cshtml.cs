@@ -10,6 +10,7 @@ using System.ComponentModel;
 using System.Data;
 using System.Text.Json;
 
+
 namespace PlanningTool.NavExtension.Pages.Procurement
 {
     public class TaggingModel : PageModel
@@ -32,21 +33,20 @@ namespace PlanningTool.NavExtension.Pages.Procurement
         }
 
         public List<ImPexCenterModel> ImpexList { get; set; } = new();
-        public List<ProcurementCenterDto> ProcurementList { get; set; } = new();
-
+        public List<ProcurementCenterDto> ProcurementList { get; set; } = new();        
+        public List<PurchaseLineModel> PurchaseLineList { get; set; } = new();
 
 
         [BindProperty] public string SelectedRowsJson { get; set; } = string.Empty;
         [BindProperty] public string HBLNo { get; set; }
-
         [BindProperty] public string ContainerNo { get; set; }
-
         [BindProperty] public DateTime? ParamCETA { get; set; }
 
         public void OnGet()
         {
             this.LoadImpex();
             this.LoadProcurementData(null);
+            this.LoadPurchaseLineData();
         }
         private string GetUser()
         {
@@ -183,7 +183,7 @@ namespace PlanningTool.NavExtension.Pages.Procurement
 
                         <p><strong>Tagged Purchase Order Details:</strong></p>
 
-                        <table border='1' cellpadding='4' cellspacing='0' style='border-collapse:collapse; width:50%;'>
+                        <table border='1' cellpadding='4' cellspacing='0' style='border-collapse:collapse; width:80%;'>
                             <thead>
                                 <tr>
                                     <th style='text-align:left;'>PO No</th>
@@ -354,10 +354,24 @@ namespace PlanningTool.NavExtension.Pages.Procurement
 
             // ✅ Always reload data
             this.LoadProcurementData(null);
-            this.LoadImpex();
+            this.LoadImpex();        
 
             return RedirectToPage();
         }
+        private void LoadPurchaseLineData()
+        {
+            try
+            {
+                PurchaseLineList = _context.PurchaseLineList
+                    .FromSqlRaw("EXEC _spGetPurchaseLine")
+                    .ToList();
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = ex.Message;
+            }
+        }
+
         private void LoadProcurementData(string _search)
         {
             try
@@ -411,7 +425,7 @@ namespace PlanningTool.NavExtension.Pages.Procurement
         private void LoadImpex()
         {
             ImpexList = _context.tblImPexCenter
-                .Where(x => x._ptStatus == 0)
+                .Where(x => x._ptStatus != 2)
                 .Select(x => new ImPexCenterModel
                 {
                     PK_ptImpexID = x.PK_ptImpexID,

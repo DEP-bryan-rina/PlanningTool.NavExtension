@@ -4,11 +4,12 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
+using PlanningTool.NavExtension.Constants;
 using PlanningTool.NavExtension.Data;
 using PlanningTool.NavExtension.Models;
 using PlanningTool.NavExtension.Services;
 using System.Data;
-using PlanningTool.NavExtension.Constants;
+using System.Text.Json;
 
 namespace PlanningTool.NavExtension.Pages.Procurement
 {
@@ -33,6 +34,21 @@ namespace PlanningTool.NavExtension.Pages.Procurement
         public List<ImPexCenterModel> ImpexList { get; set; } = new();
 
         public List<ProcurementCenterDto> ProcurementList { get; set; } = new();
+        public List<ProcurementCenterDto> ProcurementListTagged { get; set; } = new();
+
+
+        [BindProperty] public string ParamRemarks { get; set; }
+
+        
+        [BindProperty(SupportsGet = true)] 
+
+        public string? HBLNo { get; set; }
+        public List<ProcurementCenterModel> ProcurementTagged { get; set; } = new();        
+
+        [BindProperty] public ImPexCenterModel Impex { get; set; }
+        [BindProperty] public DateTime? ParamCETA { get; set; }
+        [BindProperty] public string SelectedRowsJson { get; set; }
+
         private List<string> GetRecipients()
         {
             var recipients = _context.EmailNotifications
@@ -40,33 +56,44 @@ namespace PlanningTool.NavExtension.Pages.Procurement
              .Select(x => x._ptEmailAddress)
              .Where(x => !string.IsNullOrWhiteSpace(x))
              .Distinct()
-             .ToList();
+             .ToList(); 
 
             return recipients;
         }
+        public JsonResult OnGetTaggedItems(string hblNo)
+        {
+            var data = _context.GetTaggedItems
+                .Where(x => x._ptHBLNo == hblNo && x._ptStatus != 0)
+                .Select(x => new
+                {
+                    x.PK_ptProcID,
+                    x._ptDocNo,
+                    x._ptVendorName,
+                    x._ptItemCode,
+                    x._ptItemDescription,
+                    x._ptOutstandingQty,
+                    x._ptPartialDelivered,
+                    x._ptBalanceQty
+                })
+                .ToList();
 
-        [BindProperty] public string ParamRemarks { get; set; }
-        [BindProperty] public string HBLNo { get; set; }
-        [BindProperty] public ImPexCenterModel Impex { get; set; }
-        [BindProperty] public DateTime? ParamCETA { get; set; }
-        [BindProperty] public string SelectedRowsJson { get; set; }
-
+            return new JsonResult(data);
+        }
+        
         public async Task<IActionResult> OnGetAsync()
         {
-            var access = HttpContext.Session.GetString("Procurement");
 
-            if (string.IsNullOrEmpty(access))
-            {
-                return RedirectToPage("/Account/Login");
-            }
-
-            if (!bool.Parse(access))
-            {
-                return RedirectToPage("/AccessDenied");
-            }
-
+            // Load Impex Information
             this.LoadImpex();
-            this.LoadProcurementData(searchString);
+
+            // Load PO Oustanding Qty.
+            this.LoadProcurementData("_spGetProcurementCenter", ProcurementList);
+
+            // Load Tagged POs
+            ProcurementTagged = _context.GetTaggedItems
+            .Where(x => x._ptStatus == 1)
+            .ToList();          
+            
 
             return Page();
         }
@@ -79,9 +106,9 @@ namespace PlanningTool.NavExtension.Pages.Procurement
                 : Environment.UserName;
 
         }
-        public async Task<IActionResult> OnPostTagAsync(string HBLNo, List<string> SelectedRows)
+
+        public async Task<IActionResult> OnPostTagAsync()
         {
-            this.LoadProcurementData(searchString);
             try
             {
                 string hblNo = Request.Form["HBLNo"];
@@ -104,38 +131,24 @@ namespace PlanningTool.NavExtension.Pages.Procurement
                     decimal Quantity
                 )>();
 
+                var selectedItems =
+                    JsonSerializer.Deserialize<List<ProcurementCenterDto>>
+                    (
+                        SelectedRowsJson
+                    ) ?? new();
+
+
                 using var con = new SqlConnection(conStr);
                 await con.OpenAsync();
 
-                foreach (var row in SelectedRows)
+                foreach (var item in selectedItems)
                 {
-                    var parts = row.Split('|');
-
-                    int docType = int.Parse(parts[0]);
-                    string docNo = parts[1];
-                    int lineNo = int.Parse(parts[2]);
-                    string itemCode = parts[3].Trim();
-
-                    string key = $"{docType}|{docNo}|{lineNo}|{itemCode}";
-
-                    decimal partialDelivered =
-                        decimal.TryParse(
-                            Request.Form[$"PartialDeliveredValues[{key}]"],
-                            out var pd)
-                        ? pd
-                        : 0;
-
-                    var itemInfo = ProcurementList.FirstOrDefault(x =>
-                        x.IDDocType == docType &&
-                        x.IDDocNo == docNo &&
-                        x.IDLineNo == lineNo &&
-                        x.ItemCode == itemCode);
 
                     taggedItems.Add((
-                        docNo,
-                        itemCode,
-                        itemInfo?.ItemDescription ?? string.Empty,
-                        partialDelivered
+                        item.IDDocNo,
+                        item.ItemCode,
+                        item.ItemDescription,
+                        item.ptPartialDelivered.GetValueOrDefault()
                     ));
 
                     using var cmd = new SqlCommand("_spTagProcurementCenter", con)
@@ -143,26 +156,33 @@ namespace PlanningTool.NavExtension.Pages.Procurement
                         CommandType = CommandType.StoredProcedure
                     };
 
-                    cmd.Parameters.AddWithValue("@HBLNo", hblNo);
-                    cmd.Parameters.AddWithValue("@ContainerNo", containerNo);
-                    cmd.Parameters.AddWithValue("@DocType", docType);
-                    cmd.Parameters.AddWithValue("@DocNo", docNo);
-                    cmd.Parameters.AddWithValue("@LineNo", lineNo);
-                    cmd.Parameters.AddWithValue("@ItemCode", itemCode);
-                    cmd.Parameters.AddWithValue("@ParamPD", partialDelivered);
-                    cmd.Parameters.AddWithValue("@ParamCETA", (object?)eta ?? DBNull.Value);
-                    cmd.Parameters.AddWithValue("@ParamCBY", GetUser());
-                    cmd.Parameters.AddWithValue(
-                        "@ParamRemarks",
-                        string.IsNullOrWhiteSpace(ParamRemarks)
+                    cmd.Parameters.Add("@HBLNo", SqlDbType.NVarChar, 50).Value = item.ptHBLNo;
+                    cmd.Parameters.Add("@ContainerNo", SqlDbType.NVarChar, 50).Value = item.ptContainerNo;
+                    cmd.Parameters.Add("@DocType", SqlDbType.Int).Value = item.IDDocType;
+                    cmd.Parameters.Add("@DocNo", SqlDbType.NVarChar, 50).Value = item.IDDocNo;
+                    cmd.Parameters.Add("@LineNo", SqlDbType.Int).Value = item.IDLineNo;
+                    cmd.Parameters.Add("@ItemCode", SqlDbType.NVarChar, 50).Value = item.ItemCode;
+
+                    var pd = cmd.Parameters.Add("@ParamPD", SqlDbType.Decimal);
+                    pd.Precision = 18;
+                    pd.Scale = 2;
+                    pd.Value = item.ptPartialDelivered ?? 0m;
+
+                    cmd.Parameters.Add("@ParamCETA", SqlDbType.DateTime2).Value =
+                        item.ptContainerETA ?? (object)DBNull.Value;
+
+                    cmd.Parameters.Add("@ParamCBY", SqlDbType.NVarChar, 100).Value = GetUser();
+
+                    cmd.Parameters.Add("@ParamRemarks", SqlDbType.NVarChar, 255).Value =
+                        string.IsNullOrWhiteSpace(item.ptRemarks)
                             ? DBNull.Value
-                            : ParamRemarks);
+                            : item.ptRemarks;
 
                     await cmd.ExecuteNonQueryAsync();
+
                     updatedCount++;
                 }
-
-                TempData["SuccessMessage"] = $"{updatedCount} record(s) updated successfully.";
+                TempData["SuccessMessage"] = $"{updatedCount} record(s) tagged successfully.";
 
                 if (updatedCount > 0)
                 {
@@ -173,7 +193,7 @@ namespace PlanningTool.NavExtension.Pages.Procurement
                         <tr>
                             <td style='padding:4px 4px;'>{x.DocNo}</td>
                             <td style='padding:4px 4px;'>{x.ItemCode}</td>
-                            <td style='padding:4px 4px;'>{x.ItemDescription}</td>
+                            <td style='padding:4px 4px;'>{x.ItemDescription ?? "-"}</td>
                             <td style='padding:4px 4px; text-align:right;'>
                                 {x.Quantity:N2}
                             </td>
@@ -210,7 +230,7 @@ namespace PlanningTool.NavExtension.Pages.Procurement
 
                         <p><strong>Tagged Purchase Order Details:</strong></p>
 
-                        <table border='1' cellpadding='4' cellspacing='0' style='border-collapse:collapse; width:50%;'>
+                        <table border='1' cellpadding='4' cellspacing='0' style='border-collapse:collapse; width:80%;'>
                             <thead>
                                 <tr>
                                     <th style='text-align:left;'>PO No</th>
@@ -245,178 +265,35 @@ namespace PlanningTool.NavExtension.Pages.Procurement
                         EmailModules.Procurement)
                     );
                 }
+
             }
             catch (Exception ex)
             {
                 TempData["ErrorMessage"] = $"Error: {ex.Message}";
             }
 
-            this.LoadImpex();
-            this.LoadProcurementData(searchString);
-
+            TempData["ActiveTab"] = "#withoutstandingqty";
             return RedirectToPage();
         }
-        public async Task<IActionResult> OnPostUntagAsync(string action)
+
+        private void LoadProcurementData(string spName, List<ProcurementCenterDto> targetList)
         {
             try
             {
-                if (!string.IsNullOrWhiteSpace(action) &&
-                    action.StartsWith("untag|"))
-                {
-                    var parts = action.Replace("untag|", "").Split('|');
-
-                    int docType = int.Parse(parts[0]);
-                    string docNo = parts[1];
-                    int lineNo = int.Parse(parts[2]);
-                    string itemCode = parts[3];
-                    string hblNo = parts[4];
-
-                    DateTime conETA = DateTime.Parse(parts[5]);
-                    string etaDisplay = conETA.ToString("MMM dd, yyyy");
-
-                    var itemInfo = ProcurementList.FirstOrDefault(x =>
-                        x.IDDocType == docType &&
-                        x.IDDocNo == docNo &&
-                        x.IDLineNo == lineNo &&
-                        x.ItemCode == itemCode);
-
-                    string itemDescription = itemInfo?.ItemDescription ?? string.Empty;
-                    decimal quantity = itemInfo?.ptPartialDelivered ?? 0;
-
-                    using var con = new SqlConnection(conStr);
-                    await con.OpenAsync();
-
-                    using (var cmd = new SqlCommand("_spUntagProcurementCenter", con))
-                    {
-                        cmd.CommandType = CommandType.StoredProcedure;
-
-                        cmd.Parameters.AddWithValue("@DocType", docType);
-                        cmd.Parameters.AddWithValue("@DocNo", docNo);
-                        cmd.Parameters.AddWithValue("@LineNo", lineNo);
-                        cmd.Parameters.AddWithValue("@ItemCode", itemCode);
-                        cmd.Parameters.AddWithValue("@HBLNo", hblNo);
-                        cmd.Parameters.AddWithValue("@ModifiedBy", GetUser());
-
-                        await cmd.ExecuteNonQueryAsync();
-                    }
-
-                    TempData["SuccessMessage"] = "Record untagged successfully!";
-
-                    var recipients = GetRecipients();
-
-                    string body = $@"
-                        <div style='font-family:'Segoe UI', Arial, sans-serif; font-size:12px; font-weight:400; line-height:1.5; color:#333333;'>
-
-                            <p>Dear Team,</p>
-
-                            <p>
-                                This is to inform you that the following shipment details
-                                have been <strong>untagged</strong> from the corresponding
-                                Purchase Order in the system.
-                            </p>
-
-                            <table>
-
-                                <tr>
-                                    <th style='text-align:left;'>HBL No</th>
-                                    <td>: {hblNo}</td>
-                                </tr>
-
-                                <tr>
-                                    <th style='text-align:left;'>PO No</th>
-                                    <td>: {docNo}</td>
-                                </tr>
-
-                                <tr>
-                                    <th style='text-align:left;'>Item Code</th>
-                                    <td>: {itemCode}</td>
-                                </tr>
-
-                                <tr>
-                                    <th style='text-align:left;'>Dedon ETA</th>
-                                    <td>: {etaDisplay}</td>
-                                </tr>
-
-                                <tr>
-                                    <th style='text-align:left;'>Status</th>
-                                    <td>: Untagged</td>
-                                </tr>
-
-                            </table>
-
-                            <p>
-                                Should you encounter any issues or require further assistance,
-                                please do not hesitate to contact the IT Team.
-                            </p>
-
-                            <hr />
-
-                            <small>
-                                This is a system-generated email. Please do not reply.
-                            </small>
-
-                        </div>";
-
-                    _ = Task.Run(() =>
-                        _emailService.SendEmailAsync(
-                            recipients,
-                            "PO Untagged from Shipment",
-                            body,
-                            EmailModules.Procurement));
-                }
-            }
-            catch (SqlException sqlEx)
-            {
-                TempData["ErrorMessage"] = "Database error: " + sqlEx.Message;
-            }
-
-            // ✅ Always reload data
-            this.LoadProcurementData(searchString);
-            this.LoadImpex();
-
-            return RedirectToPage();
-        }
-        private void LoadProcurementData(string _search)
-        {
-            try
-            {
-                _search = string.IsNullOrWhiteSpace(_search) ? null : _search.Trim();
-
                 using (SqlConnection con = new SqlConnection(conStr))
                 {
-                    SqlCommand cmd = new SqlCommand("_spGetProcurementCenter", con);
+                    SqlCommand cmd = new SqlCommand(spName, con);
                     cmd.CommandType = CommandType.StoredProcedure;
-
-                    // ✅ Pass parameter properly
-                    cmd.Parameters.AddWithValue("@Search",
-                        string.IsNullOrEmpty(_search) ? (object)DBNull.Value : _search);
 
                     con.Open();
 
                     using (var reader = cmd.ExecuteReader())
                     {
-                        ProcurementList.Clear();
+                        targetList.Clear();
 
                         while (reader.Read())
                         {
-                            ProcurementList.Add(new ProcurementCenterDto
-                            {
-                                IDDocType = Convert.ToInt32(reader["IDDocType"]),
-                                IDDocNo = reader["IDDocNo"].ToString(),
-                                IDLineNo = Convert.ToInt32(reader["IDLineNo"]),
-                                VendorName = reader["VendorName"].ToString(),
-                                ItemCode = reader["ItemCode"].ToString(),
-                                ItemDescription = reader["ItemDescription"].ToString(),
-                                OutstandingQty = reader["OutstandingQty"] == DBNull.Value ? 0 : Convert.ToDecimal(reader["OutstandingQty"]),
-
-                                ptBalanceQty = reader["ptBalanceQty"] == DBNull.Value ? 0 : Convert.ToDecimal(reader["ptBalanceQty"]),
-                                ptPartialDelivered = reader["ptPartialDelivered"] == DBNull.Value ? 0 : Convert.ToDecimal(reader["ptPartialDelivered"]),
-                                ptHBLNo = reader["ptHBLNo"].ToString(),
-                                ptContainerNo = reader["ptContainerNo"].ToString(),
-                                ptContainerETA = reader["ptContainerETA"] == DBNull.Value ? (DateTime?)null : Convert.ToDateTime(reader["ptContainerETA"]),
-                                ptCountryOfOrigin = reader["ptCountryOfOrigin"] == DBNull.Value ? "" : reader["ptCountryOfOrigin"].ToString(),
-                                ptRemarks = reader["ptRemarks"] == DBNull.Value ? "" : reader["ptRemarks"].ToString()
-                            });
+                            targetList.Add(MapProcurement(reader));
                         }
                     }
                 }
@@ -426,18 +303,71 @@ namespace PlanningTool.NavExtension.Pages.Procurement
                 TempData["ErrorMessage"] = "Database error: " + sqlEx.Message;
             }
         }
+        private ProcurementCenterDto MapProcurement(SqlDataReader reader)
+        {
+            return new ProcurementCenterDto
+            {
+                IDDocType = Convert.ToInt32(reader["IDDocType"]),
+                IDDocNo = reader["IDDocNo"].ToString(),
+                IDLineNo = Convert.ToInt32(reader["IDLineNo"]),
+                VendorName = reader["VendorName"].ToString(),
+                ItemCode = reader["ItemCode"].ToString(),
+                ItemDescription = reader["ItemDescription"].ToString(),
+                OutstandingQty = reader["OutstandingQty"] == DBNull.Value ? 0 : Convert.ToDecimal(reader["OutstandingQty"]),
+                ptPartialDelivered = reader["ptPartialDelivered"] == DBNull.Value ? 0 : Convert.ToDecimal(reader["ptPartialDelivered"]),
+                ptBalanceQty = reader["ptBalanceQty"] == DBNull.Value ? 0 : Convert.ToDecimal(reader["ptBalanceQty"]),
+                ptHBLNo = reader["ptHBLNo"].ToString(),
+                ptContainerNo = reader["ptContainerNo"].ToString(),
+                ptContainerETA = reader["ptContainerETA"] == DBNull.Value ? (DateTime?)null : Convert.ToDateTime(reader["ptContainerETA"]),
+                ptCountryOfOrigin = reader["ptCountryOfOrigin"]?.ToString() ?? "",
+                ptRemarks = reader["ptRemarks"]?.ToString() ?? ""
+            };
+        }
+
+
+
         private void LoadImpex()
         {
             ImpexList = _context.tblImPexCenter
-                .Where(x => x._ptStatus == 0)
+                .Where(x => x._ptStatus == 1)
                 .Select(x => new ImPexCenterModel
                 {
                     PK_ptImpexID = x.PK_ptImpexID,
                     _ptHBLNo = x._ptHBLNo,
                     _ptContainerNo = x._ptContainerNo,
+                    _ptCountryOfOrigin = x._ptCountryOfOrigin,
                     _ptContainerETA = x._ptContainerETA
                 })
                 .ToList();
+        }
+
+        public IActionResult OnPostUntag(string UntagIDs)
+        {
+            if (!string.IsNullOrEmpty(UntagIDs))
+            {
+                var ids = UntagIDs
+                    .Split(',')
+                    .Select(int.Parse)
+                    .ToList();
+
+                var records = _context.GetTaggedItems
+                    .Where(x => ids.Contains(x.PK_ptProcID))
+                    .ToList();
+
+                foreach (var item in records)
+                {
+                    item._ptStatus = 0;
+                    item._ptModifiedBy = GetUser();
+                    item._ptModifiedDate = DateTime.Now;
+                }
+
+                _context.SaveChanges();
+            }
+
+            TempData["SuccessMessage"] = "Selected records untagged successfully.";
+            TempData["ActiveTab"] = "#tagged";
+
+            return RedirectToPage();
         }
 
     }
