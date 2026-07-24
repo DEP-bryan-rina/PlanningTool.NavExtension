@@ -8,7 +8,9 @@ using PlanningTool.NavExtension.Constants;
 using PlanningTool.NavExtension.Data;
 using PlanningTool.NavExtension.Models;
 using PlanningTool.NavExtension.Services;
+using System.ComponentModel;
 using System.Data;
+using System.Text;
 using System.Text.Json;
 
 namespace PlanningTool.NavExtension.Pages.Procurement
@@ -43,7 +45,7 @@ namespace PlanningTool.NavExtension.Pages.Procurement
         [BindProperty(SupportsGet = true)] 
 
         public string? HBLNo { get; set; }
-        public List<ProcurementCenterModel> ProcurementTagged { get; set; } = new();        
+        public List<ProcurementCenterBalance> ProcurementTagged { get; set; } = new();        
 
         [BindProperty] public ImPexCenterModel Impex { get; set; }
         [BindProperty] public DateTime? ParamCETA { get; set; }
@@ -90,7 +92,7 @@ namespace PlanningTool.NavExtension.Pages.Procurement
             this.LoadProcurementData("_spGetProcurementCenter", ProcurementList);
 
             // Load Tagged POs
-            ProcurementTagged = _context.GetTaggedItems
+            ProcurementTagged = _context.ProcurementCenterBalanceView
             .Where(x => x._ptStatus == 1)
             .ToList();          
             
@@ -230,7 +232,7 @@ namespace PlanningTool.NavExtension.Pages.Procurement
 
                         <p><strong>Tagged Purchase Order Details:</strong></p>
 
-                        <table border='1' cellpadding='4' cellspacing='0' style='border-collapse:collapse; width:80%;'>
+                        <table border='1' cellpadding='4' cellspacing='0' style='border-collapse:collapse; width:70%;'>
                             <thead>
                                 <tr>
                                     <th style='text-align:left;'>PO No</th>
@@ -324,12 +326,10 @@ namespace PlanningTool.NavExtension.Pages.Procurement
             };
         }
 
-
-
         private void LoadImpex()
         {
             ImpexList = _context.tblImPexCenter
-                .Where(x => x._ptStatus == 1)
+                .Where(x => x._ptStatus != 2)
                 .Select(x => new ImPexCenterModel
                 {
                     PK_ptImpexID = x.PK_ptImpexID,
@@ -341,34 +341,130 @@ namespace PlanningTool.NavExtension.Pages.Procurement
                 .ToList();
         }
 
+        [BindProperty]
+        public string UntagIDs { get; set; }
         public IActionResult OnPostUntag(string UntagIDs)
         {
-            if (!string.IsNullOrEmpty(UntagIDs))
+
+            if (string.IsNullOrEmpty(UntagIDs))
             {
-                var ids = UntagIDs
-                    .Split(',')
-                    .Select(int.Parse)
-                    .ToList();
-
-                var records = _context.GetTaggedItems
-                    .Where(x => ids.Contains(x.PK_ptProcID))
-                    .ToList();
-
-                foreach (var item in records)
-                {
-                    item._ptStatus = 0;
-                    item._ptModifiedBy = GetUser();
-                    item._ptModifiedDate = DateTime.Now;
-                }
-
-                _context.SaveChanges();
+                TempData["ErrorMessage"] = "No records selected.";
+                return RedirectToPage();
             }
 
-            TempData["SuccessMessage"] = "Selected records untagged successfully.";
+
+            var ids = UntagIDs
+                .Split(',')
+                .Select(int.Parse)
+                .ToList();
+
+
+            var selectedRecords = _context.GetTaggedItems
+                .Where(x => ids.Contains(x.PK_ptProcID))
+                .ToList();
+
+
+            if (!selectedRecords.Any())
+            {
+                TempData["ErrorMessage"] = "Records not found.";
+                return RedirectToPage();
+            }
+
+
+            var user = GetUser();
+            var now = DateTime.Now;
+
+
+            foreach (var item in selectedRecords)
+            {
+                item._ptPartialDelivered = 0;
+                item._ptStatus = 0;
+                item._ptModifiedBy = user;
+                item._ptModifiedDate = now;
+            }
+
+            _context.SaveChanges();
+
+
+            // ==============================
+            // Build Email Table
+            // ==============================
+
+            var emailRows = new StringBuilder();
+
+            foreach (var item in selectedRecords)
+            {
+            emailRows.Append($@"
+                <tr>
+                    <td style='padding:4px 4px;'>{item._ptDocNo}</td>
+                    <td style='padding:4px 4px;'>{item._ptItemCode}</td>
+                    <td style='padding:4px 4px;'>{item._ptItemDescription ?? "-"}</td>
+                    <td style='padding:4px 4px;'>{item._ptHBLNo}</td>
+                    <td style='padding:4px 4px;'>{item._ptContainerNo}</td>
+                    <td>: {item._ptContainerETA?.ToString("yyyy-MM-dd")}</td>              
+                </tr>");
+            }
+
+
+            var recipients = GetRecipients();
+
+            string emailBody = $@"
+                   <div style='font-family:'Segoe UI', Arial, sans-serif; font-size:12px; font-weight:400; line-height:1.5; color:#333333;'>
+
+                        <p>Dear Team,</p>
+
+                        <p> 
+                            This is to inform you that the following shipment has been
+                            <strong>successfully untagged</strong> in the system.
+                        </p>
+
+                        <table border='1' cellpadding='4' cellspacing='0' style='border-collapse:collapse; width:70%;'>
+                            <thead>
+                                <tr>
+                                    <th style='text-align:left;'>PO No</th>
+                                    <th style='text-align:left;'>Item Code</th>
+                                    <th style='text-align:left;'>Item Description</th>
+                                    <th style='text-align:left;'>HBL No</th>
+                                    <th style='text-align:left;'>Container No</th>
+                                    <th style='text-align:left;'>Dedon ETA</th>                                    
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {emailRows}
+                            </tbody>
+                        </table>
+
+                        <p>
+                            Should you encounter any issues or require further assistance,
+                            please do not hesitate to contact the IT Team.
+                        </p>
+
+                        <hr />
+
+                        <small>
+                            This is a system-generated email. Please do not reply.
+                        </small>
+
+                    </div>";
+
+            _ = Task.Run(() =>
+            _emailService.SendEmailAsync(
+                recipients,
+                "Purchase Order Successfully Untagged",
+                emailBody,
+                EmailModules.Procurement)
+            );
+
+
+            TempData["SuccessMessage"] =
+                "Selected records untagged and balance quantities updated successfully.";
+
             TempData["ActiveTab"] = "#tagged";
 
             return RedirectToPage();
+
         }
+        
         public async Task<IActionResult> OnPostTaggedUpdate(string TaggedUpdateJson)
         {
             if (string.IsNullOrWhiteSpace(TaggedUpdateJson))

@@ -27,6 +27,9 @@ namespace PlanningTool.NavExtension.Data
 
         public DbSet<PurchaseLineModel> PurchaseLineList { get; set; }
 
+        public DbSet<ProcurementCenterBalance> ProcurementCenterBalanceView { get; set; }
+
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<UserModel>()
@@ -46,6 +49,11 @@ namespace PlanningTool.NavExtension.Data
             modelBuilder.Entity<PurchaseLineModel>()
                 .HasNoKey()
                 .ToView(null);
+
+            modelBuilder.Entity<ProcurementCenterBalance>()
+                .HasNoKey()
+                .ToView("vw_ProcurementCenterBalance");
+
 
             base.OnModelCreating(modelBuilder);
         }

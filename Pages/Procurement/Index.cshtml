@@ -101,12 +101,6 @@
 								}
 							</div>
 							<div class="d-flex align-items-center gap-2 small">
-								<button type="button"
-										id="btnEEOutstanding"
-										class="btn btn-primary btn-sm">
-									<i class="fas fa-file-excel"></i>
-									Export Excel
-								</button>
 							</div>
 						</div>
 
@@ -141,7 +135,7 @@
 							<tr style="font-size: 0.8em">
 								<td>
 									<input type="checkbox"
-										   class="row-check po-check"
+										   class="row-check po-check no-export"
 										   data-doctype="@item.IDDocType"
 										   data-docno="@item.IDDocNo"
 										   data-line="@item.IDLineNo"
@@ -154,16 +148,25 @@
 									@((item.ptBalanceQty == 0 && !string.IsNullOrWhiteSpace(item.ptHBLNo)) ? "disabled" : "") />
 
 								</td>
-								<td style="display:none;">@item.IDDocType</td>
+								<td style="display:none;" class="no-export">@item.IDDocType</td>
 								<td>@item.IDDocNo</td>
-								<td style="display:none;">@item.IDLineNo</td>
+								<td style="display:none;" class="no-export">@item.IDLineNo</td>
 								<td>@item.VendorName</td>
 								<td>@item.ItemCode</td>
 								<td>@item.ItemDescription</td>
 								<td class="text-end">@item.OutstandingQty</td>
 								<td class="text-end">@item.ptPartialDelivered</td>
 								<td class="text-end">@item.ptBalanceQty</td>
-								<td>@item.ptHBLNo</td>
+								@if (!string.IsNullOrWhiteSpace(item.ptHBLNo))
+								{
+									<td>
+										<span class="hbl-no">@item.ptHBLNo</span>
+									</td>
+								}
+								else
+								{
+									<td></td>
+								}
 							</tr>
 						}
 					}
@@ -182,6 +185,7 @@
 				<div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
 					<div class="d-flex gap-2">
 						<form method="post" asp-page-handler="Untag" id="frmUntag" class="m-0">
+
 							<input type="hidden"
 								   id="UntagIDs"
 								   name="UntagIDs" />
@@ -192,14 +196,14 @@
 								<i class="fas fa-unlink"></i>
 								Untag Selected
 							</button>
+
 						</form>
 
-						<form method="post" asp-page-handler="TaggedUpdate" id="frmTaggedUpdate" class="m-0">
+						<form method="post" id="frmTaggedUpdate" class="m-0">
 							<input type="hidden" id="TaggedUpdateJson" name="TaggedUpdateJson" />
-
-
 							<button type="submit"
 									id="btnTaggedUpdate"
+									asp-page-handler="TaggedUpdate"
 									class="btn btn-success btn-sm">
 								<i class="fas fa-save"></i>
 								Update Record
@@ -229,12 +233,6 @@
 							<i class="fas fa-calendar-alt me-1"></i>
 							&gt; 14 Days
 						</span>
-						<button type="button"
-								id="btnEETagged"
-								class="btn btn-primary btn-sm">
-							<i class="fas fa-file-excel"></i>
-							Export Excel
-						</button>
 					</div>
 
 				</div>
@@ -245,8 +243,7 @@
 		<table id="tblTagged" class="table table-hover w-100">
 			<thead class="sticky-top bg-white table-bordered" style="font-size:0.80rem;">
 				<tr class="data-row">
-					<th style="width:40px;"><input type="checkbox" id="selectAllTagged" /></th>
-					<th style="text-align:left; display:none">Doc Type</th>
+					<th style="width:40px;"><input type="checkbox" id="selectAllTagged" /></th>					
 					<th style="text-align:left">PO No</th>
 					<th style="text-align:left; display:none">Line No</th>
 					<th style="text-align:left">Vendor</th>
@@ -272,17 +269,15 @@
 						<tr style="font-size: 0.8em">
 							<td>
 								<input type="checkbox"
-									   class="rowtag-check"
+									   class="rowtag-check no-export"
 									   data-id="@item.PK_ptProcID"
-									   data-doctype="@item._ptDocType"
 									   data-docno="@item._ptDocNo"
 									   data-line="@item._ptLineNo"
 									   data-item="@item._ptItemCode" />
 
-							</td>
-							<td style="display:none;">@item._ptDocType</td>
+							</td>							
 							<td>@item._ptDocNo</td>
-							<td style="display:none;">@item._ptLineNo</td>
+							<td style="display:none;" class="no-export">@item._ptLineNo</td>
 							<td>@item._ptVendorName</td>
 							<td>@item._ptItemCode</td>
 							<td>@item._ptItemDescription</td>
@@ -473,452 +468,495 @@
 {
 	<script>
 
-			let selectedPO = [];
-			let selectedUntagIDs = [];
+				let selectedPO = [];
+				let selectedUntagIDs = [];
 
-			const $impexDropdown = $('#impexDropdown');
-			const $btnTagPO = $('#btnTagPO');
+				const $impexDropdown = $('#impexDropdown');
+				const $btnTagPO = $('#btnTagPO');
 
-			/* ==============================
-			   Utilities
-			============================== */
+				/* ==============================
+				   Utilities
+				============================== */
 
-			function getTableHeight() {
-				return `${$(window).height() * 0.6}px`;
-			}
+				function getTableHeight() {
+					return `${$(window).height() * 0.6}px`;
+				}
 
-			function toggleTagButton() {
-				$btnTagPO.prop(
-					'disabled',
-					selectedPO.length === 0 || !$impexDropdown.val()
-				);
-			}
+				function toggleTagButton() {
+					$btnTagPO.prop(
+						'disabled',
+						selectedPO.length === 0 || !$impexDropdown.val()
+					);
+				}
 
-			function populateHBLFields() {
+				function populateHBLFields() {
 
-				const $selected = $('#impexDropdown option:selected');
+					const $selected = $('#impexDropdown option:selected');
 
-				$('#modalHBL').val($selected.data('hbl') || '');
-				$('#modalContainer').val($selected.data('container') || '');
-				$('#modalCountryOfOrigin').val($selected.data('origin') || '');
-				$('#modalDedonETA').val($selected.data('eta') || '');
-			}
+					$('#modalHBL').val($selected.data('hbl') || '');
+					$('#modalContainer').val($selected.data('container') || '');
+					$('#modalCountryOfOrigin').val($selected.data('origin') || '');
+					$('#modalDedonETA').val($selected.data('eta') || '');
+				}
 
-			/* ==============================
-			   HBL Coloring
-			============================== */
+				/* ==============================
+				   HBL Coloring
+				============================== */
 
-			function colorDuplicateHBL() {
+				function colorDuplicateHBL() {
 
-				const counts = {};
-				const colorMap = {};
+					const counts = {};
+					const colorMap = {};
 
-				const randomPastelColor = () =>
-					`rgb(
-						${127 + Math.floor(Math.random() * 128)},
-						${127 + Math.floor(Math.random() * 128)},
-						${127 + Math.floor(Math.random() * 128)}
-					)`;
+					const randomPastelColor = () =>
+						`rgb(
+							${127 + Math.floor(Math.random() * 128)},
+							${127 + Math.floor(Math.random() * 128)},
+							${127 + Math.floor(Math.random() * 128)}
+						)`;
 
-				$('.hbl-no').each(function () {
+					$('.hbl-no').each(function () {
 
-					const hbl = $(this).text().trim();
+						const hbl = $(this).text().trim();
 
-					if (hbl) {
-						counts[hbl] = (counts[hbl] || 0) + 1;
-					}
+						if (hbl) {
+							counts[hbl] = (counts[hbl] || 0) + 1;
+						}
+					});
+
+					$('.hbl-no').each(function () {
+
+						const hbl = $(this).text().trim();
+
+						if (counts[hbl] <= 1) return;
+
+						if (!colorMap[hbl]) {
+							colorMap[hbl] = randomPastelColor();
+						}
+
+						$(this).css({
+							backgroundColor: colorMap[hbl],
+							padding: '3px 8px',
+							borderRadius: '4px',
+							fontSize: '0.8em'
+						});
+					});
+				}
+
+				/* ==============================
+				   DataTables
+				============================== */
+
+				function createDataTable(selector, filename) {
+
+					return $(selector).DataTable({
+						pageLength: 25,
+						paging: false,
+						scrollX: true,
+						scrollY: getTableHeight(),
+						scrollCollapse: true,
+						autoWidth: false,
+						fixedHeader: true,
+						responsive: true,
+
+						dom: 'Bfrtip',
+
+						buttons: [{
+							extend: 'excelHtml5',
+							text: '<i class="fa fa-file-excel-o"></i> Export Excel',
+							className: 'btn btn-sm erp-btn',
+
+							title: null,
+							filename: filename,
+
+							exportOptions: {
+								columns: ':visible:not(.no-export)',
+								modifier: {
+									search: 'applied',
+									order: 'applied'
+								}
+							},
+
+							action: function (e, dt, button, config) {
+
+								const fileName = `${config.filename}.xlsx`;
+
+								const message =
+									`Export data to Excel?\n\n` +
+									`File:\n${fileName}\n\n` +
+									`The save location is controlled by your browser settings.`;
+
+								if (confirm(message)) {
+
+									$.fn.dataTable.ext.buttons.excelHtml5.action.call(
+										this,
+										e,
+										dt,
+										button,
+										config
+									);
+
+								}
+							}
+						}]
+					});
+				}
+
+
+				function addColumnFilter(table, tableId) {
+
+					const $filter = $(`${tableId}_filter`);
+					const $searchInput = $filter.find('input');
+					const $columnFilter = $('<select class="columnFilter"></select>');
+
+					$filter.find('label')
+						.contents()
+						.filter((_, node) => node.nodeType === 3)
+						.remove();
+
+					$searchInput.attr(
+						'placeholder',
+						'Type to filter (F3)'
+					);
+
+					table.columns().every(function (index) {
+
+						const title = $(this.header()).text().trim();
+
+						if (!title) return;
+
+						$columnFilter.append(
+							`<option value="${index}">${title}</option>`
+						);
+					});
+
+					$searchInput.after($columnFilter);
+
+					const filterData = () => {
+
+						table.columns().search('');
+
+						table
+							.column(+$columnFilter.val())
+							.search($searchInput.val())
+							.draw();
+					};
+
+					$searchInput.on('input', filterData);
+					$columnFilter.on('change', filterData);
+				}
+
+				/* ==============================
+				   Page Load
+				============================== */
+
+				$(function () {
+
+					$impexDropdown.select2();
+
+					const today = new Date().toISOString().split('T')[0];
+
+					const outstandingTable = createDataTable(
+						'#tblOutstanding',
+						`Procurement_PO_OutstandingBalance_${today}`
+					);
+
+					const taggedTable = createDataTable(
+						'#tblTagged',
+						`Procurement_PO_Tagged_${today}`
+					);
+
+
+					addColumnFilter(outstandingTable, '#tblOutstanding');
+					addColumnFilter(taggedTable, '#tblTagged');
+
+					colorDuplicateHBL();
+
+					taggedTable.on('draw', colorDuplicateHBL);
+
+					$(window).on('resize', () => {
+
+						$.fn.dataTable
+							.tables({ visible: true, api: true })
+							.columns.adjust();
+					});
+
 				});
 
-				$('.hbl-no').each(function () {
 
-					const hbl = $(this).text().trim();
+				/* ==============================
+				   Untagging
+				============================== */
 
-					if (counts[hbl] <= 1) return;
+				$(document).on(
+					'change',
+					'#tblTagged .rowtag-check',
+					function () {
 
-					if (!colorMap[hbl]) {
-						colorMap[hbl] = randomPastelColor();
+						const id = $(this).data('id');
+
+						if (this.checked) {
+							selectedUntagIDs.push(id);
+						} else {
+							selectedUntagIDs =
+								selectedUntagIDs.filter(
+									x => x !== id
+								);
+						}
+					}
+				);
+
+				$('#btnUntag').on('click', function (e) {
+
+					if (!selectedUntagIDs.length) {
+
+						alert(
+							'Please select record(s) to untag.'
+						);
+
+						e.preventDefault();
+						return;
+					}
+
+					if (
+						!confirm(
+							`Are you sure you want to untag ${selectedUntagIDs.length} record(s)?`
+						)
+					) {
+						e.preventDefault();
+						return;
+					}
+
+					$('#UntagIDs').val(
+						selectedUntagIDs.join(',')
+					);
+				});
+
+				/* ==============================
+				   Row Selection
+				============================== */
+
+				$('#selectAllOutstanding').on('change', function () {
+
+					$('.row-check:not(:disabled)')
+						.prop('checked', this.checked)
+						.trigger('change');
+				});
+				$('#selectAllTagged').on('change', function () {
+
+					$('.rowtag-check:not(:disabled)')
+						.prop('checked', this.checked)
+						.trigger('change');
+				});
+
+				$(document).on(
+					'change',
+					'.row-check',
+					function () {
+
+						const $checkbox = $(this);
+						const $row = $checkbox.closest('tr');
+
+						const item = {
+							IDDocType: $checkbox.data('doctype'),
+							IDDocNo: $checkbox.data('docno'),
+							IDLineNo: $checkbox.data('line'),
+							ItemCode: $checkbox.data('item'),
+							ItemDescription: $checkbox.data('description'),
+							VendorName: $row.find('td:eq(4)').text().trim(),
+							ptOutstandingQty: Number($checkbox.data('outstanding')),
+							ptPartialQty: Number($checkbox.data('partialqty')),
+							ptBalanceQty: Number($checkbox.data('balanceqty'))
+						};
+
+						if (this.checked) {
+
+							selectedPO.push(item);
+
+						} else {
+
+							selectedPO = selectedPO.filter(x =>
+								!(
+									x.IDDocNo === item.IDDocNo &&
+									x.IDLineNo === item.IDLineNo &&
+									x.ItemCode === item.ItemCode
+								)
+							);
+						}
+
+						toggleTagButton();
+					}
+				);
+
+				$impexDropdown.on('change', function () {
+					populateHBLFields();
+					toggleTagButton();
+				});
+
+				/* ==============================
+				   Modal
+				============================== */
+
+				$('#btnTagPO').on('click', function () {
+
+					const $tbody =
+						$('#tblSelected tbody').empty();
+
+						selectedPO.forEach(item => {
+
+						$tbody.append(`
+							<tr
+								data-doctype="${item.IDDocType}"
+								data-docno="${item.IDDocNo}"
+								data-line="${item.IDLineNo}"
+								data-item="${item.ItemCode}">
+
+								<td>${item.IDDocNo}</td>
+								<td>${item.VendorName}</td>
+								<td>${item.ItemCode}</td>
+								<td>${item.ItemDescription}</td>
+								<td class="text-end">
+									${item.ptOutstandingQty}
+								</td>
+								<td class="text-end">
+									${item.ptPartialQty}
+								</td>
+								<td>
+									  <input type="number"
+									   class="form-control form-control-sm pd text-end"
+									   value="${item.ptBalanceQty}"
+									   min="1"
+									   max="${item.ptOutstandingQty}"
+									   step="0.01"
+									   required
+									   data-balance="${item.ptBalanceQty}">
+								</td>
+
+							</tr>
+						`);
+					});
+
+					populateHBLFields();
+
+					$('#tagModal').modal('show');
+				});
+
+				/* ==============================
+				   Save Payload
+				============================== */
+
+				$('#btnProceed').on('click', function () {
+
+					const payload = [];
+
+					$('#tblSelected tbody tr').each(function () {
+
+						payload.push({
+
+							ptHBLNo: $('#modalHBL').val() || '',
+							ptContainerNo: $('#modalContainer').val() || '',
+
+							IDDocType: Number($(this).data('doctype')),
+							IDDocNo: String($(this).data('docno')),
+							IDLineNo: Number($(this).data('line')),
+
+							ItemCode: String($(this).data('item')),
+							ItemDescription:
+								$(this).find('td:eq(3)').text().trim(),
+
+							ptPartialDelivered:
+								Number($(this).find('.pd').val() || 0),
+
+							ptContainerETA:
+								$('#modalDedonETA').val(),
+
+							ptRemarks:
+								$('#modalRemarks').val() || ''
+						});
+					});
+
+					$('#SelectedRowsJson')
+						.val(JSON.stringify(payload));
+
+				});
+
+				/* ==============================
+				   Apply CSS Color
+				============================== */
+				$('.eta-date').each(function () {
+
+					const etaValue = $(this).data('eta');
+
+					if (!etaValue) return;
+
+					const etaDate = new Date(etaValue);
+					const today = new Date();
+
+					today.setHours(0, 0, 0, 0);
+					etaDate.setHours(0, 0, 0, 0);
+
+					const days = Math.ceil(
+						(etaDate - today) / (1000 * 60 * 60 * 24)
+					);
+
+					let color;
+
+					if (days < 0) {
+						color = '#dc3545'; // Overdue
+					}
+					else if (days <= 14) {
+						color = '#198754'; // <=14 Days
+					}
+					else {
+						color = '#6c757d'; // >14 Days
 					}
 
 					$(this).css({
-						backgroundColor: colorMap[hbl],
+						backgroundColor: color,
+						color: '#fff',
 						padding: '3px 8px',
 						borderRadius: '4px',
-						fontSize: '0.8em'
+						fontWeight: '600',
+						fontSize: '0.8em',
+						display: 'inline-block'
 					});
-				});
-			}
 
-			/* ==============================
-			   DataTables
-			============================== */
-
-			function createDataTable(selector) {
-
-				return $(selector).DataTable({
-					pageLength: 25,
-					paging: true,
-					scrollX: true,
-					scrollY: getTableHeight(),
-					scrollCollapse: true,
-					autoWidth: false,
-					fixedHeader: true,
-					responsive: true
-				});
-			}
-
-			function addColumnFilter(table, tableId) {
-
-				const $filter = $(`${tableId}_filter`);
-				const $searchInput = $filter.find('input');
-				const $columnFilter = $('<select class="columnFilter"></select>');
-
-				$filter.find('label')
-					.contents()
-					.filter((_, node) => node.nodeType === 3)
-					.remove();
-
-				$searchInput.attr(
-					'placeholder',
-					'Type to filter (F3)'
-				);
-
-				table.columns().every(function (index) {
-
-					const title = $(this.header()).text().trim();
-
-					if (!title) return;
-
-					$columnFilter.append(
-						`<option value="${index}">${title}</option>`
-					);
 				});
 
-				$searchInput.after($columnFilter);
+		$(document).on('change', '.rowtag-check', function () {
 
-				const filterData = () => {
+				const $row = $(this).closest('tr');
+				const $cell = $row.find('.partial-cell');
 
-					table.columns().search('');
-
-					table
-						.column(+$columnFilter.val())
-						.search($searchInput.val())
-						.draw();
-				};
-
-				$searchInput.on('input', filterData);
-				$columnFilter.on('change', filterData);
-			}
-
-			/* ==============================
-			   Page Load
-			============================== */
-
-			$(function () {
-
-				$impexDropdown.select2();
-
-				const outstandingTable =
-					createDataTable('#tblOutstanding');
-
-				const taggedTable =
-					createDataTable('#tblTagged');
-
-				addColumnFilter(
-					outstandingTable,
-					'#tblOutstanding'
-				);
-
-				addColumnFilter(
-					taggedTable,
-					'#tblTagged'
-				);
-
-				colorDuplicateHBL();
-
-				taggedTable.on('draw', colorDuplicateHBL);
-
-				$(window).on('resize', () => {
-
-					$.fn.dataTable
-						.tables({ visible: true, api: true })
-						.columns.adjust();
-				});
-
-			});
-
-			/* ==============================
-			   Untagging
-			============================== */
-
-			$(document).on(
-				'change',
-				'#tblTagged .rowtag-check',
-				function () {
-
-					const id = $(this).data('id');
-
-					if (this.checked) {
-						selectedUntagIDs.push(id);
-					} else {
-						selectedUntagIDs =
-							selectedUntagIDs.filter(
-								x => x !== id
-							);
-					}
-				}
-			);
-
-			$('#btnUntag').on('click', function (e) {
-
-				if (!selectedUntagIDs.length) {
-
-					alert(
-						'Please select record(s) to untag.'
-					);
-
-					e.preventDefault();
+				if (!$cell.length) {
+					console.log('partial-cell not found');
 					return;
 				}
 
-				if (
-					!confirm(
-						`Are you sure you want to untag ${selectedUntagIDs.length} record(s)?`
-					)
-				) {
-					e.preventDefault();
-					return;
-				}
+				const defaultValue = $cell.data('default') ?? 0;
+				const maxQty = $cell.data('max') ?? 0;
 
-				$('#UntagIDs').val(
-					selectedUntagIDs.join(',')
-				);
-			});
 
-			/* ==============================
-			   Row Selection
-			============================== */
+				if (this.checked) {
 
-			$('#selectAllOutstanding').on('change', function () {
-
-				$('.row-check:not(:disabled)')
-					.prop('checked', this.checked)
-					.trigger('change');
-			});
-			$('#selectAllTagged').on('change', function () {
-
-				$('.rowtag-check:not(:disabled)')
-					.prop('checked', this.checked)
-					.trigger('change');
-			});
-
-			$(document).on(
-				'change',
-				'.row-check',
-				function () {
-
-					const $checkbox = $(this);
-					const $row = $checkbox.closest('tr');
-
-					const item = {
-						IDDocType: $checkbox.data('doctype'),
-						IDDocNo: $checkbox.data('docno'),
-						IDLineNo: $checkbox.data('line'),
-						ItemCode: $checkbox.data('item'),
-						ItemDescription: $checkbox.data('description'),
-						VendorName: $row.find('td:eq(4)').text().trim(),
-						ptOutstandingQty: Number($checkbox.data('outstanding')),
-						ptPartialQty: Number($checkbox.data('partialqty')),
-						ptBalanceQty: Number($checkbox.data('balanceqty'))
-					};
-
-					if (this.checked) {
-
-						selectedPO.push(item);
-
-					} else {
-
-						selectedPO = selectedPO.filter(x =>
-							!(
-								x.IDDocNo === item.IDDocNo &&
-								x.IDLineNo === item.IDLineNo &&
-								x.ItemCode === item.ItemCode
-							)
-						);
-					}
-
-					toggleTagButton();
-				}
-			);
-
-			$impexDropdown.on('change', function () {
-				populateHBLFields();
-				toggleTagButton();
-			});
-
-			/* ==============================
-			   Modal
-			============================== */
-
-			$('#btnTagPO').on('click', function () {
-
-				const $tbody =
-					$('#tblSelected tbody').empty();
-
-					selectedPO.forEach(item => {
-
-					$tbody.append(`
-						<tr
-							data-doctype="${item.IDDocType}"
-							data-docno="${item.IDDocNo}"
-							data-line="${item.IDLineNo}"
-							data-item="${item.ItemCode}">
-
-							<td>${item.IDDocNo}</td>
-							<td>${item.VendorName}</td>
-							<td>${item.ItemCode}</td>
-							<td>${item.ItemDescription}</td>							
-							<td class="text-end">
-								${item.ptOutstandingQty}
-							</td>
-							<td class="text-end">
-								${item.ptPartialQty}
-							</td>
-							<td>
-								  <input type="number"
-								   class="form-control form-control-sm pd text-end"
-								   value="${item.ptBalanceQty}"
-								   min="1"
-								   max="${item.ptOutstandingQty}"
-								   step="0.01"
-								   required
-								   data-balance="${item.ptBalanceQty}">
-							</td>
-
-						</tr>
+					$cell.html(`
+						<input type="number"
+								class="form-control form-control-sm text-end partial-input"
+								value="${defaultValue}"
+								min="0"
+								max="${maxQty}"
+								step="0.01"
+								required>
 					`);
-				});
 
-				populateHBLFields();
-
-				$('#tagModal').modal('show');
-			});
-
-			/* ==============================
-			   Save Payload
-			============================== */
-
-			$('#btnProceed').on('click', function () {
-
-				const payload = [];
-
-				$('#tblSelected tbody tr').each(function () {
-
-					payload.push({
-
-						ptHBLNo: $('#modalHBL').val() || '',
-						ptContainerNo: $('#modalContainer').val() || '',
-
-						IDDocType: Number($(this).data('doctype')),
-						IDDocNo: String($(this).data('docno')),
-						IDLineNo: Number($(this).data('line')),
-
-						ItemCode: String($(this).data('item')),
-						ItemDescription:
-							$(this).find('td:eq(3)').text().trim(),
-
-						ptPartialDelivered:
-							Number($(this).find('.pd').val() || 0),
-
-						ptContainerETA:
-							$('#modalDedonETA').val(),
-
-						ptRemarks:
-							$('#modalRemarks').val() || ''
-					});
-				});
-
-				$('#SelectedRowsJson')
-					.val(JSON.stringify(payload));
-
-			});
-
-			/* ==============================
-			   Apply CSS Color
-			============================== */
-			$('.eta-date').each(function () {
-
-				const etaValue = $(this).data('eta');
-
-				if (!etaValue) return;
-
-				const etaDate = new Date(etaValue);
-				const today = new Date();
-
-				today.setHours(0, 0, 0, 0);
-				etaDate.setHours(0, 0, 0, 0);
-
-				const days = Math.ceil(
-					(etaDate - today) / (1000 * 60 * 60 * 24)
-				);
-
-				let color;
-
-				if (days < 0) {
-					color = '#dc3545'; // Overdue
-				}
-				else if (days <= 14) {
-					color = '#198754'; // <=14 Days
 				}
 				else {
-					color = '#6c757d'; // >14 Days
+
+					$cell
+						.html(defaultValue)
+						.data('value', defaultValue);
+
 				}
-
-				$(this).css({
-					backgroundColor: color,
-					color: '#fff',
-					padding: '3px 8px',
-					borderRadius: '4px',
-					fontWeight: '600',
-					fontSize: '0.8em',
-					display: 'inline-block'
-				});
-
-			});
-
-	$(document).on('change', '.rowtag-check', function () {
-
-			const $row = $(this).closest('tr');
-			const $cell = $row.find('.partial-cell');
-
-			if (!$cell.length) {
-				console.log('partial-cell not found');
-				return;
-			}
-
-			const defaultValue = $cell.data('default') ?? 0;
-			const maxQty = $cell.data('max') ?? 0;
-
-
-			if (this.checked) {
-
-				$cell.html(`
-					<input type="number"
-						   class="form-control form-control-sm text-end partial-input"
-						   value="${defaultValue}"
-						   min="0"
-						   max="${maxQty}"
-						   step="0.01"
-						   required>
-				`);
-
-			}
-			else {
-
-				$cell
-					.html(defaultValue)
-					.data('value', defaultValue);
-
-			}
 
 		});
 
@@ -981,7 +1019,7 @@
 			);
 
 		});
-		
+
 		$('button[data-bs-toggle="tab"]').on('shown.bs.tab', function () {
 
 				setTimeout(function(){
@@ -996,7 +1034,7 @@
 
 				},300);
 
-			});			
+		});
 
 	</script>
 }
