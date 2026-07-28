@@ -340,11 +340,18 @@ namespace PlanningTool.NavExtension.Pages.Procurement
                 })
                 .ToList();
         }
+        private void CheckImPexStatus()
+        {
+
+        }
 
         [BindProperty]
         public string UntagIDs { get; set; }
         public IActionResult OnPostUntag(string UntagIDs)
         {
+            // ==============================
+            // Validate selected records
+            // ==============================
 
             if (string.IsNullOrEmpty(UntagIDs))
             {
@@ -353,11 +360,19 @@ namespace PlanningTool.NavExtension.Pages.Procurement
             }
 
 
+            // ==============================
+            // Convert selected IDs to List
+            // ==============================
+
             var ids = UntagIDs
                 .Split(',')
                 .Select(int.Parse)
                 .ToList();
 
+
+            // ==============================
+            // Get selected tagged PO records
+            // ==============================
 
             var selectedRecords = _context.GetTaggedItems
                 .Where(x => ids.Contains(x.PK_ptProcID))
@@ -375,6 +390,11 @@ namespace PlanningTool.NavExtension.Pages.Procurement
             var now = DateTime.Now;
 
 
+            // ==============================
+            // Remove tagging from selected PO
+            // Reset status and delivered quantity
+            // ==============================
+
             foreach (var item in selectedRecords)
             {
                 item._ptPartialDelivered = 0;
@@ -383,7 +403,72 @@ namespace PlanningTool.NavExtension.Pages.Procurement
                 item._ptModifiedDate = now;
             }
 
+
             _context.SaveChanges();
+
+
+            // ==============================
+            // Get affected HBL numbers
+            // Used to validate ImPex status
+            // ==============================
+
+            var hblNumbers = selectedRecords
+                .Where(x => !string.IsNullOrEmpty(x._ptHBLNo))
+                .Select(x => x._ptHBLNo)
+                .Distinct()
+                .ToList();
+
+
+            if (hblNumbers.Any())
+            {
+
+                // ==============================
+                // Check remaining tagged PO
+                // If HBL still has active tagged items,
+                // keep ImPex status active
+                // ==============================
+
+                var activeTaggedHBL = _context.GetTaggedItems
+                    .Where(x =>
+                        hblNumbers.Contains(x._ptHBLNo) &&
+                        x._ptStatus == 1)
+                    .Select(x => x._ptHBLNo)
+                    .Distinct()
+                    .ToList();
+
+
+
+                // ==============================
+                // Get related ImPex records
+                // ==============================
+
+                var impexRecords = _context.tblImPexCenter
+                    .Where(x => hblNumbers.Contains(x._ptHBLNo))
+                    .ToList();
+
+
+
+                // ==============================
+                // Update ImPex status
+                // If no tagged PO remains for HBL,
+                // make it available again
+                // ==============================
+
+                foreach (var impex in impexRecords)
+                {
+                    if (!activeTaggedHBL.Contains(impex._ptHBLNo))
+                    {
+                        impex._ptStatus = 0;
+                        impex._ptModifiedBy = user;
+                        impex._ptModifiedDate = now;
+                    }
+                }
+
+
+                _context.SaveChanges();
+
+            }
+
 
 
             // ==============================
@@ -401,7 +486,7 @@ namespace PlanningTool.NavExtension.Pages.Procurement
                     <td style='padding:4px 4px;'>{item._ptItemDescription ?? "-"}</td>
                     <td style='padding:4px 4px;'>{item._ptHBLNo}</td>
                     <td style='padding:4px 4px;'>{item._ptContainerNo}</td>
-                    <td>: {item._ptContainerETA?.ToString("yyyy-MM-dd")}</td>              
+                    <td>{item._ptContainerETA?.ToString("yyyy-MM-dd")}</td>              
                 </tr>");
             }
 

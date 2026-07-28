@@ -1,0 +1,499 @@
+﻿@page
+@model PlanningTool.NavExtension.Pages.WMS.IndexModel
+@{
+	ViewBag.Title = "Warehouse Dashboard";
+
+	var today = DateTime.Today;
+	var next14 = today.AddDays(14);
+
+	// var upcoming = Model.ProcurementTagged
+	// 	.Where(x => x._ptContainerETA.HasValue &&
+	// 				x._ptContainerETA.Value.Date >= today &&
+	// 				x._ptContainerETA.Value.Date <= next14)
+	// 	.OrderBy(x => x._ptContainerETA);
+
+	var upcoming = Model.ProcurementTagged
+				.Where(x => x._ptStatus == 1)
+				.OrderBy(x => x._ptContainerETA)
+				.ToList();
+
+	var totalPO = upcoming.Count();
+	var totalContainer = upcoming.Select(x => x._ptContainerNo).Distinct().Count();
+	var totalHBL = upcoming.Select(x => x._ptHBLNo).Distinct().Count();
+	var totalVendor = upcoming.Select(x => x._ptVendorName).Distinct().Count();
+}
+
+<div class="container-fluid">
+
+	<!-- Page Header -->
+	<div class="row mb-3">
+		<div class="col-md-12">
+			<h3 class="fw-bold">
+				<i class="fas fa-chart-line text-primary"></i>
+				WHS Dashboard
+			</h3>
+
+			<small class="text-muted">
+				Upcoming Shipments (Next 14 Days)
+			</small>
+
+			<hr />
+		</div>
+	</div>
+
+	<!-- KPI CARDS -->
+
+	<div class="row">
+
+		<div class="col-lg-3 col-md-6">
+
+			<div class="card shadow-sm border-0">
+
+				<div class="card-body">
+
+					<div class="d-flex justify-content-between">
+
+						<div>
+
+							<small class="text-muted">
+								HBL
+							</small>
+
+							<h2 class="fw-bold">
+								@totalHBL
+							</h2>
+
+						</div>
+
+						<div class="text-primary">
+
+							<i class="fas fa-ship fa-2x"></i>
+
+						</div>
+
+					</div>
+
+				</div>
+
+			</div>
+
+		</div>
+
+
+		<div class="col-lg-3 col-md-6">
+
+			<div class="card shadow-sm border-0">
+
+				<div class="card-body">
+
+					<div class="d-flex justify-content-between">
+
+						<div>
+
+							<small class="text-muted">
+								Containers
+							</small>
+
+							<h2 class="fw-bold">
+								@totalContainer
+							</h2>
+
+						</div>
+
+						<div class="text-success">
+
+							<i class="fas fa-box fa-2x"></i>
+
+						</div>
+
+					</div>
+
+				</div>
+
+			</div>
+
+		</div>
+
+
+		<div class="col-lg-3 col-md-6">
+
+			<div class="card shadow-sm border-0">
+
+				<div class="card-body">
+
+					<div class="d-flex justify-content-between">
+
+						<div>
+
+							<small class="text-muted">
+								Tagged PO
+							</small>
+
+							<h2 class="fw-bold">
+								@totalPO
+							</h2>
+
+						</div>
+
+						<div class="text-warning">
+
+							<i class="fas fa-file-alt fa-2x"></i>
+
+						</div>
+
+					</div>
+
+				</div>
+
+			</div>
+
+		</div>
+
+
+		<div class="col-lg-3 col-md-6">
+
+			<div class="card shadow-sm border-0">
+
+				<div class="card-body">
+
+					<div class="d-flex justify-content-between">
+
+						<div>
+
+							<small class="text-muted">
+								Vendors
+							</small>
+
+							<h2 class="fw-bold">
+								@totalVendor
+							</h2>
+
+						</div>
+
+						<div class="text-danger">
+
+							<i class="fas fa-industry fa-2x"></i>
+
+						</div>
+
+					</div>
+
+				</div>
+
+			</div>
+
+		</div>
+
+	</div>
+	<br />
+	<table id="tblTagged" class="table table-hover w-100">
+		<thead class="bg-white table-bordered">
+			<tr style="font-size: 0.80em">
+				<th>PO No</th>
+				<th>Vendor</th>
+				<th>Item Code</th>
+				<th>Item Description</th>
+				<th>PO Outstanding Qty</th>
+				<th>Tagged Qty</th>
+				<th>Balance For Tagging</th>
+				<th>HBL No</th>
+				<th>Container No</th>
+				<th>Dedon ETA</th>
+				<th>Country of Origin</th>
+				<th>Remarks</th>
+				<th>Status</th>
+			</tr>
+
+		</thead>
+
+		<tbody>
+
+			@foreach (var item in upcoming)
+			{
+				var days = (item._ptContainerETA.Value.Date - today).Days;
+
+				string badge = "bg-success";
+				string text = $"{days} Days";
+
+				if (days == 0)
+				{
+					badge = "bg-danger";
+					text = "Today";
+				}
+				else if (days <= 3)
+				{
+					badge = "bg-warning";
+					text = $"{days} Days";
+				}
+
+				<tr style="font-size: 0.8em">
+					<td>@item._ptDocNo</td>
+					<td>@item._ptVendorName</td>
+					<td>@item._ptItemCode</td>
+					<td>@item._ptItemDescription</td>
+					<td>@item._ptOutstandingQty</td>
+					<td>@item._ptPartialDelivered</td>
+					<td>@item._ptBalanceQty</td>
+					<td>@item._ptHBLNo</td>
+					<td>@item._ptContainerNo</td>
+					<td>
+						@item._ptContainerETA.Value.ToString("MMM dd")
+					</td>
+					<td>@item._ptCountryOfOrigin</td>
+					<td>@item._ptRemarks</td>
+					<td>
+
+						<span class="badge @badge">
+
+							@text
+
+						</span>
+
+					</td>
+
+				</tr>
+
+			}
+
+		</tbody>
+
+	</table>	
+
+</div>
+@section Scripts {
+	<script>
+
+		/* ==============================
+			Utilities
+		============================== */
+
+		function getTableHeight() {
+			return `${$(window).height() * 0.6}px`;
+		}
+
+		/* ==============================
+		DataTables
+		============================== */
+
+		function createDataTable(selector, filename) {
+
+			return $(selector).DataTable({
+
+				pageLength: 25,
+
+				paging: false,
+
+				scrollX: true,
+
+				scrollY: getTableHeight(),
+
+				scrollCollapse: true,
+
+				autoWidth: false,
+
+				fixedHeader: true,
+
+				responsive: false,
+
+				stateSave: false,
+
+				destroy: true,
+
+
+				dom: 'Bfrtip',
+
+
+				buttons: [
+
+					{
+						extend: 'excelHtml5',
+
+						text: '<i class="fa fa-file-excel-o"></i> Export Excel',
+
+						className: 'btn btn-sm erp-btn',
+
+
+						title: null,
+
+						filename: filename,
+
+
+						exportOptions: {
+
+							columns: ':visible:not(.no-export)',
+
+							modifier: {
+								search: 'applied',
+								order: 'applied'
+							}
+
+						},
+
+
+						action: function (e, dt, button, config) {
+
+							const fileName = `${config.filename}.xlsx`;
+
+							const message =
+								`Export data to Excel?\n\n` +
+								`File:\n${fileName}\n\n` +
+								`The save location is controlled by your browser settings.`;
+
+
+							if (confirm(message)) {
+
+								$.fn.dataTable.ext.buttons.excelHtml5.action.call(
+									this,
+									e,
+									dt,
+									button,
+									config
+								);
+
+							}
+
+						}
+
+					}
+
+				]
+
+			});
+		}
+
+
+		/* ==============================
+		   Column Filter
+		============================== */
+
+		function addColumnFilter(table, tableId) {
+
+			const $filter = $(`${tableId}_filter`);
+
+			if (!$filter.length) return;
+
+
+			const $searchInput = $filter.find('input');
+
+			const $columnFilter = $('<select>', {
+				class: 'columnFilter form-select form-select-sm'
+			});
+
+
+			// Remove default "Search:"
+			$filter.find('label')
+				.contents()
+				.filter((_, node) => node.nodeType === 3)
+				.remove();
+
+
+			$searchInput.attr(
+				'placeholder',
+				'Type to filter (F3)'
+			);
+
+
+			table.columns().every(function (index) {
+
+				const title = $(this.header())
+					.text()
+					.trim();
+
+
+				if (title) {
+
+					$columnFilter.append(
+						$('<option>', {
+							value: index,
+							text: title
+						})
+					);
+
+				}
+
+			});
+
+
+			$searchInput.after($columnFilter);
+
+
+			function filterData() {
+
+				table.columns().search('');
+
+
+				table
+					.column(Number($columnFilter.val()))
+					.search($searchInput.val())
+					.draw();
+
+			}
+
+
+			$searchInput.on('input', filterData);
+
+			$columnFilter.on('change', filterData);
+
+		}
+
+
+		/* ==============================
+		   Page Load
+		============================== */
+
+		$(function () {
+
+
+			const today = new Date()
+				.toISOString()
+				.split('T')[0];
+
+
+			const taggedTable = createDataTable(
+				'#tblTagged',
+				`Procurement_PO_Upcoming_${today}`
+			);
+
+
+			addColumnFilter(
+				taggedTable,
+				'#tblTagged'
+			);
+
+
+			if (typeof colorDuplicateHBL === 'function') {
+
+				colorDuplicateHBL();
+
+				taggedTable.on(
+					'draw',
+					colorDuplicateHBL
+				);
+
+			}
+
+
+			$(window).on(
+				'resize',
+				function () {
+
+					$.fn.dataTable
+						.tables({
+							visible: true,
+							api: true
+						})
+						.columns
+						.adjust();
+
+				}
+			);
+
+
+		});
+
+
+	</script>
+}
+
+
+

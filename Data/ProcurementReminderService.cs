@@ -50,7 +50,7 @@ namespace PlanningTool.NavExtension.Services
                                             days <= 14,
 
                         "DelaysReminder" => emailSettings._ptDelaysReminder == true &&
-                                            reminder.ContainerETA.Value.Date < DateTime.Today,
+                                            DateTime.Today >= reminder.ContainerETA.Value.Date.AddDays(7),
 
                         _ => false
                     };
