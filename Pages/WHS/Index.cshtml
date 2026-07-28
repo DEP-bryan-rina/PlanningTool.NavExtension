@@ -1,21 +1,17 @@
 ﻿@page
-@model PlanningTool.NavExtension.Pages.WMS.IndexModel
+@model PlanningTool.NavExtension.Pages.WHS.IndexModel
 @{
 	ViewBag.Title = "Warehouse Dashboard";
 
 	var today = DateTime.Today;
 	var next14 = today.AddDays(14);
 
-	// var upcoming = Model.ProcurementTagged
-	// 	.Where(x => x._ptContainerETA.HasValue &&
-	// 				x._ptContainerETA.Value.Date >= today &&
-	// 				x._ptContainerETA.Value.Date <= next14)
-	// 	.OrderBy(x => x._ptContainerETA);
-
 	var upcoming = Model.ProcurementTagged
-				.Where(x => x._ptStatus == 1)
-				.OrderBy(x => x._ptContainerETA)
-				.ToList();
+		.Where(x => x._ptContainerETA.HasValue &&
+					x._ptStatus == 1 &&
+					x._ptContainerETA.Value.Date >= today &&
+					x._ptContainerETA.Value.Date <= next14)
+		.OrderBy(x => x._ptContainerETA);
 
 	var totalPO = upcoming.Count();
 	var totalContainer = upcoming.Select(x => x._ptContainerNo).Distinct().Count();

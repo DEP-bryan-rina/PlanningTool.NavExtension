@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using PlanningTool.NavExtension.Data;
 using PlanningTool.NavExtension.Models;
 
-namespace PlanningTool.NavExtension.Pages.WMS
+namespace PlanningTool.NavExtension.Pages.WHS
 {
     public class IndexModel : PageModel
     {

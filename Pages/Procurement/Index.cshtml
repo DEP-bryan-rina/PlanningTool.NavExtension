@@ -299,37 +299,10 @@
 							<td>
 								@if (item._ptContainerETA.HasValue)
 								{
-									var eta = item._ptContainerETA.Value.Date;
-									var today = DateTime.Today;
-
 									<span class="eta-date"
-										  data-eta="@eta.ToString("yyyy-MM-dd")">
-										@eta.ToString("yyyy-MM-dd")
+										  data-eta="@item._ptContainerETA.Value.ToString("yyyy-MM-dd")">
+										@item._ptContainerETA.Value.ToString("yyyy-MM-dd")
 									</span>
-
-									<br />
-
-									@if (today >= eta.AddDays(7))
-									{
-										<span class="badge bg-danger">
-											<i class="fas fa-triangle-exclamation me-1"></i>
-											Overdue
-										</span>
-									}
-									else if (eta <= today.AddDays(14))
-									{
-										<span class="badge bg-success">
-											<i class="fas fa-shipping-fast me-1"></i>
-											≤ 14 Days
-										</span>
-									}
-									else
-									{
-										<span class="badge bg-secondary">
-											<i class="fas fa-calendar-alt me-1"></i>
-											> 14 Days
-										</span>
-									}
 								}
 							</td>
 							<td>@item._ptCountryOfOrigin</td>
@@ -943,7 +916,7 @@
 			============================== */
 			$('.eta-date').each(function () {
 
-				const etaValue = $(this).data('eta');
+			const etaValue = $(this).data('eta');
 
 				if (!etaValue) return;
 
@@ -953,21 +926,12 @@
 				today.setHours(0, 0, 0, 0);
 				etaDate.setHours(0, 0, 0, 0);
 
-				const days = Math.ceil(
-					(etaDate - today) / (1000 * 60 * 60 * 24)
-				);
+				const days = Math.ceil((etaDate - today) / 86400000);
 
-				let color;
-
-				if (days < 0) {
-					color = '#dc3545'; // Overdue
-				}
-				else if (days <= 14) {
-					color = '#198754'; // <=14 Days
-				}
-				else {
-					color = '#6c757d'; // >14 Days
-				}
+				const color =
+					days <= -7 ? '#b02a37' : // Delayed 7+ days
+					days <= 14 ? '#198754' : // <= 14 days
+								 '#6c757d';  // > 14 days
 
 				$(this).css({
 					backgroundColor: color,
