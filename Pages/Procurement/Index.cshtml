@@ -503,7 +503,7 @@
 		}
 
 		/* ==============================
-			HBL Coloring
+			Random HBL Duplicate Coloring
 		============================== */
 
 		function colorDuplicateHBL() {
@@ -605,6 +605,9 @@
 			});
 		}
 
+		/* ==============================
+			addColumnFilter filter 
+		============================== */
 
 		function addColumnFilter(table, tableId) {
 
@@ -775,175 +778,178 @@
 				ptBalanceQty: Number($checkbox.data('balanceqty'))
 			};
 
-			if (this.checked) {
+		if (this.checked) {
 
-				const duplicate = selectedPO.some(x =>
-					x.IDDocType === item.IDDocType &&
-					x.IDDocNo === item.IDDocNo &&
-					x.IDLineNo === item.IDLineNo &&
-					x.ItemCode === item.ItemCode &&
-					x.ItemDescription === item.ItemDescription &&
-					x.VendorName === item.VendorName
-				);
+			const duplicate = selectedPO.some(x =>
+				x.IDDocType === item.IDDocType &&
+				x.IDDocNo === item.IDDocNo &&
+				x.IDLineNo === item.IDLineNo &&
+				x.ItemCode === item.ItemCode &&
+				x.ItemDescription === item.ItemDescription &&
+				x.VendorName === item.VendorName
+			);
 
-				if (duplicate) {
+			if (duplicate) {
 
-					if (!isCheckingAll) {
-						alert("This line has already been selected.");
-					}
-
-					$checkbox.prop('checked', false);
-					toggleTagButton();
-					return;
+				if (!isCheckingAll) {
+					alert("This line has already been selected.");
 				}
 
-				selectedPO.push(item);
-
-			} else {
-
-				selectedPO = selectedPO.filter(x =>
-					!(
-						x.IDDocNo === item.IDDocNo &&
-						x.IDLineNo === item.IDLineNo &&
-						x.ItemCode === item.ItemCode
-					)
-				);
+				$checkbox.prop('checked', false);
+				toggleTagButton();
+				return;
 			}
 
-			toggleTagButton();
+			selectedPO.push(item);
+
+		} else {
+
+			selectedPO = selectedPO.filter(x =>
+				!(
+					x.IDDocNo === item.IDDocNo &&
+					x.IDLineNo === item.IDLineNo &&
+					x.ItemCode === item.ItemCode
+				)
+			);
+		}
+
+		toggleTagButton();
 
 		});
 
-				
-			$impexDropdown.on('change', function () {
+		/* ==============================
+			ImPex Dropdown Changed
+		============================== */
 
-				toggleTagButton();
+		$impexDropdown.on('change', function () {
 
-				populateHBLFields();
+			toggleTagButton();
 
+			populateHBLFields();
+
+		});
+
+
+		/* ==============================
+			Modal
+		============================== */
+
+		$('#btnTagPO').on('click', function () {
+
+			const $tbody =
+				$('#tblSelected tbody').empty();
+
+				selectedPO.forEach(item => {
+
+				$tbody.append(`
+					<tr
+						data-doctype="${item.IDDocType}"
+						data-docno="${item.IDDocNo}"
+						data-line="${item.IDLineNo}"
+						data-item="${item.ItemCode}">
+
+						<td>${item.IDDocNo}</td>
+						<td>${item.VendorName}</td>
+						<td>${item.ItemCode}</td>
+						<td>${item.ItemDescription}</td>
+						<td class="text-end">
+							${item.ptOutstandingQty}
+						</td>
+						<td class="text-end">
+							${item.ptPartialQty}
+						</td>
+						<td>
+								<input type="number"
+								class="form-control form-control-sm pd text-end"
+								value="${item.ptBalanceQty}"
+								min="1"
+								max="${item.ptBalanceQty}"
+								step="0.01"
+								required
+								data-balance="${item.ptBalanceQty}">
+						</td>
+
+					</tr>
+				`);
 			});
 
+			populateHBLFields();
 
-			/* ==============================
-				Modal
-			============================== */
+			$('#tagModal').modal('show');
+		});
 
-			$('#btnTagPO').on('click', function () {
+		/* ==============================
+			Save Payload
+		============================== */
 
-				const $tbody =
-					$('#tblSelected tbody').empty();
+		$('#btnProceed').on('click', function () {
 
-					selectedPO.forEach(item => {
+			const payload = [];
 
-					$tbody.append(`
-						<tr
-							data-doctype="${item.IDDocType}"
-							data-docno="${item.IDDocNo}"
-							data-line="${item.IDLineNo}"
-							data-item="${item.ItemCode}">
+			$('#tblSelected tbody tr').each(function () {
 
-							<td>${item.IDDocNo}</td>
-							<td>${item.VendorName}</td>
-							<td>${item.ItemCode}</td>
-							<td>${item.ItemDescription}</td>
-							<td class="text-end">
-								${item.ptOutstandingQty}
-							</td>
-							<td class="text-end">
-								${item.ptPartialQty}
-							</td>
-							<td>
-									<input type="number"
-									class="form-control form-control-sm pd text-end"
-									value="${item.ptBalanceQty}"
-									min="1"
-									max="${item.ptBalanceQty}"
-									step="0.01"
-									required
-									data-balance="${item.ptBalanceQty}">
-							</td>
+				payload.push({
 
-						</tr>
-					`);
+					ptHBLNo: $('#modalHBL').val() || '',
+					ptContainerNo: $('#modalContainer').val() || '',
+
+					IDDocType: Number($(this).data('doctype')),
+					IDDocNo: String($(this).data('docno')),
+					IDLineNo: Number($(this).data('line')),
+
+					ItemCode: String($(this).data('item')),
+					ItemDescription:
+						$(this).find('td:eq(3)').text().trim(),
+
+					ptPartialDelivered:
+						Number($(this).find('.pd').val() || 0),
+
+					ptContainerETA:
+						$('#modalDedonETA').val(),
+
+					ptRemarks:
+						$('#modalRemarks').val() || ''
 				});
-
-				populateHBLFields();
-
-				$('#tagModal').modal('show');
 			});
 
-			/* ==============================
-				Save Payload
-			============================== */
+			$('#SelectedRowsJson')
+				.val(JSON.stringify(payload));
 
-			$('#btnProceed').on('click', function () {
+		});
 
-				const payload = [];
-
-				$('#tblSelected tbody tr').each(function () {
-
-					payload.push({
-
-						ptHBLNo: $('#modalHBL').val() || '',
-						ptContainerNo: $('#modalContainer').val() || '',
-
-						IDDocType: Number($(this).data('doctype')),
-						IDDocNo: String($(this).data('docno')),
-						IDLineNo: Number($(this).data('line')),
-
-						ItemCode: String($(this).data('item')),
-						ItemDescription:
-							$(this).find('td:eq(3)').text().trim(),
-
-						ptPartialDelivered:
-							Number($(this).find('.pd').val() || 0),
-
-						ptContainerETA:
-							$('#modalDedonETA').val(),
-
-						ptRemarks:
-							$('#modalRemarks').val() || ''
-					});
-				});
-
-				$('#SelectedRowsJson')
-					.val(JSON.stringify(payload));
-
-			});
-
-			/* ==============================
-				Apply CSS Color
-			============================== */
-			$('.eta-date').each(function () {
+		/* ==============================
+			Apply CSS Color
+		============================== */
+		$('.eta-date').each(function () {
 
 			const etaValue = $(this).data('eta');
 
-				if (!etaValue) return;
+			if (!etaValue) return;
 
-				const etaDate = new Date(etaValue);
-				const today = new Date();
+			const etaDate = new Date(etaValue);
+			const today = new Date();
 
-				today.setHours(0, 0, 0, 0);
-				etaDate.setHours(0, 0, 0, 0);
+			today.setHours(0, 0, 0, 0);
+			etaDate.setHours(0, 0, 0, 0);
 
-				const days = Math.ceil((etaDate - today) / 86400000);
+			const days = Math.ceil((etaDate - today) / 86400000);
 
-				const color =
-					days <= -7 ? '#b02a37' : // Delayed 7+ days
-					days <= 14 ? '#198754' : // <= 14 days
-								 '#6c757d';  // > 14 days
+			const color =
+				days <= -7 ? '#b02a37' : // Delayed 7+ days
+				days <= 14 ? '#198754' : // <= 14 days
+								'#6c757d';  // > 14 days
 
-				$(this).css({
-					backgroundColor: color,
-					color: '#fff',
-					padding: '3px 8px',
-					borderRadius: '4px',
-					fontWeight: '600',
-					fontSize: '0.8em',
-					display: 'inline-block'
-				});
-
+			$(this).css({
+				backgroundColor: color,
+				color: '#fff',
+				padding: '3px 8px',
+				borderRadius: '4px',
+				fontWeight: '600',
+				fontSize: '0.8em',
+				display: 'inline-block'
 			});
+
+		});
 
 		$(document).on('change', '.rowtag-check', function () {
 
