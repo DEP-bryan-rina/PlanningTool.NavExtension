@@ -87,12 +87,10 @@
 									</label>
 
 									<select asp-for="EmailNotification._ptUserType"
+											asp-items="Model.UserTypes"
 											class="form-select erp-dropdown"
 											required>
 										<option value="">-- Select --</option>
-										<option value="Admin">Admin</option>
-										<option value="User">User</option>
-										<option value="Notification" selected>Notification</option>
 									</select>
 
 								</div>
@@ -566,9 +564,10 @@
 				paging: true,
 				autoWidth: false,
 				fixedHeader: true,
-				stateSave: true
+				stateSave: false
 			});
 
 		});
+
 	</script>
 }

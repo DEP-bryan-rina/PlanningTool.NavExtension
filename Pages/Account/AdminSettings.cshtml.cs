@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using PlanningTool.NavExtension.Data;
 using PlanningTool.NavExtension.Models;
@@ -38,7 +39,12 @@ namespace PlanningTool.NavExtension.Pages.Account
                     ?? new EmailNotication();
             }
         }
-
+        public List<SelectListItem> UserTypes { get; set; } = new()
+        {
+            new SelectListItem { Value = "Admin", Text = "Admin" },
+            new SelectListItem { Value = "User", Text = "User" },
+            new SelectListItem { Value = "Notification", Text = "Notification" }
+        };
         public IActionResult OnPostSave()
         {
             try
