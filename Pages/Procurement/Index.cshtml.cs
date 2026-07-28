@@ -45,6 +45,7 @@ namespace PlanningTool.NavExtension.Pages.Procurement
         [BindProperty(SupportsGet = true)] 
 
         public string? HBLNo { get; set; }
+
         public List<ProcurementCenterBalance> ProcurementTagged { get; set; } = new();        
 
         [BindProperty] public ImPexCenterModel Impex { get; set; }
@@ -464,7 +465,6 @@ namespace PlanningTool.NavExtension.Pages.Procurement
                     }
                 }
 
-
                 _context.SaveChanges();
 
             }
@@ -479,15 +479,16 @@ namespace PlanningTool.NavExtension.Pages.Procurement
 
             foreach (var item in selectedRecords)
             {
-            emailRows.Append($@"
-                <tr>
-                    <td style='padding:4px 4px;'>{item._ptDocNo}</td>
-                    <td style='padding:4px 4px;'>{item._ptItemCode}</td>
-                    <td style='padding:4px 4px;'>{item._ptItemDescription ?? "-"}</td>
-                    <td style='padding:4px 4px;'>{item._ptHBLNo}</td>
-                    <td style='padding:4px 4px;'>{item._ptContainerNo}</td>
-                    <td>{item._ptContainerETA?.ToString("yyyy-MM-dd")}</td>              
-                </tr>");
+                emailRows.Append($@"
+                    <tr>
+                        <td style='padding:4px 4px;'>{item._ptDocNo}</td>
+                        <td style='padding:4px 4px;'>{item._ptItemCode}</td>
+                        <td style='padding:4px 4px;'>{item._ptItemDescription ?? "-"}</td>
+                        <td style='padding:4px 4px;'>{item._ptHBLNo}</td>
+                        <td style='padding:4px 4px;'>{item._ptContainerNo}</td>
+                        <td>{item._ptContainerETA?.ToString("yyyy-MM-dd")}</td>              
+                    </tr>"
+                );
             }
 
 

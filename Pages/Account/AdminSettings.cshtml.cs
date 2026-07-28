@@ -122,18 +122,33 @@ namespace PlanningTool.NavExtension.Pages.Account
             return RedirectToPage();
         }
 
-        public IActionResult OnGetDelete(int id)
+        public IActionResult OnPostDelete(int id)
         {
             var data = _context.EmailNotifications
                 .FirstOrDefault(x => x._PK_ptEmailNotification_ID == id);
 
             if (data != null)
             {
-                _context.EmailNotifications.Remove(data);
+                data._ptStatus = "Inactive";
                 _context.SaveChanges();
             }
 
-            TempData["Success"] = "Deleted successfully";
+            TempData["Success"] = "Marked as inactive successfully";
+            return RedirectToPage();
+        }
+
+        public IActionResult OnPostActivate(int id)
+        {
+            var data = _context.EmailNotifications
+                .FirstOrDefault(x => x._PK_ptEmailNotification_ID == id);
+
+            if (data != null)
+            {
+                data._ptStatus = "Active";
+                _context.SaveChanges();
+            }
+
+            TempData["Success"] = "Activated successfully";
             return RedirectToPage();
         }
         private string GenerateEmailBody(ReminderNotification reminder)
@@ -141,31 +156,31 @@ namespace PlanningTool.NavExtension.Pages.Account
             if (reminder.ReminderType == "2WeeksReminder")
             {
                 return $@"
-            <p>Hello Team,</p>
+                <p>Hello Team,</p>
 
-            <p>
-                This is an automated reminder that the following shipment
-                is expected to arrive within the next 14 days.
-            </p>
+                <p>
+                    This is an automated reminder that the following shipment
+                    is expected to arrive within the next 14 days.
+                </p>
 
-            <table border='1' cellpadding='5'>
-                <tr>
-                    <td><b>PO No</b></td>
-                    <td>{reminder.PONo}</td>
-                </tr>
-                <tr>
-                    <td><b>HBL No</b></td>
-                    <td>{reminder.HBLNo}</td>
-                </tr>
-                <tr>
-                    <td><b>Container No</b></td>
-                    <td>{reminder.ContainerNo}</td>
-                </tr>
-                <tr>
-                    <td><b>ETA</b></td>
-                    <td>{reminder.ContainerETA:MMMM dd, yyyy}</td>
-                </tr>
-            </table>";
+                <table border='1' cellpadding='5'>
+                    <tr>
+                        <td><b>PO No</b></td>
+                        <td>{reminder.PONo}</td>
+                    </tr>
+                    <tr>
+                        <td><b>HBL No</b></td>
+                        <td>{reminder.HBLNo}</td>
+                    </tr>
+                    <tr>
+                        <td><b>Container No</b></td>
+                        <td>{reminder.ContainerNo}</td>
+                    </tr>
+                    <tr>
+                        <td><b>ETA</b></td>
+                        <td>{reminder.ContainerETA:MMMM dd, yyyy}</td>
+                    </tr>
+                </table>";
             }
 
             return $@"
