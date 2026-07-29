@@ -49,71 +49,58 @@
 	</div>
 
 	<!-- KPI CARDS -->
+	<div class="row mb-4">
 
-	<div class="row">
-
-		<!-- HBL -->
-		<div class="col-lg-3 col-md-6">
-			<div class="card shadow-sm border-0">
-				<div class="card-body">
-					<div class="d-flex justify-content-between align-items-center">
-						<div>
-							<small class="text-muted">HBL</small>
-							<h2 class="fw-bold mb-0">@totalHBL</h2>
-						</div>
-						<i class="fas fa-truck fa-2x text-primary"></i>						
+		<div class="col-md-3 mb-3">
+			<div class="card qa-card h-100">
+				<div class="card-body d-flex align-items-center">					
+					<i class="bi bi-truck text-danger fs-1 me-3"></i>
+					<div>
+						<div class="kpi-value text-danger">@totalHBL</div>
+						<div class="kpi-label">HBL</div>
 					</div>
 				</div>
 			</div>
 		</div>
 
-		<!-- Containers -->
-		<div class="col-lg-3 col-md-6">
-			<div class="card shadow-sm border-0">
-				<div class="card-body">
-					<div class="d-flex justify-content-between align-items-center">
-						<div>
-							<small class="text-muted">Containers</small>
-							<h2 class="fw-bold mb-0">@totalContainer</h2>
-						</div>
-						<i class="fas fa-boxes-stacked fa-2x text-success"></i>
+		<div class="col-md-3 mb-3">
+			<div class="card qa-card h-100">
+				<div class="card-body d-flex align-items-center">					
+					<i class="bi bi-boxes text-success fs-1 me-3"></i>
+					<div>
+						<div class="kpi-value text-success">@totalContainer</div>
+						<div class="kpi-label">Containers</div>
 					</div>
 				</div>
 			</div>
 		</div>
 
-		<!-- Tagged PO -->
-		<div class="col-lg-3 col-md-6">
-			<div class="card shadow-sm border-0">
-				<div class="card-body">
-					<div class="d-flex justify-content-between align-items-center">
-						<div>
-							<small class="text-muted">Tagged PO</small>
-							<h2 class="fw-bold mb-0">@totalPO</h2>
-						</div>
-						<i class="fas fa-clipboard-check fa-2x text-warning"></i>
+		<div class="col-md-3 mb-3">
+			<div class="card qa-card h-100">
+				<div class="card-body d-flex align-items-center">
+					<i class="bi bi-clipboard2-check text-primary fs-1 me-3"></i>					
+					<div>
+						<div class="kpi-value text-primary">@totalPO</div>
+						<div class="kpi-label">PO Tagged</div>
 					</div>
 				</div>
 			</div>
 		</div>
 
-		<!-- Vendors -->
-		<div class="col-lg-3 col-md-6">
-			<div class="card shadow-sm border-0">
-				<div class="card-body">
-					<div class="d-flex justify-content-between align-items-center">
-						<div>
-							<small class="text-muted">Vendors</small>
-							<h2 class="fw-bold mb-0">@totalVendor</h2>
-						</div>
-						<i class="fas fa-dolly fa-2x text-success"></i>
+		<div class="col-md-3 mb-3">
+			<div class="card qa-card h-100">
+				<div class="card-body d-flex align-items-center">					
+					<i class="bi bi-person-badge text-warning fs-1 me-3"></i>
+					<div>
+						<div class="kpi-value text-warning">@totalVendor</div>
+						<div class="kpi-label">Vendors</div>
 					</div>
 				</div>
 			</div>
 		</div>
-
 	</div>
-	<br />
+	
+	
 	<table id="tblTagged" class="table table-hover w-100">
 		<thead class="bg-white table-bordered">
 			<tr style="font-size: 0.80em">

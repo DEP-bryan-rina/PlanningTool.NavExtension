@@ -1,222 +1,421 @@
 ﻿@page
 @model PlanningTool.NavExtension.Pages.QA.IndexModel
 @{
-    ViewData["Title"] = "QA Dashboard";
+	ViewData["Title"] = "QA Dashboard";
 }
+<style>
+	@@keyframes pulse {
+		0%, 100% {
+			transform: scale(1);
+		}
 
-<div class="qa-dashboard-header mb-4">
-    <div class="d-flex align-items-center">
-		<img src="~/logo.png" alt="logo" class="rounded-circle" width="40" height="40"/>&nbsp;
-        <div class="qa-title">
-            RAW MATERIAL QUALITY INSPECTION DASHBOARD
-        </div>
-    </div>
+		50% {
+			transform: scale(1.15);
+		}
+	}
+</style>
+<div class="container-fluid">
+	<!-- Page Header -->
+	<div class="row mb-3">
+		<div class="col-md-12">
+			<h3 class="fw-bold">
+				<i class="fas fa-chart-line text-success"></i>
+				QA Dashboard
+			</h3>
+
+			<h6 class="mb-3 text-secondary">
+				<i class="fas fa-clipboard-check me-2 text-success"
+				   style="display:inline-block; animation:pulse 2s ease-in-out infinite;"></i>
+				Quality Monitoring & Analytics
+			</h6>
+
+			<hr />
+		</div>
+	</div>
+
+	<div class="row mb-4">
+
+		<div class="col-md-3 mb-3">
+			<div class="card qa-card h-100">
+				<div class="card-body d-flex align-items-center">
+					<i class="bi bi-exclamation-triangle text-danger fs-1 me-3"></i>
+					<div>
+						<div class="kpi-value text-danger">@Model.DefectRate%</div>
+						<div class="kpi-label">Defect Rate</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div class="col-md-3 mb-3">
+			<div class="card qa-card h-100">
+				<div class="card-body d-flex align-items-center">
+					<i class="bi bi-stopwatch text-success fs-1 me-3"></i>
+					<div>
+						<div class="kpi-value text-success">@Model.Completion%</div>
+						<div class="kpi-label">Completion</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div class="col-md-3 mb-3">
+			<div class="card qa-card h-100">
+				<div class="card-body d-flex align-items-center">
+					<i class="bi bi-clipboard2-check text-primary fs-1 me-3"></i>
+					<div>
+						<div class="kpi-value text-primary">@Model.QualityRating%</div>
+						<div class="kpi-label">Quality Rating</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div class="col-md-3 mb-3">
+			<div class="card qa-card h-100">
+				<div class="card-body d-flex align-items-center">
+					<i class="bi bi-calendar-check text-warning fs-1 me-3"></i>
+					<div>
+						<div class="kpi-value text-warning">@Model.LeadTime</div>
+						<div class="kpi-label">Lead Time (Days)</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+	</div>
+
+	<div class="table-responsive qa-table-container">
+		<table id="tblQA" class="table table-hover w-100">
+			<thead class="sticky-top bg-white table-bordered" style="font-size:0.75rem;">
+				<tr>
+					<th>Item Code</th>
+					<th>Description</th>
+					<th>Date Received</th>
+					<th>UoM</th>
+					<th class="text-center">Qty Received</th>
+					<th class="text-center">Status</th>
+					<th class="text-center">Qty Good</th>
+					<th class="text-center">Qty Reject</th>
+					<th class="text-center">Qty Repair</th>
+					<th class="text-center">Earliest WK Required</th>
+					<th class="text-center">Lead Time (Days)</th>
+				</tr>
+			</thead>
+
+			<tbody style="font-size:0.75rem;">
+
+				@if (Model.Items?.Any() == true)
+				{
+					@foreach (var item in Model.Items)
+					{
+						var statusClass = item.Status switch
+						{
+							"OK" => "status-ok",
+							"WIP" => "status-wip",
+							"NS" => "status-ns",
+							_ => "status-na"
+						};
+
+						<tr>
+							<td><strong>@item.ItemCode</strong></td>
+							<td>@item.Description</td>
+							<td>@item.DateReceived?.ToString("yyyy-MM-dd")</td>
+							<td>@item.UOM</td>
+
+							<td class="text-center">
+								@item.QtyReceived.ToString("N0")
+							</td>
+
+							<td class="text-center @statusClass">
+								@item.Status
+							</td>
+
+							<td class="text-center">
+								@item.QtyGood.ToString("N0")
+							</td>
+
+							<td class="text-center">
+								@if (item.QtyReject > 0)
+								{
+									<span class="badge bg-danger">
+										@item.QtyReject.ToString("N0")
+									</span>
+								}
+								else
+								{
+									@item.QtyReject.ToString("N0")
+								}
+							</td>
+
+							<td class="text-center">
+								@if (item.QtyRepair > 0)
+								{
+									<span class="badge bg-primary">
+										@item.QtyRepair.ToString("N0")
+									</span>
+								}
+								else
+								{
+									@item.QtyRepair.ToString("N0")
+								}
+							</td>
+
+							<td class="text-center">
+								@item.EarliestWKRequired
+							</td>
+
+							<td class="text-center" style="width:100px;">
+								@(item.LeadTimeDays > 0 ? item.LeadTimeDays.ToString() : "")
+							</td>
+						</tr>
+					}
+				}
+				else
+				{
+					<tr>
+						<td colspan="11" class="text-center">
+							No records found.
+						</td>
+					</tr>
+				}
+
+			</tbody>
+		</table>
+	</div>
 </div>
-
-<div class="row mb-4">
-
-    <div class="col-md-3 mb-3">
-        <div class="card qa-card h-100">
-            <div class="card-body d-flex align-items-center">
-                <i class="bi bi-exclamation-triangle text-danger fs-1 me-3"></i>
-                <div>
-                    <div class="kpi-value text-danger">@Model.DefectRate%</div>
-                    <div class="kpi-label">Defect Rate</div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-md-3 mb-3">
-        <div class="card qa-card h-100">
-            <div class="card-body d-flex align-items-center">
-                <i class="bi bi-stopwatch text-success fs-1 me-3"></i>
-                <div>
-                    <div class="kpi-value text-success">@Model.Completion%</div>
-                    <div class="kpi-label">Completion</div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-md-3 mb-3">
-        <div class="card qa-card h-100">
-            <div class="card-body d-flex align-items-center">
-                <i class="bi bi-clipboard2-check text-primary fs-1 me-3"></i>
-                <div>
-                    <div class="kpi-value text-primary">@Model.QualityRating%</div>
-                    <div class="kpi-label">Quality Rating</div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-md-3 mb-3">
-        <div class="card qa-card h-100">
-            <div class="card-body d-flex align-items-center">
-                <i class="bi bi-calendar-check text-warning fs-1 me-3"></i>
-                <div>
-                    <div class="kpi-value text-warning">@Model.LeadTime</div>
-                    <div class="kpi-label">Lead Time (Days)</div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-</div>
-
-<div class="table-responsive qa-table-container">
-    <table id="tblQA" class="table table-hover w-100">
-        <thead class="sticky-top bg-white table-bordered" style="font-size:0.75rem;">
-            <tr>
-                <th>Item Code</th>
-                <th>Description</th>
-                <th>Date Received</th>
-                <th>UoM</th>
-                <th class="text-center">Qty Received</th>
-                <th class="text-center">Status</th>
-                <th class="text-center">Qty Good</th>
-                <th class="text-center">Qty Reject</th>
-                <th class="text-center">Qty Repair</th>
-                <th class="text-center">Earliest WK Required</th>
-                <th class="text-center">Lead Time (Days)</th>
-            </tr>
-        </thead>
-
-        <tbody style="font-size:0.75rem;">
-
-            @if (Model.Items?.Any() == true)
-            {
-                @foreach (var item in Model.Items)
-                {
-                    var statusClass = item.Status switch
-                    {
-                        "OK" => "status-ok",
-                        "WIP" => "status-wip",
-                        "NS" => "status-ns",
-                        _ => "status-na"
-                    };
-
-                    <tr>
-                        <td><strong>@item.ItemCode</strong></td>
-                        <td>@item.Description</td>
-                        <td>@item.DateReceived?.ToString("yyyy-MM-dd")</td>
-                        <td>@item.UOM</td>
-
-                        <td class="text-center">
-                            @item.QtyReceived.ToString("N0")
-                        </td>
-
-                        <td class="text-center @statusClass">
-                            @item.Status
-                        </td>
-
-                        <td class="text-center">
-                            @item.QtyGood.ToString("N0")
-                        </td>
-
-                        <td class="text-center">
-                            @if (item.QtyReject > 0)
-                            {
-                                <span class="badge bg-danger">
-                                    @item.QtyReject.ToString("N0")
-                                </span>
-                            }
-                            else
-                            {
-                                @item.QtyReject.ToString("N0")
-                            }
-                        </td>
-
-                        <td class="text-center">
-                            @if (item.QtyRepair > 0)
-                            {
-                                <span class="badge bg-primary">
-                                    @item.QtyRepair.ToString("N0")
-                                </span>
-                            }
-                            else
-                            {
-                                @item.QtyRepair.ToString("N0")
-                            }
-                        </td>
-
-                        <td class="text-center">
-                            @item.EarliestWKRequired
-                        </td>
-
-                        <td class="text-center" style="width:100px;">
-                            @(item.LeadTimeDays > 0 ? item.LeadTimeDays.ToString() : "")
-                        </td>
-                    </tr>
-                }
-            }
-            else
-            {
-                <tr>
-                    <td colspan="11" class="text-center">
-                        No records found.
-                    </td>
-                </tr>
-            }
-
-        </tbody>
-    </table>
-</div>
-
 @section Scripts
 {
-    <script>
-        $(function () {
+	<script>
 
-            // Dropdown and Seach
-            const table = $('#tblQA').DataTable({
-                pageLength: 25,
-                scrollX: true,
-                scrollY: '60vh',
-                scrollCollapse: true,
-                paging: true,
-                autoWidth: false,
-                fixedHeader: true,
-                stateSave: true
-            });
-            const $input = $('#tblQA_filter input');
-            const $select = $('<select id="columnFilter"></select>');
+		/* ==============================
+			Utilities
+		============================== */
 
-            table.columns().every(function (i) {
-                const title = $(this.header()).text().trim();
+		function getTableHeight() {
+			return `${$(window).height() * 0.6}px`;
+		}
 
-                if (title) {
-                    $select.append(`<option value="${i}">${title}</option>`);
-                }
-            });
+		/* ==============================
+		DataTables
+		============================== */
 
-            $('#tblQA_filter label')
-                .contents()
-                .filter((_, n) => n.nodeType === 3)
-                .remove();
+		function createDataTable(selector, filename) {
 
-            $input
-                .attr('placeholder', 'Type to filter (F3)')
-                .after($select)
-                .on('input', function () {
-                    table.columns().search('');
-                    table.column($select.val()).search(this.value).draw();
-                });
+			return $(selector).DataTable({
 
-            $select.on('change', () => $input.trigger('input'));
+				pageLength: 25,
 
-            const savedSearch = sessionStorage.getItem('tblQASearch');
+				paging: false,
 
-            if (savedSearch) {
-                table.search(savedSearch).draw();
-                $('.dataTables_filter input').val(savedSearch);
-            }
+				scrollX: true,
 
-            $('.dataTables_filter input').on('keyup', function () {
-                sessionStorage.setItem('tblQASearch', this.value);
-            });
+				scrollY: getTableHeight(),
 
-        });
-    </script>
+				scrollCollapse: true,
+
+				autoWidth: false,
+
+				fixedHeader: true,
+
+				responsive: false,
+
+				stateSave: false,
+
+				destroy: true,
+
+
+				dom: 'Bfrtip',
+
+
+				buttons: [
+
+					{
+						extend: 'excelHtml5',
+
+						text: '<i class="fa fa-file-excel-o"></i> Export Excel',
+
+						className: 'btn btn-sm erp-btn',
+
+
+						title: null,
+
+						filename: filename,
+
+
+						exportOptions: {
+
+							columns: ':visible:not(.no-export)',
+
+							modifier: {
+								search: 'applied',
+								order: 'applied'
+							}
+
+						},
+
+
+						action: function (e, dt, button, config) {
+
+							const fileName = `${config.filename}.xlsx`;
+
+							const message =
+								`Export data to Excel?\n\n` +
+								`File:\n${fileName}\n\n` +
+								`The save location is controlled by your browser settings.`;
+
+
+							if (confirm(message)) {
+
+								$.fn.dataTable.ext.buttons.excelHtml5.action.call(
+									this,
+									e,
+									dt,
+									button,
+									config
+								);
+
+							}
+
+						}
+
+					}
+
+				]
+
+			});
+		}
+
+
+		/* ==============================
+		   Column Filter
+		============================== */
+
+		function addColumnFilter(table, tableId) {
+
+			const $filter = $(`${tableId}_filter`);
+
+			if (!$filter.length) return;
+
+
+			const $searchInput = $filter.find('input');
+
+			const $columnFilter = $('<select>', {
+				class: 'columnFilter form-select form-select-sm'
+			});
+
+
+			// Remove default "Search:"
+			$filter.find('label')
+				.contents()
+				.filter((_, node) => node.nodeType === 3)
+				.remove();
+
+
+			$searchInput.attr(
+				'placeholder',
+				'Type to filter (F3)'
+			);
+
+
+			table.columns().every(function (index) {
+
+				const title = $(this.header())
+					.text()
+					.trim();
+
+
+				if (title) {
+
+					$columnFilter.append(
+						$('<option>', {
+							value: index,
+							text: title
+						})
+					);
+
+				}
+
+			});
+
+
+			$searchInput.after($columnFilter);
+
+
+			function filterData() {
+
+				table.columns().search('');
+
+
+				table
+					.column(Number($columnFilter.val()))
+					.search($searchInput.val())
+					.draw();
+
+			}
+
+
+			$searchInput.on('input', filterData);
+
+			$columnFilter.on('change', filterData);
+
+		}
+
+
+		/* ==============================
+		   Page Load
+		============================== */
+
+		$(function () {
+
+
+			const today = new Date()
+				.toISOString()
+				.split('T')[0];
+
+
+			const taggedTable = createDataTable(
+				'#tblQA',
+				`QA_Dashboard_Report_${today}`
+			);
+
+
+			addColumnFilter(
+				taggedTable,
+				'#tblQA'
+			);
+
+
+			if (typeof colorDuplicateHBL === 'function') {
+
+				colorDuplicateHBL();
+
+				taggedTable.on(
+					'draw',
+					colorDuplicateHBL
+				);
+
+			}
+
+
+			$(window).on(
+				'resize',
+				function () {
+
+					$.fn.dataTable
+						.tables({
+							visible: true,
+							api: true
+						})
+						.columns
+						.adjust();
+
+				}
+			);
+
+
+		});
+
+
+	</script>
 }
