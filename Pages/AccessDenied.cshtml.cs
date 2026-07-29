@@ -27,7 +27,7 @@ namespace PlanningTool.NavExtension.Pages
                     userId.ToUpperInvariant());
 
             if (permission?.Procurement == true)
-                ReturnUrl = "/Procurement/Tagging";
+                ReturnUrl = "/Procurement/Index";
             else if (permission?.ImPex == true)
                 ReturnUrl = "/Impex/Index";
         }

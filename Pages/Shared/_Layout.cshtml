@@ -153,6 +153,8 @@
 
 					</ul>
 				</li>
+
+				<!-- 🔷 Warehouse Dashboard -->
 				<li class="nav-item">
 					<a class="nav-link @(currentPath.StartsWith("/WHS") ? "active" : "")"
 					   asp-page="/WHS/Index">
@@ -164,17 +166,25 @@
 
 			<div class="d-flex align-items-center text-white">
 
-				<!-- Refresh Button -->
-
 				<button id="btnRefresh"
-						class="btn btn-link text-white me-3"
-						title="Sync all data">
-
+						class="btn btn-link text-white p-0 me-3"
+						title="Sync All Data">
 					<i class="fas fa-sync-alt"></i>
-
 				</button>
+
 				<i class="bi bi-person-circle me-1"></i>
-				@currentUser
+				<span>@currentUser</span>
+
+				@if (User?.Identity?.IsAuthenticated == true)
+				{
+					<a asp-page="/Account/Logout"
+					   class="text-white text-decoration-none ms-3"
+					   title="Sign Out Active Directory Account">
+						<i class="fas fa-sign-out-alt me-1"></i>
+						Sign Out
+					</a>
+				}
+
 			</div>
 
 		</div>
