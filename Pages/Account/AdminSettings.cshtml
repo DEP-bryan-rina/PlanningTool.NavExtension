@@ -203,8 +203,8 @@
 										<td class="text-center">
 											<a asp-page="./AdminSettings"
 											   asp-route-id="@item._PK_ptEmailNotification_ID"
-											   class="btn btn-warning btn-sm">
-												<i class="fa fa-pencil small"></i>
+											   class="btn btn-warning btn-sm erp-btn">
+												<i class="fa fa-pencil small text-primary"></i>
 											</a>
 
 											@if (item._ptStatus == "Inactive")
@@ -217,10 +217,10 @@
 														   value="@item._PK_ptEmailNotification_ID" />
 
 													<button type="submit"
-															class="btn btn-success btn-sm"
+															class="btn btn-success btn-sm erp-btn"
 															title="Activate"
 															onclick="return confirm('Are you sure you want to activate @item._ptEmailAddress?');">
-														<i class="fa fa-check"></i>
+														<i class="fa fa-check text-success"></i>
 													</button>
 												</form>
 											}
@@ -234,10 +234,10 @@
 														   value="@item._PK_ptEmailNotification_ID" />
 
 													<button type="submit"
-															class="btn btn-danger btn-sm"
+															class="btn btn-danger btn-sm erp-btn"
 															title="Inactive"
 															onclick="return confirm('Are you sure you want to mark @item._ptEmailAddress as inactive?');">
-														<i class="fa fa-ban"></i>
+														<i class="fa fa-ban text-danger"></i>
 													</button>
 												</form>
 											}

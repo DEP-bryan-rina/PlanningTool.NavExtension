@@ -176,7 +176,8 @@ namespace PlanningTool.NavExtension.Services
                         recipients,
                         subject,
                         body,
-                        EmailModules.ShipmentNotification);
+                        EmailModules.ShipmentNotification
+                    );
 
                     reminder.EmailStatus = "Sent";
                     reminder.SentDate = DateTime.Now;
