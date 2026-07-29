@@ -153,7 +153,13 @@
 
 					</ul>
 				</li>
-
+				<li class="nav-item">
+					<a class="nav-link @(currentPath.StartsWith("/WHS") ? "active" : "")"
+					   asp-page="/WHS/Index">
+						<i class="bi bi-box-seam me-1"></i>
+						WHS
+					</a>
+				</li>
 			</ul>
 
 			<div class="d-flex align-items-center text-white">
