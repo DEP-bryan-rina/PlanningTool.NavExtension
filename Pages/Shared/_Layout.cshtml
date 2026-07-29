@@ -96,51 +96,53 @@
 		<a class="navbar-brand" asp-page="/Index">
 			<span class="fw-medium" style="color: darkorange">Planning Tool</span>
 			<small class="opacity-75">| NAV Extension</small>
-		</a>		
+		</a>
 
 		<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#topMenu">
 			<span class="navbar-toggler-icon"></span>
 		</button>
 
 		<div class="collapse navbar-collapse" id="topMenu">
+			@{
+				var menus = new[]
+				{
+					new
+					{
+						Visible = permission?.ImPex == true,
+						Path = "/ImPex",
+						Page = "/ImPex/Index",
+						Icon = "bi-globe2",
+						Text = "Impex Center"
+					},
+					new
+					{
+						Visible = permission?.Procurement == true,
+						Path = "/Procurement",
+						Page = "/Procurement/Index",
+						Icon = "bi-cart-check",
+						Text = "Procurement Center"
+					}
+				};
+
+				var visibleMenus = menus.Where(m => m.Visible).ToList();
+			}
 
 			<ul class="navbar-nav me-auto">
 
-				<!-- 🔷 Material Planning Main Menu -->
-				<li class="nav-item dropdown">
-					<a class="nav-link dropdown-toggle"
-					   href="#"
-					   id="materialPlanningMenu"
-					   role="button"
-					   data-bs-toggle="dropdown"
-					   aria-expanded="false">
-						Material Arrival Update
-					</a>
+				@if (visibleMenus.Any())
+				{
+					<li class="nav-item dropdown">
+						<a class="nav-link dropdown-toggle"
+						   href="#"
+						   id="arrivalUpdateMenu"
+						   role="button"
+						   data-bs-toggle="dropdown"
+						   aria-expanded="false">
+							Material Arrival Update
+						</a>
 
-					<ul class="dropdown-menu" aria-labelledby="materialPlanningMenu">
-
-						@{
-							var menus = new[]
-							{
-								new
-								{
-									Visible = permission?.ImPex == true,
-									Path = "/ImPex",
-									Page = "/ImPex/Index",
-									Icon = "bi-globe2",
-									Text = "Impex Center"
-								},
-								new
-								{
-									Visible = permission?.Procurement == true,
-									Path = "/Procurement",
-									Page = "/Procurement/Index",
-									Icon = "bi-cart-check",
-									Text = "Procurement Center"
-								}
-							};
-
-							@foreach (var menu in menus.Where(m => m.Visible))
+						<ul class="dropdown-menu" aria-labelledby="arrivalUpdateMenu">
+							@foreach (var menu in visibleMenus)
 							{
 								<li>
 									<a class="dropdown-item @(currentPath.StartsWith(menu.Path) ? "active" : "")"
@@ -150,11 +152,10 @@
 									</a>
 								</li>
 							}
-						}
-					</ul>
-				</li>
+						</ul>
+					</li>
+				}
 
-				<!-- 🔷 Warehouse Dashboard -->
 				<li class="nav-item">
 					<a class="nav-link @(currentPath.StartsWith("/WHS") ? "active" : "")"
 					   asp-page="/WHS/Index">
@@ -162,7 +163,9 @@
 						WHS
 					</a>
 				</li>
+
 			</ul>
+
 
 			<div class="d-flex align-items-center text-white">
 
@@ -173,7 +176,7 @@
 				</button>
 
 				<i class="bi bi-person-circle me-1" style="color: darkorange"></i>
-				<span>@currentUser</span>				
+				<span>@currentUser</span>
 
 			</div>
 
