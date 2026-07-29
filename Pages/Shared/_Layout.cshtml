@@ -139,6 +139,17 @@
 									Text = "Procurement Center"
 								}
 							};
+
+							@foreach (var menu in menus.Where(m => m.Visible))
+							{
+								<li>
+									<a class="dropdown-item @(currentPath.StartsWith(menu.Path) ? "active" : "")"
+									   asp-page="@menu.Page">
+										<i class="bi @menu.Icon me-2"></i>
+										@menu.Text
+									</a>
+								</li>
+							}
 						}
 					</ul>
 				</li>
