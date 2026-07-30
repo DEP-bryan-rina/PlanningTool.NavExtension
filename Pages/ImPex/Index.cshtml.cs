@@ -389,13 +389,27 @@ namespace PlanningTool.NavExtension.Pages.ImPex
                                     </tr>
 
                                     <tr>
-                                        <th style='text-align:left;'>Dedon ETA</th>
+                                        <th style='text-align:left;'>DEDON ETA</th>
                                         <td>: {existing._ptContainerETA:MMM dd, yyyy}</td>
+                                    </tr>
+                                    
+                                     <tr>
+                                        <th style='text-align:left;'>Country Of Origin</th>
+                                        <td>: {existing._ptCountryOfOrigin}</td>
                                     </tr>
 
                                     <tr>
                                         <th style='text-align:left;'>Status</th>
                                         <td>: Updated</td>
+                                    </tr>
+                                    <tr>
+                                    <th style='text-align:left;'>Action Performed By</th>
+                                        <td>: {GetUser()}</td>
+                                    </tr>
+
+                                    <tr>
+                                        <th style='text-align:left;'>Action Date</th>
+                                        <td>: {DateTime.Now:MMM dd, yyyy hh:mm tt}</td>
                                     </tr>
                                 </table>
 

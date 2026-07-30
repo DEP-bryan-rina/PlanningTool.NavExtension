@@ -510,7 +510,7 @@ namespace PlanningTool.NavExtension.Pages.Procurement
                         </p>
 
                         <p>
-                            <strong>Action Performed By:</strong> {user}
+                            <strong>Action Performed By:</strong> {user} | {DateTime.Now:MMM dd, yyyy hh:mm tt}
                         </p>
 
                         <p>
