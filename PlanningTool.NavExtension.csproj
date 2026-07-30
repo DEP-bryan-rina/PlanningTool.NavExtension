@@ -15,6 +15,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Database\Sql_View\" />
     <Folder Include="Database\Sql_SP\" />
     <Folder Include="Database\Sql_Tables\" />
   </ItemGroup>

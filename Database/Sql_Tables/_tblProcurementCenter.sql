@@ -1,7 +1,7 @@
 USE [DWREPORTS]
 GO
 
-/****** Object:  Table [dbo].[_tblProcurementCenter]    Script Date: 7/9/2026 1:06:18 PM ******/
+/****** Object:  Table [dbo].[_tblProcurementCenter]    Script Date: 7/30/2026 10:16:00 AM ******/
 SET ANSI_NULLS ON
 GO
 
@@ -28,6 +28,7 @@ CREATE TABLE [dbo].[_tblProcurementCenter](
 	[_ptModifiedDate] [datetime] NULL,
 	[_ptRemarks] [nvarchar](255) NULL,
 	[_ptStatus] [int] NULL,
+	[_ptCountryOfOrigin] [nvarchar](50) NULL,
 PRIMARY KEY CLUSTERED 
 (
 	[PK_ptProcID] ASC
