@@ -41,22 +41,19 @@ namespace PlanningTool.NavExtension.Services
             {
                 try
                 {
-                    var days = (reminder.ContainerETA.Value.Date - DateTime.Today).Days;
+                    if (!reminder.ContainerETA.HasValue)
+                        continue;
 
                     var shouldSend = reminder.ReminderType switch
                     {
-                        "2WeeksReminder" => emailSettings._pt2WeeksReminder == true &&
-                                            days >= 0 &&
-                                            days <= 14,
-
-                        "DelaysReminder" => emailSettings._ptDelaysReminder == true &&
-                                            DateTime.Today >= reminder.ContainerETA.Value.Date.AddDays(7),
-
+                        "2WeeksReminder" => emailSettings._pt2WeeksReminder,
+                        "DelaysReminder" => emailSettings._ptDelaysReminder,
                         _ => false
                     };
 
                     if (!shouldSend)
                         continue;
+
 
                     var subject = reminder.ReminderType switch
                     {
