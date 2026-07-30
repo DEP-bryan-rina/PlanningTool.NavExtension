@@ -198,7 +198,8 @@ namespace PlanningTool.NavExtension.Pages.ImPex
                                 <tr>
                                     <th style='text-align:left;'>HBL No</th>
                                     <th style='text-align:left;'>Container No</th>
-                                    <th style='text-align:left;'>Dedon ETA</th>
+                                    <th style='text-align:left;'>DEDON ETA</th>
+                                    <th style='text-align:left;'>Country Of Origin</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -206,6 +207,7 @@ namespace PlanningTool.NavExtension.Pages.ImPex
                                     <td>{Impex._ptHBLNo}</td>
                                     <td>{Impex._ptContainerNo}</td>
                                     <td>{Impex._ptContainerETA:MMM dd, yyyy}</td>
+                                    <td>{Impex._ptCountryOfOrigin}</td>
                                 </tr>
                             </tbody>
                         </table>
