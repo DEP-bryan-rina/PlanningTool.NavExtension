@@ -340,11 +340,7 @@ namespace PlanningTool.NavExtension.Pages.Procurement
                     _ptContainerETA = x._ptContainerETA
                 })
                 .ToList();
-        }
-        private void CheckImPexStatus()
-        {
-
-        }
+        }        
 
         [BindProperty]
         public string UntagIDs { get; set; }

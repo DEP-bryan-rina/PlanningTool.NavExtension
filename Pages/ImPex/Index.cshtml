@@ -3,111 +3,124 @@
 @{
 	ViewData["Title"] = "ImPex Center";
 }
+<style>
+	@@keyframes pulse {
+		0%, 100% {
+			transform: scale(1);
+		}
+
+		50% {
+			transform: scale(1.15);
+		}
+	}
+</style>
 <div class="container-fluid">
+	<!-- Page Header -->
+	<div class="row mb-3">
+		<div class="col-md-12">
+			<h3 class="fw-bold d-inline me-4">
+				<i class="fas fa-globe text-primary"></i>
+				ImPex Center
+			</h3>
+			<h6 class="mb-3 text-secondary d-inline">
+				<i class="fas fa-clipboard-check me-2 text-success" style="display:inline-block; animation:pulse 2s ease-in-out infinite;">
+
+				</i> Shipment Information
+			</h6>
+			<hr />
+		</div>
+	</div>
+
+
 	<form id="frmImpex" method="post" asp-page-handler="Save">
+		<input type="hidden" asp-for="Impex.PK_ptImpexID" />		
+		<div class="row g-3">
+			<!-- Column 1 -->
+			<div class="col-lg-4">
 
-		<input type="hidden" asp-for="Impex.PK_ptImpexID" />
+				<div class="mb-3">
+					<label class="erp-label">
+						HBL No <span class="text-danger">*</span>
+					</label>
 
-		<div class="card border-0 shadow-sm">
-			<div class="card-header bg-white border-bottom">
-				<h5 class="mb-0 fw-semibold">
-					<i class="fas fa-file-import text-primary me-2"></i>
-					Shipment Information
-				</h5>
-			</div>
+					<input asp-for="Impex._ptHBLNo"
+						   id="HBLNo"
+						   class="form-control erp-control erp-input"
+						   placeholder="HBL Number"
+						   onblur="checkHblExists()"
+						   required />
 
-			<div class="card-body">
-				<div class="row g-3">
-					<!-- Column 1 -->
-					<div class="col-lg-4">
+					<small id="hblMessage"></small>
+				</div>
 
-						<div class="mb-3">
-							<label class="erp-label">
-								HBL No <span class="text-danger">*</span>
-							</label>
+				<div>
+					<label class="erp-label">
+						Dedon ETA <span class="text-danger">*</span>
+					</label>
 
-							<input asp-for="Impex._ptHBLNo"
-								   id="HBLNo"
-								   class="form-control erp-control erp-input"
-								   placeholder="HBL Number"
-								   onblur="checkHblExists()"
-								   required />
-
-							<small id="hblMessage"></small>
-						</div>
-
-						<div>
-							<label class="erp-label">
-								Dedon ETA <span class="text-danger">*</span>
-							</label>
-
-							<input asp-for="Impex._ptContainerETA"
-								   type="date"
-								   class="form-control erp-control erp-input"
-								   min="@DateTime.Today.ToString("yyyy-MM-dd")"
-								   required />
-						</div>
-
-					</div>
-
-					<!-- Column 2 -->
-					<div class="col-lg-4">
-
-						<div class="mb-3">
-							<label class="erp-label">
-								Container No <span class="text-danger">*</span>
-							</label>
-
-							<input asp-for="Impex._ptContainerNo"
-								   class="form-control erp-control erp-input"
-								   placeholder="Container Number"
-								   required />
-						</div>
-
-						<div>
-							<label class="erp-label">
-								Country of Origin <span class="text-danger">*</span>
-							</label>
-
-							<select asp-for="Impex._ptCountryOfOrigin"
-									class="form-select erp-control erp-dropdown"
-									required>
-								<option value="">Select Country...</option>
-
-								@foreach (var country in Model.CountryList)
-								{
-									<option value="@country.Value">
-										@country.Text
-									</option>
-								}
-							</select>
-
-							<span asp-validation-for="Impex._ptCountryOfOrigin"
-								  class="text-danger small"></span>
-						</div>
-
-					</div>
-
-					<!-- Column 3 -->
-					<div class="col-lg-4">
-
-						<label class="erp-label">
-							Remarks
-						</label>
-
-						<textarea asp-for="Impex._ptRemarks" style="height: 105px"
-								  class="form-control erp-control erp-textarea"
-								  rows="5"
-								  placeholder="Remarks">
-					</textarea>
-
-					</div>
-
+					<input asp-for="Impex._ptContainerETA"
+						   type="date"
+						   class="form-control erp-control erp-input"
+						   min="@DateTime.Today.ToString("yyyy-MM-dd")"
+						   required />
 				</div>
 
 			</div>
-		</div>
 
+			<!-- Column 2 -->
+			<div class="col-lg-4">
+
+				<div class="mb-3">
+					<label class="erp-label">
+						Container No <span class="text-danger">*</span>
+					</label>
+
+					<input asp-for="Impex._ptContainerNo"
+						   class="form-control erp-control erp-input"
+						   placeholder="Container Number"
+						   required />
+				</div>
+
+				<div>
+					<label class="erp-label">
+						Country of Origin <span class="text-danger">*</span>
+					</label>
+
+					<select asp-for="Impex._ptCountryOfOrigin"
+							class="form-select erp-control erp-dropdown"
+							required>
+						<option value="">Select Country...</option>
+
+						@foreach (var country in Model.CountryList)
+						{
+							<option value="@country.Value">
+								@country.Text
+							</option>
+						}
+					</select>
+
+					<span asp-validation-for="Impex._ptCountryOfOrigin"
+						  class="text-danger small"></span>
+				</div>
+
+			</div>
+
+			<!-- Column 3 -->
+			<div class="col-lg-4">
+
+				<label class="erp-label">
+					Remarks
+				</label>
+
+				<textarea asp-for="Impex._ptRemarks" style="height: 105px"
+						  class="form-control erp-control erp-textarea"
+						  rows="5"
+						  placeholder="Remarks">
+					</textarea>
+
+			</div>
+
+		</div>
 		<div class="mt-3">
 
 			@if (Model.Impex != null && Model.Impex.PK_ptImpexID > 0)
@@ -137,7 +150,6 @@
 			}
 
 		</div>
-
 	</form>
 	<br />
 	<div class="table-responsive">

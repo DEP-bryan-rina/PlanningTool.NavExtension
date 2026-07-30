@@ -4,33 +4,71 @@
 	ViewData["Title"] = "Procurement Center";
 	var activeTab = TempData["ActiveTab"]?.ToString() ?? "#withoutstandingqty";
 }
+<style>
+	@@keyframes pulse {
+		0%, 100% {
+			transform: scale(1);
+		}
 
+		50% {
+			transform: scale(1.15);
+		}
+	}
+
+	
+
+	
+
+</style>
 <div class="container-fluid">
+	<!-- Page Header -->
+	<div class="row mb-3">
+		<div class="col-md-12">
+			<h3 class="fw-bold d-inline me-4">
+				<i class="fas fa-file-contract text-primary"></i>
+				Procurement Center
 
-	<div class="d-flex justify-content-between align-items-center mb-3">
-		<ul class="nav nav-tabs w-100" id="expirationTab" role="tablist">
+			</h3>
+			<h6 class="mb-3 text-secondary d-inline">
+				<i class="fas fa-truck-loading me-2 text-success" style="display:inline-block; animation:pulse 2s ease-in-out infinite;"></i>
+				Procurement & Logistics Classification
+			</h6>
+			<hr />
+		</div>
+	</div>
+	<div class="erp-ribbon">
+		<ul class="nav nav-tabs procurement-tabs" id="expirationTab" role="tablist">
 
 			<li class="nav-item">
-				<button class="nav-link @(activeTab == "#withoutstandingqty" ? "active" : "")"
-						data-bs-toggle="tab"
-						data-bs-target="#withoutstandingqty">
-					<i class="fa fa-list-alt"></i>
-					PO Outstanding Qty
-				</button>
+				<div class="ribbon-group">
+					<div class="ribbon-title">PROCUREMENT</div>
+					<button class="ribbon-btn @(activeTab == "#withoutstandingqty" ? "active" : "")"
+							data-bs-toggle="tab"
+							data-bs-target="#withoutstandingqty">
+
+						<i class="fa fa-list-alt"></i>
+						<span>Outstanding POs</span>
+					</button>
+				</div>
 			</li>
 
 			<li class="nav-item">
-				<button class="nav-link @(activeTab == "#tagged" ? "active" : "")"
-						data-bs-toggle="tab"
-						data-bs-target="#tagged">
-					<i class="fa fa-tags me-1"></i>
-					Tagged POs
-				</button>
+				<div class="ribbon-group">
+					<div class="ribbon-title">CLASSIFICATION</div>
+					<button class="ribbon-btn @(activeTab == "#tagged" ? "active" : "")"
+							data-bs-toggle="tab"
+							data-bs-target="#tagged">
+
+						<i class="fa fa-tags"></i>
+						<span>Tagged POs</span>
+					</button>
+				</div>
 			</li>
 
 		</ul>
 
 	</div>
+
 
 	<div class="tab-content mt-3">
 
@@ -54,14 +92,10 @@
 									<div class="d-flex align-items-end gap-2">
 
 										<div>
-											<label class="erp-label mb-1">
-												HBL No <span class="text-danger">*</span>
-											</label>
-
 											<select id="impexDropdown"
 													name="ImpexID"
 													class="form-select erp-control"
-													style="min-width:150px;"
+													style="min-width:250px;"
 													required>
 												<option value="">Select HBL No...</option>
 
@@ -194,8 +228,8 @@
 
 							<button type="submit"
 									id="btnUntag"
-									class="btn btn-danger btn-sm">
-								<i class="fas fa-unlink"></i>
+									class="btn btn-danger btn-sm erp-btn">
+								<i class="fas fa-unlink text-danger"></i>
 								Untag Selected
 							</button>
 
@@ -206,8 +240,8 @@
 							<button type="submit"
 									id="btnTaggedUpdate"
 									asp-page-handler="TaggedUpdate"
-									class="btn btn-success btn-sm">
-								<i class="fas fa-save"></i>
+									class="btn btn-success btn-sm erp-btn">
+								<i class="fas fa-save text-success"></i>
 								Update Record
 							</button>
 						</form>
@@ -245,7 +279,7 @@
 		<table id="tblTagged" class="table table-hover w-100">
 			<thead class="sticky-top bg-white table-bordered" style="font-size:0.80rem;">
 				<tr class="data-row">
-					<th style="width:40px;"><input type="checkbox" id="selectAllTagged" /></th>					
+					<th style="width:40px;"><input type="checkbox" id="selectAllTagged" /></th>
 					<th style="text-align:left">PO No</th>
 					<th style="text-align:left; display:none">Line No</th>
 					<th style="text-align:left">Vendor</th>
@@ -277,7 +311,7 @@
 									   data-line="@item._ptLineNo"
 									   data-item="@item._ptItemCode" />
 
-							</td>							
+							</td>
 							<td>@item._ptDocNo</td>
 							<td style="display:none;" class="no-export">@item._ptLineNo</td>
 							<td>@item._ptVendorName</td>
@@ -609,7 +643,7 @@
 		}
 
 		/* ==============================
-			addColumnFilter filter 
+			addColumnFilter filter
 		============================== */
 
 		function addColumnFilter(table, tableId) {
