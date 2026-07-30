@@ -9,7 +9,8 @@ namespace PlanningTool.NavExtension.Models
         public int PermitID { get; set; }
         public string PONo { get; set; }
         public string? HBLNo { get; set; }
-        public string? ContainerNo { get; set; }        
+        public string? ContainerNo { get; set; }      
+        public string? CountryOfOrigin { get; set; }
         public string ReminderType { get; set; }
         public string RecipientEmail { get; set; }
         public DateTime? ContainerETA { get; set; }

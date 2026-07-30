@@ -177,6 +177,15 @@ namespace PlanningTool.NavExtension.Pages.ImPex
                                 <th style='text-align:left;'>Status</th>
                                 <td>: New</td>
                             </tr>
+                             <tr>
+                                <th style='text-align:left;'>Action Performed By</th>
+                                <td>: {GetUser()}</td>
+                            </tr>
+
+                            <tr>
+                                <th style='text-align:left;'>Action Date</th>
+                                <td>: {DateTime.Now:MMM dd, yyyy hh:mm tt}</td>
+                            </tr>
                         </table>
 
                         <p><strong>Shipment Details:</strong></p>

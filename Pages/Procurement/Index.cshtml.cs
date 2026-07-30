@@ -229,6 +229,15 @@ namespace PlanningTool.NavExtension.Pages.Procurement
                                 <th style='text-align:left;'>Status</th>
                                 <td>: Tagged</td>
                             </tr>
+                             <tr>
+                                <th style='text-align:left;'>Action Performed By</th>
+                                <td>: {GetUser()}</td>
+                            </tr>
+
+                            <tr>
+                                <th style='text-align:left;'>Action Date</th>
+                                <td>: {DateTime.Now:MMM dd, yyyy hh:mm tt}</td>
+                            </tr>
                         </table>
 
                         <p><strong>Tagged Purchase Order Details:</strong></p>
@@ -495,9 +504,17 @@ namespace PlanningTool.NavExtension.Pages.Procurement
 
                         <p>Dear Team,</p>
 
-                        <p> 
+                       <p>
                             This is to inform you that the following shipment has been
-                            <strong>successfully untagged</strong> in the system.
+                            <strong>successfully untagged</strong> from the Procurement Center.
+                        </p>
+
+                        <p>
+                            <strong>Action Performed By:</strong> {user}
+                        </p>
+
+                        <p>
+                            Please review the shipment details below for reference.
                         </p>
 
                         <table border='1' cellpadding='4' cellspacing='0' style='border-collapse:collapse; width:70%;'>

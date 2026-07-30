@@ -1,14 +1,14 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using PlanningTool.NavExtension.Data;
-
 using PlanningTool.NavExtension.Constants;
+using PlanningTool.NavExtension.Data;
+using PlanningTool.NavExtension.Models;
 
 namespace PlanningTool.NavExtension.Services
 {
     public class ProcurementReminderService
     {
         private readonly AppDbContext _context;
-        private readonly EmailService _emailService;
+        private readonly EmailService _emailService;        
 
         public ProcurementReminderService(
             AppDbContext context,
@@ -44,6 +44,7 @@ namespace PlanningTool.NavExtension.Services
                     if (!reminder.ContainerETA.HasValue)
                         continue;
 
+
                     var shouldSend = reminder.ReminderType switch
                     {
                         "2WeeksReminder" => emailSettings._pt2WeeksReminder,
@@ -54,120 +55,140 @@ namespace PlanningTool.NavExtension.Services
                     if (!shouldSend)
                         continue;
 
+                    var reminderItems = await _context.GetTaggedItems
+                        .Where(p =>
+                            p._ptDocNo == reminder.PONo &&
+                            p._ptHBLNo == reminder.HBLNo &&
+                            p._ptContainerNo == reminder.ContainerNo &&
+                            p._ptContainerETA == reminder.ContainerETA &&
+                            p._ptStatus == 1)
+                        .Select(p => new
+                        {
+                            p._ptDocNo,
+                            p._ptItemCode,
+                            p._ptItemDescription,
+                            p._ptPartialDelivered
+
+                        }).ToListAsync();
+
+
+                    var itemRows = string.Join("",
+                        reminderItems.Select(x => $@"
+                        <tr>
+                            <td style='padding:4px 4px;'>{x._ptDocNo}</td>
+                            <td style='padding:4px 4px;'>{x._ptItemCode}</td>
+                            <td style='padding:4px 4px;'>{x._ptItemDescription ?? "-"}</td>
+                            <td style='padding:4px 4px;text-align:right;'>{x._ptPartialDelivered:N2}</td>
+                        </tr>"));
+
 
                     var subject = reminder.ReminderType switch
                     {
-                        "2WeeksReminder" => "Dedon ETA Reminder",
-                        "DelaysReminder" => "Delayed Dedon ETA Notification",
+                        "2WeeksReminder" => "DEDON ETA | 2 Weeks Notification",
+                        "DelaysReminder" => "DEDON ETA | Delayed Notification",
                         _ => "Procurement Notification"
                     };
 
-                    var body = reminder.ReminderType == "2WeeksReminder"
-                    ? $@"
-                    <div style='font-family:'Segoe UI', Arial, sans-serif; font-size:12px; font-weight:400; line-height:1.5; color:#ffffff;'>
 
-                        <p>Dear Team,</p>
+                    var message = reminder.ReminderType == "2WeeksReminder"
+                        ? "This is a friendly reminder that the following shipment is expected to arrive within the next <strong>14 days</strong>."
+                        : "This is to inform you that the ETA of the following shipment has already passed and requires immediate attention.";
 
-                        <p>
-                            This is a friendly reminder that the following shipment is expected to arrive
-                            within the next <strong>14 days</strong>.
-                        </p>
 
-                        <table>
+                    var daysUntilETA = (reminder.ContainerETA.Value.Date - DateTime.Today).Days;
 
-                            <tr>
-                                <th style='text-align:left;'>HBL No</th>
-                                <td style='text-align:left;'>: {reminder.HBLNo}</td>
-                            </tr>
+                    var status = daysUntilETA >= 0
+                        ? $"Arriving Within {daysUntilETA} Days"
+                        : $"Delayed by {Math.Abs(daysUntilETA)} Days";
 
-                            <tr>
-                                <th style='text-align:left;'>Container No</th>
-                                <td style='text-align:left;'>: {reminder.ContainerNo}</td>
-                            </tr>
 
-                            <tr>
-                                <th style='text-align:left;'>PO No</th>
-                                <td style='text-align:left;'>: {reminder.PONo}</td>
-                            </tr>
+                    var action = reminder.ReminderType == "2WeeksReminder"
+                        ? "Please ensure the necessary preparations and coordination are completed prior to the shipment arrival."
+                        : "Kindly review the shipment status and take the necessary actions if follow-up is required.";
 
-                            <tr>
-                                <th style='text-align:left;'>Dedon ETA</th>
-                                <td style='text-align:left;'>: {reminder.ContainerETA:yyyy-MM-dd}</td>
-                            </tr>
+                    var body = $@"
+                        <div style='font-family:'Segoe UI', Arial, sans-serif; font-size:12px; font-weight:400; line-height:1.5; color:#333333;'>
 
-                            <tr>
-                                <th style='text-align:left;'>Status</th>
-                                <td style='text-align:left;'>: Arriving Within 2 Weeks</td>
-                            </tr>
+                            <p>Dear Team,</p>
 
-                        </table>
+                            <p>
+                                {message}
+                            </p>
 
-                        <p>
-                            Please ensure the necessary preparations and coordination are completed
-                            prior to the shipment arrival.
-                        </p>
-                        <hr />
 
-                        <small>
-                            This is a system-generated email. Please do not reply.
-                        </small>
+                            <table>
 
-                    </div>"
-                    : $@"
-                    <div style='font-family:'Segoe UI', Arial, sans-serif; font-size:12px; font-weight:400; line-height:1.5; color:#ffffff;'>
+                                <tr>
+                                    <th style='text-align:left;'>HBL No</th>
+                                    <td>: {reminder.HBLNo}</td>
+                                </tr>
 
-                        <p>Dear Team,</p>
+                                <tr>
+                                    <th style='text-align:left;'>Container No</th>
+                                    <td>: {reminder.ContainerNo}</td>
+                                </tr>
 
-                        <p>
-                            This is to inform you that the ETA of the following shipment has already
-                            passed and may require immediate attention.
-                        </p>
+                                <tr>
+                                    <th style='text-align:left;'>Country Of Origin</th>
+                                    <td>: {reminder.CountryOfOrigin}</td>
+                                </tr>
 
-                        <table>
+                                <tr>
+                                    <th style='text-align:left;'>Dedon ETA</th>
+                                    <td>: {reminder.ContainerETA:yyyy-MM-dd}</td>
+                                </tr>
 
-                            <tr>
-                                <th style='text-align:left;'>HBL No</th>
-                                <td style='text-align:left;'>: {reminder.HBLNo}</td>
-                            </tr>
+                                <tr>
+                                    <th style='text-align:left;'>Status</th>
+                                    <td>: {status}</td>
+                                </tr>
 
-                            <tr>
-                                <th style='text-align:left;'>Container No</th>
-                                <td style='text-align:left;'>: {reminder.ContainerNo}</td>
-                            </tr>
+                            </table>
 
-                            <tr>
-                                <th style='text-align:left;'>PO No</th>
-                                <td style='text-align:left;'>: {reminder.PONo}</td>
-                            </tr>
 
-                            <tr>
-                                <th style='text-align:left;'>Dedon ETA</th>
-                                <td style='text-align:left;'>: {reminder.ContainerETA:yyyy-MM-dd}</td>
-                            </tr>
+                            <p><strong>Purchase Order Details:</strong></p>
 
-                            <tr>
-                                <th style='text-align:left;'>Status</th>
-                                <td style='text-align:left;'>: Delayed</td>
-                            </tr>
 
-                        </table>
+                            <table border='1' cellpadding='4' cellspacing='0'
+                                    style='border-collapse:collapse;width:70%;'>
 
-                        <p>
-                            Kindly review the shipment status and take the necessary actions
-                            if follow-up is required.
-                        </p>
-                        <hr />
+                                <thead>
+                                    <tr>
+                                        <th style='text-align:left;'>PO No</th>
+                                        <th style='text-align:left;'>Item Code</th>
+                                        <th style='text-align:left;'>Item Description</th>
+                                        <th style='text-align:right;'>Expected Qty</th>
+                                    </tr>
+                                </thead>
 
-                        <small>
-                            This is a system-generated email. Please do not reply.
-                        </small>
+                                <tbody>
+                                    {itemRows}
+                                </tbody>
 
-                    </div>";
+                            </table>
+
+                            <p>
+                                {action}
+                            </p>
+                            <p>
+                                Should you encounter any issues or require further assistance,
+                                please do not hesitate to contact the IT Team.
+                            </p>
+
+                            <hr />
+
+                            <small>
+                                This is a system-generated email. Please do not reply.
+                            </small>
+
+                        </div>"
+                    ;
 
                     var recipients = reminder.RecipientEmail
-                    .Split(new[] { ';', ',' }, StringSplitOptions.RemoveEmptyEntries)
-                    .Select(x => x.Trim())
-                    .ToList();
+                        .Split(new[] { ';', ',' }, StringSplitOptions.RemoveEmptyEntries)
+                        .Select(x => x.Trim())
+                        .ToList();
+
 
                     await _emailService.SendEmailAsync(
                         recipients,
@@ -175,6 +196,7 @@ namespace PlanningTool.NavExtension.Services
                         body,
                         EmailModules.ShipmentNotification
                     );
+
 
                     reminder.EmailStatus = "Sent";
                     reminder.SentDate = DateTime.Now;
