@@ -35,11 +35,11 @@ namespace PlanningTool.NavExtension.Pages.Account
             // Load Reminders
             ContainerETAView = _context.vw_ProcurementETAEmailNotification.ToList();
 
-            ReminderNotifications = await _context.tblReminderNotification
-                        .OrderByDescending(x => x.CreatedDate)
-                        .ToListAsync();
+            //ReminderNotifications = await _context.tblReminderNotification
+            //            .OrderByDescending(x => x.CreatedDate)
+            //            .ToListAsync();
 
-
+            
             if (id.HasValue)
             {
                 EmailNotification = _context.EmailNotifications

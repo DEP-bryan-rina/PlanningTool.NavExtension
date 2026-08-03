@@ -90,11 +90,11 @@ namespace PlanningTool.NavExtension.Services
                 "Upcoming" =>
                     "DEDON ETA | Upcoming Shipment Notification",
 
+                "Shipment Today" =>
+                    "DEDON ETA | Shipment Arriving Today Notification",
+
                 "Due" =>
                     "DEDON ETA | Shipment Due Notification",
-
-                "Overdue" =>
-                    "DEDON ETA | Overdue Shipment Notification",
 
                 "Delayed" =>
                     "DEDON ETA | Delayed Shipment Notification",
@@ -305,23 +305,19 @@ namespace PlanningTool.NavExtension.Services
             return status switch
             {
                 "Upcoming" =>
-                "This is to inform you that the following shipment is scheduled to arrive soon. Please review the shipment details below and prepare accordingly.",
+                    "This is to inform you that the following shipment is scheduled to arrive within the next 14 days. Please review the shipment details and prepare accordingly.",
 
+                "Shipment Today" =>
+                    "This is to inform you that the following shipment is expected to arrive today. Please ensure the necessary receiving arrangements are completed.",
 
                 "Due" =>
-                "This is to inform you that the following shipment is expected to arrive within the next few days. Please ensure all necessary preparations are completed.",
-
-
-                "Overdue" =>
-                "This is to inform you that the following shipment has passed its expected arrival date. Please coordinate with the relevant parties for an update.",
-
+                    "This is to inform you that the following shipment has passed its ETA by less than 7 days. Please review the shipment status and follow up accordingly.",
 
                 "Delayed" =>
-                "This is to inform you that the following shipment is significantly delayed beyond the expected arrival date. Please take the necessary follow-up actions.",
-
+                    "This is to inform you that the following shipment has been delayed beyond 7 days from the expected arrival date. Please take the necessary follow-up actions.",
 
                 _ =>
-                "This is to inform you of the latest shipment status update."
+                    "This is to inform you of the latest shipment status update. Please review the details below."
             };
         }
     }

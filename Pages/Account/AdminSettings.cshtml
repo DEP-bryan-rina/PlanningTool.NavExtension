@@ -357,7 +357,7 @@
 
 	<div class="card-body">
 
-		@if (!Model.ReminderNotifications.Any())
+		@if (!Model.ContainerETAView.Any())
 		{
 			<div class="alert alert-info">
 				No reminders found.
@@ -378,7 +378,7 @@
 							<th>ETA</th>
 							<th class="text-center">Days</th>
 							<th>Status</th>
-							<th class="text-end">Delivered Qty</th>
+							<th class="text-end">Tagged Qty</th>							
 						</tr>
 					</thead>
 					<tbody style="font-size:0.75rem;">
@@ -387,15 +387,36 @@
 							var badge = "bg-secondary";
 							var text = "";
 
-							if (item.ShipmentStatus == "Due")
+							switch (item.ShipmentStatus)
 							{
-								badge = "bg-warning text-dark";
-								text = $"Due ({item.DaysToETA} Days)";
-							}
-							else if (item.ShipmentStatus == "Delayed")
-							{
-								badge = "bg-danger";
-								text = $"Delayed {Math.Abs(item.DaysToETA)} Days";
+								case "Upcoming":
+									badge = "bg-success";
+									text = $"Upcoming in {item.DaysToETA} Days";
+									break;
+
+
+								case "Shipment Today":
+									badge = "bg-info text-dark";
+									text = "Shipment Today";
+									break;
+
+
+								case "Due":
+									badge = "bg-warning text-dark";
+									text = $"Due {Math.Abs(item.DaysToETA)} Days Overdue";
+									break;
+
+
+								case "Delayed":
+									badge = "bg-danger";
+									text = $"Delayed {Math.Abs(item.DaysToETA)} Days";
+									break;
+
+
+								default:
+									badge = "bg-secondary";
+									text = item.ShipmentStatus;
+									break;
 							}
 
 							<tr>
