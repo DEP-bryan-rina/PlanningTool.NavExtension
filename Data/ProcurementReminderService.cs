@@ -1,7 +1,10 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using ClosedXML.Excel;
+using DocumentFormat.OpenXml.Wordprocessing;
+using Microsoft.EntityFrameworkCore;
 using PlanningTool.NavExtension.Constants;
 using PlanningTool.NavExtension.Data;
 using PlanningTool.NavExtension.Models;
+using System.Net.Mail;
 
 namespace PlanningTool.NavExtension.Services
 {
@@ -53,33 +56,45 @@ namespace PlanningTool.NavExtension.Services
             {
                 var recipients = shipmentGroup
                     .Select(x => x._ptEmailAddress)
+                    .Where(email => !string.IsNullOrWhiteSpace(email))
                     .Distinct()
                     .ToList();
-
 
                 if (!recipients.Any())
                     return;
 
-                var subject =
-                    GetSubject(shipmentGroup.Key);
 
-                var body =
-                    await BuildEmailBodyAsync(
-                        shipmentGroup);
+                var subject = GetSubject(shipmentGroup.Key);
+
+                var body = await BuildEmailBodyAsync(shipmentGroup);
+
+
+                // Generate Excel attachment
+                var excelBytes = GenerateShipmentExcel(shipmentGroup);
+
+                var fileName = $"{GetShipmentStatusText(shipmentGroup.Key)}_{DateTime.Now:yyyy-MM-dd}.xlsx";
+
+                var attachment = new Attachment(
+                    new MemoryStream(excelBytes),
+                    fileName,
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                );
+
 
                 await _emailService.SendEmailAsync(
                     recipients,
                     subject,
                     body,
-                    EmailModules.ShipmentNotification);
+                    EmailModules.ShipmentNotification,
+                    attachment
+                );
 
 
-                await SaveEmailHistoryAsync(
-                    shipmentGroup);
+                await SaveEmailHistoryAsync(shipmentGroup);
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                Console.WriteLine($"Shipment notification failed: {ex.Message}");
             }
         }
 
@@ -103,159 +118,70 @@ namespace PlanningTool.NavExtension.Services
                     "DEDON Procurement Notification"
             };
         }
-
+        private string GetShipmentStatusText(string status)
+        {
+            return status switch
+            {
+                "Today" => "Shipment_Arriving_Today",
+                "Upcoming" => "Upcoming _Shipment_Arrival",
+                "Overdue" => "Shipment_Overdue",
+                "Delayed" => "Shipment_Delayed",
+                _ => status
+            };
+        }
 
         private async Task<string> BuildEmailBodyAsync(
             IGrouping<string, vw_ProcurementETAEmailNotification> shipmentGroup)
         {
 
             var items = shipmentGroup
-            .GroupBy(x => x.PK_ptProcID)
-            .Select(g => g.First())
-            .Select(x => new
-            {
-                x._ptDocNo,
-                x._ptHBLNo,
-                x._ptContainerNo,
-                x._ptVendorName,
-                x._ptItemDescription,
-                x._ptCountryOfOrigin,
-                x._ptContainerETA,
-                x._ptPartialDelivered
-            })
-            .ToList();
+                .GroupBy(x => x.PK_ptProcID)
+                .Select(g => g.First())
+                .Select(x => new
+                {
+                    x._ptDocNo,
+                    x._ptHBLNo,
+                    x._ptContainerNo,
+                    x._ptVendorName,
+                    x._ptItemDescription,
+                    x._ptCountryOfOrigin,
+                    x._ptContainerETA,
+                    x._ptPartialDelivered
+                })
+                .ToList();
 
 
-
-            var rows = string.Join("", items.Select(x => $@"
-
-                <tr>
-                    <td style='padding:5px;text-align:left'>{x._ptDocNo}</td>
-                    <td style='padding:5px;text-align:left'>{x._ptHBLNo}</td>
-                    <td style='padding:5px;text-align:left'>{x._ptContainerNo}</td>
-                    <td style='padding:5px;text-align:left'>{x._ptVendorName ?? "-"}</td>
-                    <td style='padding:5px;text-align:left'>{x._ptItemDescription ?? "-"}</td>
-                    <td style='padding:5px;text-align:left'>{x._ptCountryOfOrigin ?? "-"}</td>
-                    <td style='padding:5px;text-align:left'>{x._ptContainerETA:yyyy-MM-dd}</td>
-                    <td style='padding:5px;text-align:right'>
-                        {x._ptPartialDelivered:N2}
-                    </td>
-                </tr>
-
-                "));
-
-
-
-            var etaList = string.Join(", ",
-                shipmentGroup
-                .Select(x => x._ptContainerETA)
-                .Distinct()
-                .Select(x => x?.ToString("yyyy-MM-dd")));
-
-
-
-            var statusText = shipmentGroup.Key switch
-            {
-                "Upcoming" =>
-                    "Upcoming shipment arrival",
-
-                "Overdue" =>
-                    "Shipment overdue",
-
-                "Delayed" =>
-                    "Shipment delayed",
-
-                _ =>
-                    shipmentGroup.Key
-            };
-
-
+                var etaList = string.Join(", ",
+                    shipmentGroup
+                        .Select(x => x._ptContainerETA)
+                        .Distinct()
+                        .Select(x => x?.ToString("yyyy-MM-dd"))
+                );
+            
 
             return $@"
-
                 <div style='font-family:'Segoe UI', Arial, sans-serif; font-size:12px; font-weight:400; line-height:1.5; color:#333333;'>
 
-                <p>Dear Team,</p>
+                    <p>Dear Team,</p>
 
+                    <p>
+                        {GetShipmentMessage(shipmentGroup.Key)}
+                    </p>                                    
 
-                <p>
-                    {GetShipmentMessage(shipmentGroup.Key)}
-                </p>
+                    <p>
+                       If you have any questions or require assistance, please contact the IT Team.
+                    </p>
 
+                    <p>
+                        Thank you.
+                    </p>
+                    <hr/>
 
-                <table cellpadding='3'>
-
-                    <tr>
-                        <td><b>Status</b></td>
-                        <td>: {statusText}</td>
-                    </tr>
-
-
-                    <tr>
-                        <td><b>Container ETA</b></td>
-                        <td>: {etaList}</td>
-                    </tr>
-
-                </table>
-                <br/>
-
-
-                <b>Shipment Details</b>
-                <br/><br/>
-                <table border='1'
-                cellpadding='5'
-                cellspacing='0'
-                style='border-collapse:collapse;width:100%'>
-
-                    <thead>
-
-                        <tr style='background-color:#f2f2f2'>
-                            <th style='padding:5px;text-align:left'>PO No</th>
-                            <th style='padding:5px;text-align:left'>HBL No</th>
-                            <th style='padding:5px;text-align:left'>Container No</th>
-                            <th style='padding:5px;text-align:left'>Vendor</th>
-                            <th style='padding:5px;text-align:left'>Description</th>
-                            <th style='padding:5px;text-align:left'>Country</th>
-                            <th style='padding:5px;text-align:left'>DEDON ETA</th>
-                            <th style='padding:5px;text-align:right'>Tagged Qty</th>
-                        </tr>
-
-                    </thead>
-
-
-                <tbody>
-
-                    {rows}
-
-                </tbody>
-
-
-                </table>
-
-
-                <br/>
-
-
-                <p>
-                    Please review and take necessary action.
-                </p>
-
-
-                 <p>
-                    Should you encounter any issues or require further assistance,
-                    please do not hesitate to contact the IT Team.
-                </p>
-
-                <hr />
-
-
-                <small>
-                    System generated email. Please do not reply.
-                </small>
-
+                    <small>
+                        System generated email. Please do not reply.
+                    </small>
 
                 </div>
-
             ";
         }
 
@@ -305,20 +231,81 @@ namespace PlanningTool.NavExtension.Services
             return status switch
             {
                 "Upcoming" =>
-                    "This is to inform you that the following shipment is scheduled to arrive within the next 14 days. Please review the shipment details and prepare accordingly.",
+                    """
+                    This is an automated notification informing you that one or more shipments are expected to arrive within the next 14 days.
+                    <br/><br/>
+                    Please refer to the attached Excel file for the shipment details and review the information accordingly. Kindly ensure that all necessary preparations and coordination are completed prior to the scheduled arrival.
+                    """,
 
                 "Shipment Today" =>
-                    "This is to inform you that the following shipment is expected to arrive today. Please ensure the necessary receiving arrangements are completed.",
+                    """
+                    This is to inform you that the following shipment is expected to arrive today.
+                    <br/><br/>
+                    Please refer to the attached Excel file for the shipment details and review the information accordingly. Kindly ensure that all necessary receiving arrangements are completed and coordinate with the concerned teams to facilitate a smooth receiving process.
+                    """,
 
                 "Due" =>
-                    "This is to inform you that the following shipment has passed its ETA by less than 7 days. Please review the shipment status and follow up accordingly.",
+                    """
+                    This is to inform you that the following shipment has passed its ETA by less than seven (7) days.
+                    <br/><br/>
+                    Please refer to the attached Excel file for the shipment details and review the information accordingly. Kindly follow up with the concerned parties to confirm the latest shipment status and take the necessary actions to avoid further delays.
+                    """,
 
                 "Delayed" =>
-                    "This is to inform you that the following shipment has been delayed beyond 7 days from the expected arrival date. Please take the necessary follow-up actions.",
+                    """
+                    This is an automated notification to inform you that the following shipment has been delayed by more than seven (7) days beyond its expected arrival date.
+                    <br/><br/>
+                    Please refer to the attached Excel file for the shipment details and review the information accordingly. Kindly coordinate with the concerned parties and take the necessary follow-up actions to determine the updated shipment status and minimize any potential impact on operations.
+                    """,
 
                 _ =>
                     "This is to inform you of the latest shipment status update. Please review the details below."
             };
+        }
+        private byte[] GenerateShipmentExcel(IEnumerable<vw_ProcurementETAEmailNotification> items)
+        {
+            using var workbook = new XLWorkbook();
+
+            var worksheet = workbook.Worksheets.Add("Shipment Details");
+
+            // Headers
+            worksheet.Cell(1, 1).Value = "PO No";
+            worksheet.Cell(1, 2).Value = "HBL No";
+            worksheet.Cell(1, 3).Value = "Container No";
+            worksheet.Cell(1, 4).Value = "Vendor";
+            worksheet.Cell(1, 5).Value = "Item Code";
+            worksheet.Cell(1, 6).Value = "Item Description";
+            worksheet.Cell(1, 7).Value = "Country";
+            worksheet.Cell(1, 8).Value = "DEDON ETA";
+            worksheet.Cell(1, 9).Value = "Tagged Qty";
+
+            var header = worksheet.Range("A1:I1");
+            header.Style.Font.Bold = true;
+            header.Style.Fill.BackgroundColor = XLColor.LightGray;
+
+            int row = 2;
+
+            foreach (var x in items)
+            {
+                worksheet.Cell(row, 1).Value = x._ptDocNo;
+                worksheet.Cell(row, 2).Value = x._ptHBLNo;
+                worksheet.Cell(row, 3).Value = x._ptContainerNo;
+                worksheet.Cell(row, 4).Value = x._ptVendorName ?? "-";
+                worksheet.Cell(row, 5).Value = x._ptItemCode ?? "-";
+                worksheet.Cell(row, 6).Value = x._ptItemDescription ?? "-";
+                worksheet.Cell(row, 7).Value = x._ptCountryOfOrigin ?? "-";
+                worksheet.Cell(row, 8).Value = x._ptContainerETA?.ToString("yyyy-MM-dd");
+                worksheet.Cell(row, 9).Value = x._ptPartialDelivered;
+
+                row++;
+            }
+
+            worksheet.Columns().AdjustToContents();
+
+            using var stream = new MemoryStream();
+            workbook.SaveAs(stream);
+
+            return stream.ToArray();
         }
     }
 }

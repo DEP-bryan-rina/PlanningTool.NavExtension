@@ -73,12 +73,12 @@ app.MapRazorPages()
    .RequireAuthorization();
 
 // Manual test execution
-//using (var scope = app.Services.CreateScope())
-//{
-//    var reminderService = scope.ServiceProvider
-//        .GetRequiredService<ProcurementReminderService>();
+using (var scope = app.Services.CreateScope())
+{
+    var reminderService = scope.ServiceProvider
+        .GetRequiredService<ProcurementReminderService>();
 
-//    reminderService.ProcessProcurementReminders().GetAwaiter().GetResult();
-//}
+    reminderService.ProcessProcurementReminders().GetAwaiter().GetResult();
+}
 
 app.Run();

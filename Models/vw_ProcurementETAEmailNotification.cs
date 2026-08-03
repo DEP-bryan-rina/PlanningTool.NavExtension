@@ -12,6 +12,8 @@ namespace PlanningTool.NavExtension.Models
         public string _ptContainerNo { get; set; }
 
         public string _ptVendorName { get; set; }
+
+        public string _ptItemCode { get; set; }
         public string _ptItemDescription { get; set; }
         public string _ptCountryOfOrigin { get; set; }
 

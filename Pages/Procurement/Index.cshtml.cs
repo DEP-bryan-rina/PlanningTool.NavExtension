@@ -261,7 +261,10 @@ namespace PlanningTool.NavExtension.Pages.Procurement
                             please do not hesitate to contact the IT Team.
                         </p>
 
-                        <hr />
+                         <p>
+                            Thank you.
+                        </p>
+                        <hr/>
 
                         <small>
                             This is a system-generated email. Please do not reply.
@@ -538,7 +541,10 @@ namespace PlanningTool.NavExtension.Pages.Procurement
                             please do not hesitate to contact the IT Team.
                         </p>
 
-                        <hr />
+                         <p>
+                            Thank you.
+                        </p>
+                        <hr/>
 
                         <small>
                             This is a system-generated email. Please do not reply.

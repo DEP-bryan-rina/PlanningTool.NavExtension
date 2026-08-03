@@ -8,9 +8,7 @@
 	var upcoming = Model.ProcurementTagged
 		.Where(x =>
 			x._ptContainerETA.HasValue &&
-			x._ptStatus == 1 &&
-			x._ptContainerETA.Value.Date <= today.AddDays(14))
-		.OrderBy(x => x._ptContainerETA)
+			x._ptStatus == 1)
 		.ToList();
 
 	var totalPO = upcoming.Count();
