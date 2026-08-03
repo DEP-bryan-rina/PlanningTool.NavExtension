@@ -1,0 +1,623 @@
+﻿@page
+@model PlanningTool.NavExtension.Pages.QA.VendorsModel
+@{
+	ViewData["Title"] = "Vendor Quality Performance";
+}
+<style>
+	@@keyframes pulse {
+		0%, 100% {
+			transform: scale(1);
+		}
+
+		50% {
+			transform: scale(1.15);
+		}
+	}
+
+	.qa-report {
+		font-family: Arial;
+		padding: 20px;
+	}
+
+
+	.summary {
+		font-size: 18px;
+		line-height: 30px;
+	}
+
+
+	.defect {
+		color: #d93025;
+	}
+
+
+
+	.charts {
+		display: flex;
+		gap: 20px;
+	}
+
+
+	.chart-box {
+		width: 50%;
+		border: 1px solid #ddd;
+		padding: 20px;
+		cursor: pointer;
+	}
+
+
+		.chart-box:hover {
+			background: #f7f7f7;
+		}
+
+
+	canvas {
+		height: 350px !important;
+	}
+
+	.vendor-table-scroll {
+		max-height: 430px;
+		overflow-y: auto;
+		overflow-x: auto;
+	}
+
+
+		.vendor-table-scroll thead th {
+			position: sticky;
+			top: 0;
+			z-index: 10;
+			background: white;
+			border-bottom: 2px solid #dee2e6;
+		}
+
+
+		.vendor-table-scroll table {
+			margin-bottom: 0;
+		}
+</style>
+<div class="container-fluid">
+	<!-- Page Header -->
+	<div class="row mb-3">
+		<div class="col-md-12">
+			<h3 class="fw-bold">
+				<i class="fas fa-chart-line text-success"></i>
+				Vendor Quality Performance
+			</h3>
+
+			<h6 class="mb-3 text-secondary">
+				<i class="fas fa-clipboard-check me-2 text-success"
+				   style="display:inline-block; animation:pulse 2s ease-in-out infinite;"></i>
+				Raw Materials & Vendor Quality Performance Report
+			</h6>
+
+			<hr />
+		</div>
+	</div>
+	<div class="accordion" id="vendorsKPI">
+		<div class="accordion-item">
+			<h2 class="accordion-header" id="headingVendorKPI">
+				<button class="accordion-button py-2 px-3 small btn-sm"
+						type="button"
+						data-bs-toggle="collapse"
+						data-bs-target="#collapseVendorKPI"
+						aria-expanded="true"
+						aria-controls="collapseVendorKPI">
+					Vendors KPI
+				</button>
+			</h2>
+
+			<div id="collapseVendorKPI"
+				 class="accordion-collapse collapse show"
+				 aria-labelledby="headingVendorKPI"
+				 data-bs-parent="#VendorKPIAccordion">
+
+				<div class="accordion-body">
+					<div class="row mb-3">
+						<div class="col-md-6">
+							<div class="card shadow-sm">
+								<div class="card-header fw-bold text-center">
+									Vendor Defect Rate 2026
+								</div>
+								<div class="card-body">
+									<canvas id="chartMonth"></canvas>
+								</div>
+							</div>
+						</div>
+
+						<div class="col-md-6">
+							<div class="table-responsive vendor-table-scroll">
+
+								<table id="tblVendorsCalculation" class="table table-hover w-100">
+									<thead class="sticky-top bg-white table-bordered" style="font-size:0.75rem; ">
+										<tr>
+											<th>#</th>
+											<th>Vendor Name</th>
+											<th class="text-end">Qty Received</th>
+											<th class="text-end">Qty Good</th>
+											<th class="text-end">Qty Repair</th>
+											<th class="text-end">Qty Reject</th>
+											<th class="text-end">Defect Rate</th>
+										</tr>
+									</thead>
+
+									<tbody style="font-size:0.75rem;">
+
+										@if (Model.VendorReport != null && Model.VendorReport.Any())
+										{
+											var i = 1;
+
+											foreach (var item in Model.VendorReport)
+											{
+												<tr>
+
+													<td>
+														@i
+													</td>
+
+													<td>@item.VendorName</td>
+													<td class="text-end">@item.QtyReceived.ToString("N0")</td>
+													<td class="text-end">@item.QtyGood.ToString("N0")</td>
+													<td class="text-end">@item.QtyRepair.ToString("N0")</td>
+													<td class="text-end">@item.QtyReject.ToString("N0")</td>
+
+													<td class="text-end">
+
+														<span class="badge
+															@(item.DefectRate >= 5
+																	  ? "bg-danger"
+																	  : item.DefectRate >= 2
+																		  ? "bg-warning text-dark"
+																		  : "bg-success")">
+
+															@item.DefectRate.ToString("N2")%
+
+														</span>
+
+													</td>
+
+
+												</tr>
+
+												i++;
+											}
+										}
+										else
+										{
+											<tr>
+												<td colspan="7" class="text-center text-muted">
+													No Vendor QA data found.
+												</td>
+											</tr>
+										}
+
+									</tbody>
+
+								</table>
+							</div>
+						</div>
+					</div>
+
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="row mt-4">
+
+		<div class="col-12">
+			<div class="table-responsive">
+
+				<table id="tblVendors" class="table table-hover w-100">
+					<thead class="sticky-top bg-white table-bordered" style="font-size:0.75rem;">
+						<tr>
+							<th>#</th>
+							<th>Vendor Code</th>
+							<th>Vendor Name</th>
+							<th>Contact</th>
+							<th>Phone</th>
+							<th>Email</th>
+							<th>City</th>
+							<th>Country</th>
+							<th>Buyer</th>
+							<th>Payment Terms</th>
+							<th>Currency</th>
+							<th>Status</th>
+							<th>Last Modified</th>
+						</tr>
+					</thead>
+
+
+					<tbody style="font-size:0.75rem;">
+
+						@if (Model.VendorView != null && Model.VendorView.Any())
+						{
+							var i = 1;
+
+							foreach (var item in Model.VendorView)
+							{
+								<tr>
+
+									<td>
+										@i
+									</td>
+
+
+									<td>
+										@item.VendorCode
+									</td>
+
+
+									<td>
+										@item.VendorName
+
+									</td>
+
+
+									<td>
+										@item.ContactPerson
+									</td>
+
+
+									<td>
+										@item.PhoneNo
+									</td>
+
+
+									<td>
+										<a href="mailto:@item.Email">
+											@item.Email
+										</a>
+									</td>
+
+
+									<td>
+										@item.City
+									</td>
+
+
+									<td>
+										@item.Country
+									</td>
+
+
+									<td>
+										@item.Buyer
+									</td>
+
+
+									<td>
+										@item.PaymentTerms
+									</td>
+
+
+									<td>
+										@item.Currency
+									</td>
+
+
+									<td>
+										<span class="badge
+											@(item.Status == "Active"
+														  ? "bg-success"
+														  : "bg-danger")">
+
+											@item.Status
+
+										</span>
+									</td>
+
+
+									<td>
+										@(item.LastModified?.ToString("yyyy-MM-dd") ?? "-")
+									</td>
+
+
+								</tr>
+
+								i++;
+							}
+						}
+						else
+						{
+							<tr>
+								<td colspan="13" class="text-center text-muted">
+									No vendor data available.
+								</td>
+							</tr>
+						}
+
+					</tbody>
+
+				</table>
+
+			</div>
+
+		</div>
+
+	</div>
+</div>
+@section Scripts
+{
+	<script>
+		/* ==============================
+			Utilities
+		============================== */
+
+		function getTableHeight() {
+			return `${$(window).height() * 0.6}px`;
+		}
+
+		/* ==============================
+		DataTables
+		============================== */
+
+		function createDataTable(selector, filename) {
+
+			return $(selector).DataTable({
+
+				pageLength: 25,
+
+				paging: false,
+
+				scrollX: true,
+
+				scrollY: getTableHeight(),
+
+				scrollCollapse: true,
+
+				autoWidth: false,
+
+				fixedHeader: true,
+
+				responsive: false,
+
+				stateSave: false,
+
+				destroy: true,
+
+
+				dom: 'Bfrtip',
+
+
+				buttons: [
+
+					{
+						extend: 'excelHtml5',
+
+						text: '<i class="fa fa-file-excel-o"></i> Export Excel',
+
+						className: 'btn btn-sm erp-btn',
+
+
+						title: null,
+
+						filename: filename,
+
+
+						exportOptions: {
+
+							columns: ':visible:not(.no-export)',
+
+							modifier: {
+								search: 'applied',
+								order: 'applied'
+							}
+
+						},
+
+
+						action: function (e, dt, button, config) {
+
+							const fileName = `${config.filename}.xlsx`;
+
+							const message =
+								`Export data to Excel?\n\n` +
+								`File:\n${fileName}\n\n` +
+								`The save location is controlled by your browser settings.`;
+
+
+							if (confirm(message)) {
+
+								$.fn.dataTable.ext.buttons.excelHtml5.action.call(
+									this,
+									e,
+									dt,
+									button,
+									config
+								);
+
+							}
+
+						}
+
+					}
+
+				]
+
+			});
+		}
+
+
+		/* ==============================
+		   Column Filter
+		============================== */
+
+		function addColumnFilter(table, tableId) {
+
+			const $filter = $(`${tableId}_filter`);
+
+			if (!$filter.length) return;
+
+
+			const $searchInput = $filter.find('input');
+
+			const $columnFilter = $('<select>', {
+				class: 'columnFilter form-select form-select-sm'
+			});
+
+
+			// Remove default "Search:"
+			$filter.find('label')
+				.contents()
+				.filter((_, node) => node.nodeType === 3)
+				.remove();
+
+
+			$searchInput.attr(
+				'placeholder',
+				'Type to filter (F3)'
+			);
+
+
+			table.columns().every(function (index) {
+
+				const title = $(this.header())
+					.text()
+					.trim();
+
+
+				if (title) {
+
+					$columnFilter.append(
+						$('<option>', {
+							value: index,
+							text: title
+						})
+					);
+
+				}
+
+			});
+
+
+			$searchInput.after($columnFilter);
+
+
+			function filterData() {
+
+				table.columns().search('');
+
+
+				table
+					.column(Number($columnFilter.val()))
+					.search($searchInput.val())
+					.draw();
+
+			}
+
+
+			$searchInput.on('input', filterData);
+
+			$columnFilter.on('change', filterData);
+
+		}
+
+
+		/* ==============================
+		   Page Load
+		============================== */
+
+		$(function () {
+
+
+			const today = new Date()
+				.toISOString()
+				.split('T')[0];
+
+
+			const taggedTable = createDataTable(
+				'#tblVendors',
+				`Vendors_List_${today}`
+			);
+
+
+			addColumnFilter(
+				taggedTable,
+				'#tblVendors'
+			);
+
+
+			if (typeof colorDuplicateHBL === 'function') {
+
+				colorDuplicateHBL();
+
+				taggedTable.on(
+					'draw',
+					colorDuplicateHBL
+				);
+
+			}
+
+
+			$(window).on(
+				'resize',
+				function () {
+
+					$.fn.dataTable
+						.tables({
+							visible: true,
+							api: true
+						})
+						.columns
+						.adjust();
+
+				}
+			);
+
+
+		});
+
+
+		async function loadVendorCharts() {
+			const response = await fetch('?handler=VendorQA');
+			const data = await response.json();
+
+			const vendors = data
+				.filter(v => Number(v.defectRate) > 0) // Exclude null, undefined, and 0
+				.sort((a, b) => b.defectRate - a.defectRate);
+
+			const config = {
+				type: 'bar',
+				data: {
+					labels: vendors.map(v => v.vendorName),
+					datasets: [{
+						data: vendors.map(v => v.defectRate),
+						backgroundColor: '#5B9BD5',
+						borderColor: '#5B9BD5',
+						borderWidth: 1,
+						barThickness: 20
+					}]
+				},
+				options: {
+					indexAxis: 'y',
+					responsive: true,
+					maintainAspectRatio: false,
+					plugins: {
+						legend: {
+							display: false
+						}
+					},
+					scales: {
+						x: {
+							beginAtZero: true,
+							ticks: {
+								callback: value => `${value}%`
+							}
+						},
+						y: {
+							ticks: {
+								autoSkip: false,
+								padding: 8
+							}
+						}
+					}
+				}
+			};
+
+			new Chart(document.getElementById('chartMonth'), config);
+			new Chart(document.getElementById('chartYear'), config);
+		}
+
+		loadVendorCharts();
+	</script>
+	
+}

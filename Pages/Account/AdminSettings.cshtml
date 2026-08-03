@@ -35,84 +35,163 @@
 								<input type="hidden"
 									   asp-for="EmailNotification._PK_ptEmailNotification_ID" />
 
-								<div class="mb-3">
+								<!-- Email -->
+								<div class="card border-0 shadow-sm mb-3">
+									<div class="card-body">
 
-									<label class="form-label">
-										Email Address <span class="text-danger">*</span>
-									</label>
+										<h6 class="fw-bold mb-3">Email Information</h6>
 
-									<input asp-for="EmailNotification._ptEmailAddress"
-										   class="form-control erp-input"
-										   type="email"
-										   required />
+										<div class="mb-3">
+											<label asp-for="EmailNotification._ptEmailAddress" class="form-label">
+												Email Address <span class="text-danger">*</span>
+											</label>
 
+											<input asp-for="EmailNotification._ptEmailAddress"
+												   type="email"
+												   class="form-control erp-input"
+												   required />
+										</div>
+
+										<div class="mb-0">
+											<label asp-for="EmailNotification._ptUserType" class="form-label">
+												User Type <span class="text-danger">*</span>
+											</label>
+
+											<select asp-for="EmailNotification._ptUserType"
+													asp-items="Model.UserTypes"
+													class="form-select erp-dropdown"
+													required>
+												<option value="">-- Select User Type --</option>
+											</select>
+										</div>
+
+									</div>
 								</div>
 
-								<div class="form-check mb-2">
-									<input asp-for="EmailNotification._ptImPex"
-										   class="form-check-input" />
-									<label class="form-check-label">
-										ImPex?
-									</label>
+								<!-- Modules -->
+								<div class="card border-0 shadow-sm mb-3">
+									<div class="card-body">
+
+										<h6 class="fw-bold mb-3">Modules</h6>
+
+										<div class="form-check mb-2">
+											<input asp-for="EmailNotification._ptImPex"
+												   class="form-check-input" />
+											<label asp-for="EmailNotification._ptImPex"
+												   class="form-check-label">
+												ImPex
+											</label>
+										</div>
+
+										<div class="form-check">
+											<input asp-for="EmailNotification._ptProcurement"
+												   class="form-check-input" />
+											<label asp-for="EmailNotification._ptProcurement"
+												   class="form-check-label">
+												Procurement
+											</label>
+										</div>
+
+									</div>
 								</div>
 
-								<div class="form-check mb-2">
-									<input asp-for="EmailNotification._ptProcurement"
-										   class="form-check-input" />
-									<label class="form-check-label">
-										Procurement?
-									</label>
+								<!-- Reminder Settings -->
+								<div class="card border-0 shadow-sm mb-4">
+									<div class="card-body">
+
+										<h6 class="fw-bold mb-3">Reminder Settings</h6>
+
+										<div class="row g-3 align-items-center mb-3">
+
+											<div class="col-md-4">
+												<div class="form-check">
+													<input asp-for="EmailNotification._pt2WeeksReminder"
+														   class="form-check-input" />
+													<label asp-for="EmailNotification._pt2WeeksReminder"
+														   class="form-check-label">
+														Enable 2-Week Reminder
+													</label>
+												</div>
+											</div>
+
+											<div class="col-md-8">
+												<select asp-for="EmailNotification._pt2WeeksTrigger"
+														class="form-select erp-dropdown" required>
+													<option value="">-- Select Trigger --</option>
+													<option value="Monday">Monday</option>
+													<option value="Tuesday">Tuesday</option>
+													<option value="Wednesday">Wednesday</option>
+													<option value="Thursday">Thursday</option>
+													<option value="Friday">Friday</option>
+													<option value="Saturday">Saturday</option>
+													<option value="Sunday">Sunday</option>
+													<option value="Daily">Daily</option>
+													<option value="Weekly">Weekly</option>
+													<option value="Monthly">Monthly</option>
+													<option value="Yearly">Yearly</option>
+												</select>
+											</div>
+
+										</div>
+
+										<div class="row g-3 align-items-center">
+
+											<div class="col-md-4">
+												<div class="form-check">
+													<input asp-for="EmailNotification._ptDelaysReminder"
+														   class="form-check-input" />
+													<label asp-for="EmailNotification._ptDelaysReminder"
+														   class="form-check-label">
+														Enable Delays Reminder
+													</label>
+												</div>
+											</div>
+
+											<div class="col-md-8">
+												<select asp-for="EmailNotification._ptDelaysTrigger"
+														class="form-select erp-dropdown" required>
+													<option value="">-- Select Trigger --</option>
+													<option value="Monday">Monday</option>
+													<option value="Tuesday">Tuesday</option>
+													<option value="Wednesday">Wednesday</option>
+													<option value="Thursday">Thursday</option>
+													<option value="Friday">Friday</option>
+													<option value="Saturday">Saturday</option>
+													<option value="Sunday">Sunday</option>
+													<option value="Daily">Daily</option>
+													<option value="Weekly">Weekly</option>
+													<option value="Monthly">Monthly</option>
+													<option value="Yearly">Yearly</option>
+												</select>
+											</div>
+
+										</div>
+
+									</div>
 								</div>
 
-								<div class="form-check mb-2">
-									<input asp-for="EmailNotification._pt2WeeksReminder"
-										   class="form-check-input" />
-									<label class="form-check-label">
-										2 Weeks Reminder?
-									</label>
-								</div>
+								<!-- Actions -->
+								<div class="d-flex gap-2">
 
-								<div class="form-check mb-3">
-									<input asp-for="EmailNotification._ptDelaysReminder"
-										   class="form-check-input" />
-									<label class="form-check-label">
-										Delays Reminder?
-									</label>
-								</div>
+									@if (Model.EmailNotification._PK_ptEmailNotification_ID == 0)
+									{
+										<button type="submit" class="btn btn-primary erp-btn px-4">
+											<i class="fas fa-plus me-1"></i> Add New
+										</button>
+									}
+									else
+									{
+										<button type="submit" class="btn btn-success erp-btn px-4">
+											<i class="fas fa-save me-1"></i> Update
+										</button>
 
-								<div class="mb-3">
-
-									<label class="form-label">
-										User Type <span class="text-danger">*</span>
-									</label>
-
-									<select asp-for="EmailNotification._ptUserType"
-											asp-items="Model.UserTypes"
-											class="form-select erp-dropdown"
-											required>
-										<option value="">-- Select --</option>
-									</select>
+										<a asp-page="./AdminSettings"
+										   class="btn btn-outline-secondary erp-btn px-4">
+											<i class="fas fa-times me-1"></i> Cancel
+										</a>
+									}
 
 								</div>
-
-								@if (Model.EmailNotification._PK_ptEmailNotification_ID == 0)
-								{
-									<button type="submit" class="btn btn-primary erp-btn">
-										Add New
-									</button>
-								}
-								else
-								{
-									<button type="submit" class="btn btn-success erp-btn">
-										Update
-									</button>
-
-									<a asp-page="./AdminSettings"
-									   class="btn btn-outline-secondary px-4 erp-btn">
-										<i class="fas fa-times me-1"></i>
-										Cancel
-									</a>
-								}
 
 							</form>
 
@@ -128,7 +207,9 @@
 									<th>ImPex Notification</th>
 									<th>Procurement Notification</th>
 									<th>2 Weeks Reminder</th>
+									<th>2 Weeks Triggered</th>
 									<th>Delays Reminder</th>
+									<th>Delays Triggered</th>
 									<th>User Type</th>
 									<th width="140" class="text-center">Action</th>
 								</tr>
@@ -183,6 +264,9 @@
 												</span>
 											}
 										</td>
+										<td>
+											@item._pt2WeeksTrigger
+										</td>
 
 										<td>
 											@if (item._ptDelaysReminder)
@@ -198,7 +282,12 @@
 												</span>
 											}
 										</td>
-										<td>@item._ptUserType</td>
+										<td>
+											@item._ptDelaysTrigger
+										</td>
+										<td>
+											@item._ptUserType
+										</td>
 
 										<td class="text-center">
 											<a asp-page="./AdminSettings"
@@ -277,90 +366,73 @@
 		else
 		{
 			<div class="table-responsive" style="max-height:600px; overflow:auto;">
-				<table class="table table-hover w-100">
-					<thead class="sticky-top bg-white table-bordered" style="font-size:0.75rem;">
+				<table class="table table-bordered table-striped table-hover">
+					<thead class="sticky-top bg-white table-bordered table-dark" style="font-size:0.75rem;">
 						<tr>
-							<th>Permit ID</th>
 							<th>PO No</th>
 							<th>HBL No</th>
 							<th>Container No</th>
-							<th>Type</th>
-							<th>Email</th>
-							<th>Dedon ETA</th>
+							<th>Vendor</th>
+							<th>Description</th>
+							<th>Country</th>
+							<th>ETA</th>
+							<th class="text-center">Days</th>
 							<th>Status</th>
-							<th>Created Date</th>
-							<th>Sent Date</th>
-							<th width="100" class="text-center">Preview</th>
+							<th class="text-end">Delivered Qty</th>
 						</tr>
 					</thead>
-
 					<tbody style="font-size:0.75rem;">
-
-						@foreach (var item in Model.ReminderNotifications)
+						@foreach (var item in Model.ContainerETAView)
 						{
+							var badge = "bg-secondary";
+							var text = "";
+
+							if (item.ShipmentStatus == "Due")
+							{
+								badge = "bg-warning text-dark";
+								text = $"Due ({item.DaysToETA} Days)";
+							}
+							else if (item.ShipmentStatus == "Delayed")
+							{
+								badge = "bg-danger";
+								text = $"Delayed {Math.Abs(item.DaysToETA)} Days";
+							}
+
 							<tr>
 
-								<td>
-									@item.PermitID
-								</td>
-								<td>@item.PONo</td>
-								<td>@item.HBLNo</td>
-								<td>@item.ContainerNo</td>
-								<td>
-									@if (item.ReminderType == "2WeeksReminder")
-									{
-										<span class="badge bg-warning text-dark">
-											2 Weeks Reminder
-										</span>
-									}
-									else
-									{
-										<span class="badge bg-danger">
-											Delays Reminder
-										</span>
-									}
-								</td>
+								<td>@item._ptDocNo</td>
+
+								<td>@item._ptHBLNo</td>
+
+								<td>@item._ptContainerNo</td>
+
+								<td>@item._ptVendorName</td>
+
+								<td>@item._ptItemDescription</td>
+
+								<td>@item._ptCountryOfOrigin</td>
 
 								<td>
-									@item.RecipientEmail
+									@item._ptContainerETA?.ToString("yyyy-MM-dd")
 								</td>
 
-								<td>
-									@(item.ContainerETA?.ToString("yyyy-MM-dd"))
-								</td>
-
-								<td>
-									@if (item.EmailStatus == "Sent")
-									{
-										<span class="badge bg-success">Sent</span>
-									}
-									else
-									{
-										<span class="badge bg-warning text-dark">Pending</span>
-									}
-								</td>
-
-								<td>
-									@item.CreatedDate.ToString("yyyy-MM-dd HH:mm")
-								</td>
-
-								<td>
-									@(item.SentDate?.ToString("yyyy-MM-dd HH:mm"))
-								</td>
 								<td class="text-center">
-									<button type="button"
-											class="btn btn-primary btn-sm"
-											data-bs-toggle="modal"
-											data-bs-target="#previewMail_@item.PermitID">
-										<i class="fa fa-envelope"></i>
-									</button>
+									@item.DaysToETA
+								</td>
+
+								<td>
+									<span class="badge @badge">
+										@text
+									</span>
+								</td>
+
+								<td class="text-end">
+									@(Convert.ToDecimal(item._ptPartialDelivered).ToString("N2"))
 								</td>
 
 							</tr>
 						}
-
 					</tbody>
-
 				</table>
 
 			</div>
@@ -368,178 +440,6 @@
 
 	</div>
 </div>
-<br />
-<div class="row mb-3">
-
-	<div class="col-md-3">
-		<div class="card border-warning">
-			<div class="card-body">
-
-				<h6 class="text-muted">
-					Pending Reminders
-				</h6>
-
-				<h3>
-					@Model.ReminderNotifications.Count(x => x.EmailStatus == "Pending")
-				</h3>
-
-			</div>
-		</div>
-	</div>
-
-	<div class="col-md-3">
-		<div class="card border-success">
-			<div class="card-body">
-
-				<h6 class="text-muted">
-					Reminder Sent
-				</h6>
-
-				<h3>
-					@Model.ReminderNotifications.Count(x => x.EmailStatus == "Sent")
-				</h3>
-
-			</div>
-		</div>
-	</div>
-
-</div>
-@foreach (var item in Model.ReminderNotifications)
-{
-	<div class="modal fade"
-		 id="previewMail_@item.PermitID"
-		 tabindex="-1">
-
-		<div class="modal-dialog modal-lg">
-			<div class="modal-content">
-
-				<div class="modal-header">
-					<h5 class="modal-title">
-						Email Preview
-					</h5>
-					<button type="button"
-							class="btn-close"
-							data-bs-dismiss="modal">
-					</button>
-				</div>
-
-				<div class="modal-body">
-
-					@if (item.ReminderType == "2WeeksReminder")
-					{
-						<div>
-
-							<strong>Subject:</strong>
-							[Procurement ETA Reminder] Dedon ETA in 14 Days
-
-							<hr />
-
-							<p>Hello Team,</p>
-
-							<p>
-								This is an automated reminder that the following shipment
-								is expected to arrive within the next
-								<strong>14 days</strong>.
-							</p>
-
-							<table class="table table-bordered">
-
-								<tr>
-									<th>PO No</th>
-									<td>@item.PONo</td>
-								</tr>
-
-								<tr>
-									<th>HBL No</th>
-									<td>@item.HBLNo</td>
-								</tr>
-
-								<tr>
-									<th>Container No</th>
-									<td>@item.ContainerNo</td>
-								</tr>
-
-								<tr>
-									<th>Dedon ETA</th>
-									<td>@item.ContainerETA?.ToString("MMMM dd, yyyy")</td>
-								</tr>
-
-							</table>
-
-							<p>
-								Please coordinate with the concerned supplier
-								and forwarder for the expected arrival.
-							</p>
-
-							<p>
-								Regards,<br />
-								Procurement Monitoring System
-							</p>
-
-						</div>
-					}
-					else
-					{
-						<div>
-
-							<strong>Subject:</strong>
-							[Procurement Delay Alert] Dedon ETA Overdue
-
-							<hr />
-
-							<p>Hello Team,</p>
-
-							<p>
-								The following shipment has exceeded its expected
-								arrival date and requires immediate follow-up.
-							</p>
-
-							<table class="table table-bordered">
-
-								<tr>
-									<th>PO No</th>
-									<td>@item.PONo</td>
-								</tr>
-
-								<tr>
-									<th>HBL No</th>
-									<td>@item.HBLNo</td>
-								</tr>
-
-								<tr>
-									<th>Container No</th>
-									<td>@item.ContainerNo</td>
-								</tr>
-
-								<tr>
-									<th>Dedon ETA</th>
-									<td>@item.ContainerETA?.ToString("MMMM dd, yyyy")</td>
-								</tr>
-
-							</table>
-
-							<p>
-								Please coordinate with the supplier and logistics
-								provider immediately.
-							</p>
-
-							<p>
-								Regards,<br />
-								Procurement Monitoring System
-							</p>
-
-						</div>
-					}
-
-				</div>
-
-			</div>
-		</div>
-
-	</div>
-
-}
-
 @section Scripts
 {
 	<style>

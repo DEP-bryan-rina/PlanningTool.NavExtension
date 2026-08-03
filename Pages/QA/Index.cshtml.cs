@@ -1,17 +1,22 @@
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
-using PlanningTool.NavExtension.Models;
 using PlanningTool.NavExtension.Data;
+using PlanningTool.NavExtension.Models;
+using System.Data;
 
 namespace PlanningTool.NavExtension.Pages.QA
 {
     public class IndexModel : PageModel
     {
         private readonly AppDbContext _context;
+        private readonly IConfiguration _config;
 
-        public IndexModel(AppDbContext context)
+        public IndexModel(AppDbContext context, IConfiguration config)
         {
             _context = context;
+            _config = config;
         }
 
         public List<QADashboardItem> Items { get; set; } = new();
@@ -81,8 +86,99 @@ namespace PlanningTool.NavExtension.Pages.QA
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = "An error occurred: " + ex.Message;                
+                TempData["ErrorMessage"] = "An error occurred: " + ex.Message;
             }
         }
+        public IActionResult OnGetVendorQA()
+        {
+            List<VendorQA> result = new();
+
+            using (SqlConnection con =
+            new SqlConnection(
+            _config.GetConnectionString("DevConnection")))
+            {
+
+
+                SqlCommand cmd =
+                new SqlCommand(
+                "_spGetVendorQADashboard",
+                con);
+
+
+                cmd.CommandType =
+                CommandType.StoredProcedure;
+
+
+                con.Open();
+
+
+                SqlDataReader dr =
+                cmd.ExecuteReader();
+
+
+
+                while (dr.Read())
+                {
+
+                    result.Add(new VendorQA
+                    {
+
+                        VendorName =
+                        dr["VendorName"].ToString(),
+
+
+                        QtyReceived =
+                        dr["QtyReceived"] == DBNull.Value
+                        ? 0
+                        : Convert.ToDecimal(dr["QtyReceived"]),
+
+
+                        QtyRepair =
+                        dr["QtyRepair"] == DBNull.Value
+                        ? 0
+                        : Convert.ToDecimal(dr["QtyRepair"]),
+
+
+                        QtyReject =
+                        dr["QtyReject"] == DBNull.Value
+                        ? 0
+                        : Convert.ToDecimal(dr["QtyReject"]),
+
+
+                        DefectRate =
+                        dr["DefectRate"] == DBNull.Value
+                        ? 0
+                        : Convert.ToDecimal(dr["DefectRate"])
+
+                    });
+
+                }
+
+
+            }
+
+
+            return new JsonResult(result);
+
+        }
+
+
     }
+
+
+    public class VendorQA
+    {
+
+        public string VendorName { get; set; }
+
+        public decimal QtyReceived { get; set; }
+
+        public decimal QtyRepair { get; set; }
+
+        public decimal QtyReject { get; set; }
+
+        public decimal DefectRate { get; set; }
+
+    }
+
 }

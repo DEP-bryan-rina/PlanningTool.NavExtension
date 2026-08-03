@@ -21,11 +21,19 @@ namespace PlanningTool.NavExtension.Pages.Account
         [BindProperty] public EmailNotication EmailNotification { get; set; } = new();
 
         public List<EmailNotication> NotificationList { get; set; } = new();
+
+        [BindProperty] public List<vw_ProcurementETAEmailNotification> ContainerETAView { get; set; } = new();
+
         public IList<ReminderNotification> ReminderNotifications { get; set; } = new List<ReminderNotification>();
 
         public async Task OnGet(int? id)
         {
+            // Load Notifications
             NotificationList = _context.EmailNotifications.ToList();
+
+
+            // Load Reminders
+            ContainerETAView = _context.vw_ProcurementETAEmailNotification.ToList();
 
             ReminderNotifications = await _context.tblReminderNotification
                         .OrderByDescending(x => x.CreatedDate)
@@ -63,8 +71,7 @@ namespace PlanningTool.NavExtension.Pages.Account
                     }
 
                     EmailNotification._ptStatus = "Active";
-                    EmailNotification._ptCreatedDate = DateTime.Now;
-                    EmailNotification._ptUpdatedDate = null;
+                    EmailNotification._ptCreatedDate = DateTime.Now;                   
 
 
                     _context.EmailNotifications.Add(EmailNotification);
@@ -106,8 +113,13 @@ namespace PlanningTool.NavExtension.Pages.Account
                         existing._ptEmailAddress = EmailNotification._ptEmailAddress;
                         existing._ptImPex = EmailNotification._ptImPex;
                         existing._ptProcurement = EmailNotification._ptProcurement;
+
                         existing._pt2WeeksReminder = EmailNotification._pt2WeeksReminder;
+                        existing._pt2WeeksTrigger = EmailNotification._pt2WeeksTrigger;
+
                         existing._ptDelaysReminder = EmailNotification._ptDelaysReminder;
+                        existing._ptDelaysTrigger = EmailNotification._ptDelaysTrigger;
+
                         existing._ptUserType = EmailNotification._ptUserType;
                         existing._ptUpdatedDate = DateTime.Now;
 

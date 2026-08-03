@@ -29,6 +29,12 @@ namespace PlanningTool.NavExtension.Data
 
         public DbSet<ProcurementCenterBalance> ProcurementCenterBalanceView { get; set; }
 
+        public DbSet<ContainerETAStatusViewModel> ContainerETAStatusView { get; set; }
+
+        public DbSet<vw_ProcurementETAEmailNotification> vw_ProcurementETAEmailNotification { get; set; }
+
+        public DbSet<ShipmentEmailHistory> ShipmentEmailHistory { get; set; }
+
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -53,6 +59,12 @@ namespace PlanningTool.NavExtension.Data
             modelBuilder.Entity<ProcurementCenterBalance>()
                 .HasNoKey()
                 .ToView("vw_ProcurementCenterBalance");
+
+            modelBuilder.Entity<vw_ProcurementETAEmailNotification>()               
+               .ToView("vw_ProcurementETAEmailNotification");
+
+            modelBuilder.Entity<ShipmentEmailHistory>()
+                .ToTable("_tblShipmentEmailHistory");
 
 
             base.OnModelCreating(modelBuilder);

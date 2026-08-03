@@ -173,6 +173,10 @@ namespace PlanningTool.NavExtension.Pages.ImPex
                                 <th style='text-align:left;'>Dedon ETA</th>
                                 <td>: {Impex._ptContainerETA:MMM dd, yyyy}</td>
                             </tr>
+ <tr>
+                                <th style='text-align:left;'>Status</th>
+                                <td>: {Impex._ptCountryOfOrigin}</td>
+                            </tr>
                             <tr>
                                 <th style='text-align:left;'>Status</th>
                                 <td>: New</td>

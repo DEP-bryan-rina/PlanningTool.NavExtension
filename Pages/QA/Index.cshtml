@@ -3,6 +3,7 @@
 @{
 	ViewData["Title"] = "QA Dashboard";
 }
+
 <style>
 	@@keyframes pulse {
 		0%, 100% {
@@ -14,7 +15,8 @@
 		}
 	}
 </style>
-<div class="container-fluid">
+<div class="container-fluid">		
+
 	<!-- Page Header -->
 	<div class="row mb-3">
 		<div class="col-md-12">
@@ -39,10 +41,19 @@
 			<div class="card qa-card h-100">
 				<div class="card-body d-flex align-items-center">
 					<i class="bi bi-exclamation-triangle text-danger fs-1 me-3"></i>
-					<div>
-						<div class="kpi-value text-danger">@Model.DefectRate%</div>
-						<div class="kpi-label">Defect Rate</div>
-					</div>
+					<a asp-page="/QA/Vendors" class="text-decoration-none text-black">
+						<div class="kpi-card">
+
+							<div class="kpi-value text-danger">
+								@Model.DefectRate%
+							</div>
+
+							<div class="kpi-label">
+								Defect Rate
+							</div>
+
+						</div>
+					</a>
 				</div>
 			</div>
 		</div>
@@ -97,7 +108,7 @@
 					<th class="text-center">Status</th>
 					<th class="text-center">Qty Good</th>
 					<th class="text-center">Qty Reject</th>
-					<th class="text-center">Qty Repair</th>
+					<th class="text-center">Qty For Repair</th>
 					<th class="text-center">Earliest WK Required</th>
 					<th class="text-center">Lead Time (Days)</th>
 				</tr>
@@ -416,6 +427,8 @@
 
 		});
 
+		
+	  
 
-	</script>
+	</script>	
 }

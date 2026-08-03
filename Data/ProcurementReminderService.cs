@@ -8,7 +8,8 @@ namespace PlanningTool.NavExtension.Services
     public class ProcurementReminderService
     {
         private readonly AppDbContext _context;
-        private readonly EmailService _emailService;        
+        private readonly EmailService _emailService;
+
 
         public ProcurementReminderService(
             AppDbContext context,
@@ -20,194 +21,308 @@ namespace PlanningTool.NavExtension.Services
 
         public async Task ProcessProcurementReminders()
         {
-            // Generate reminder records
-            await _context.Database.ExecuteSqlRawAsync("EXEC _spGenerateProcurementReminders");
+            var notifications = await GetNotificationsAsync();
 
-            // Get email settings
-            var emailSettings = await _context.tblEmailNotification.FirstOrDefaultAsync();
-
-            if (emailSettings == null)
+            if (!notifications.Any())
                 return;
 
-            // Get pending reminders
-            var reminders = await _context.tblReminderNotification
-                .Where(x =>
-                    x.EmailStatus == "Pending" &&
-                    !string.IsNullOrEmpty(x.RecipientEmail) &&
-                    x.ContainerETA.HasValue)
-                .ToListAsync();
 
-            foreach (var reminder in reminders)
+            var statusGroups = notifications
+                .GroupBy(x => x.ShipmentStatus);
+
+
+            foreach (var group in statusGroups)
             {
-                try
+                await SendBatchEmailAsync(group);
+            }
+        }
+
+        private async Task<List<vw_ProcurementETAEmailNotification>>
+            GetNotificationsAsync()
+        {
+            return await _context
+                .vw_ProcurementETAEmailNotification
+                .AsNoTracking()
+                .ToListAsync();
+        }
+
+        private async Task SendBatchEmailAsync(
+            IGrouping<string, vw_ProcurementETAEmailNotification> shipmentGroup)
+        {
+            try
+            {
+                var recipients = shipmentGroup
+                    .Select(x => x._ptEmailAddress)
+                    .Distinct()
+                    .ToList();
+
+
+                if (!recipients.Any())
+                    return;
+
+                var subject =
+                    GetSubject(shipmentGroup.Key);
+
+                var body =
+                    await BuildEmailBodyAsync(
+                        shipmentGroup);
+
+                await _emailService.SendEmailAsync(
+                    recipients,
+                    subject,
+                    body,
+                    EmailModules.ShipmentNotification);
+
+
+                await SaveEmailHistoryAsync(
+                    shipmentGroup);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+        }
+
+        private string GetSubject(string status)
+        {
+            return status switch
+            {
+                "Upcoming" =>
+                    "DEDON ETA | Upcoming Shipment Notification",
+
+                "Due" =>
+                    "DEDON ETA | Shipment Due Notification",
+
+                "Overdue" =>
+                    "DEDON ETA | Overdue Shipment Notification",
+
+                "Delayed" =>
+                    "DEDON ETA | Delayed Shipment Notification",
+
+                _ =>
+                    "DEDON Procurement Notification"
+            };
+        }
+
+
+        private async Task<string> BuildEmailBodyAsync(
+            IGrouping<string, vw_ProcurementETAEmailNotification> shipmentGroup)
+        {
+
+            var items = shipmentGroup
+            .GroupBy(x => x.PK_ptProcID)
+            .Select(g => g.First())
+            .Select(x => new
+            {
+                x._ptDocNo,
+                x._ptHBLNo,
+                x._ptContainerNo,
+                x._ptVendorName,
+                x._ptItemDescription,
+                x._ptCountryOfOrigin,
+                x._ptContainerETA,
+                x._ptPartialDelivered
+            })
+            .ToList();
+
+
+
+            var rows = string.Join("", items.Select(x => $@"
+
+                <tr>
+                    <td style='padding:5px;text-align:left'>{x._ptDocNo}</td>
+                    <td style='padding:5px;text-align:left'>{x._ptHBLNo}</td>
+                    <td style='padding:5px;text-align:left'>{x._ptContainerNo}</td>
+                    <td style='padding:5px;text-align:left'>{x._ptVendorName ?? "-"}</td>
+                    <td style='padding:5px;text-align:left'>{x._ptItemDescription ?? "-"}</td>
+                    <td style='padding:5px;text-align:left'>{x._ptCountryOfOrigin ?? "-"}</td>
+                    <td style='padding:5px;text-align:left'>{x._ptContainerETA:yyyy-MM-dd}</td>
+                    <td style='padding:5px;text-align:right'>
+                        {x._ptPartialDelivered:N2}
+                    </td>
+                </tr>
+
+                "));
+
+
+
+            var etaList = string.Join(", ",
+                shipmentGroup
+                .Select(x => x._ptContainerETA)
+                .Distinct()
+                .Select(x => x?.ToString("yyyy-MM-dd")));
+
+
+
+            var statusText = shipmentGroup.Key switch
+            {
+                "Upcoming" =>
+                    "Upcoming shipment arrival",
+
+                "Overdue" =>
+                    "Shipment overdue",
+
+                "Delayed" =>
+                    "Shipment delayed",
+
+                _ =>
+                    shipmentGroup.Key
+            };
+
+
+
+            return $@"
+
+                <div style='font-family:'Segoe UI', Arial, sans-serif; font-size:12px; font-weight:400; line-height:1.5; color:#333333;'>
+
+                <p>Dear Team,</p>
+
+
+                <p>
+                    {GetShipmentMessage(shipmentGroup.Key)}
+                </p>
+
+
+                <table cellpadding='3'>
+
+                    <tr>
+                        <td><b>Status</b></td>
+                        <td>: {statusText}</td>
+                    </tr>
+
+
+                    <tr>
+                        <td><b>Container ETA</b></td>
+                        <td>: {etaList}</td>
+                    </tr>
+
+                </table>
+                <br/>
+
+
+                <b>Shipment Details</b>
+                <br/><br/>
+                <table border='1'
+                cellpadding='5'
+                cellspacing='0'
+                style='border-collapse:collapse;width:100%'>
+
+                    <thead>
+
+                        <tr style='background-color:#f2f2f2'>
+                            <th style='padding:5px;text-align:left'>PO No</th>
+                            <th style='padding:5px;text-align:left'>HBL No</th>
+                            <th style='padding:5px;text-align:left'>Container No</th>
+                            <th style='padding:5px;text-align:left'>Vendor</th>
+                            <th style='padding:5px;text-align:left'>Description</th>
+                            <th style='padding:5px;text-align:left'>Country</th>
+                            <th style='padding:5px;text-align:left'>DEDON ETA</th>
+                            <th style='padding:5px;text-align:right'>Tagged Qty</th>
+                        </tr>
+
+                    </thead>
+
+
+                <tbody>
+
+                    {rows}
+
+                </tbody>
+
+
+                </table>
+
+
+                <br/>
+
+
+                <p>
+                    Please review and take necessary action.
+                </p>
+
+
+                 <p>
+                    Should you encounter any issues or require further assistance,
+                    please do not hesitate to contact the IT Team.
+                </p>
+
+                <hr />
+
+
+                <small>
+                    System generated email. Please do not reply.
+                </small>
+
+
+                </div>
+
+            ";
+        }
+
+
+        private async Task SaveEmailHistoryAsync(
+        IGrouping<string, vw_ProcurementETAEmailNotification> shipmentGroup)
+        {
+            var items = shipmentGroup
+                .GroupBy(x => new
                 {
-                    if (!reminder.ContainerETA.HasValue)
-                        continue;
+                    x.PK_ptProcID,
+                    x._PK_ptEmailNotification_ID
+                })
+                .Select(g => g.First())
+                .ToList();
 
 
-                    var shouldSend = reminder.ReminderType switch
+            foreach (var item in items)
+            {
+                _context.ShipmentEmailHistory.Add(
+                    new ShipmentEmailHistory
                     {
-                        "2WeeksReminder" => emailSettings._pt2WeeksReminder,
-                        "DelaysReminder" => emailSettings._ptDelaysReminder,
-                        _ => false
-                    };
+                        _ptProcID = item.PK_ptProcID,
 
-                    if (!shouldSend)
-                        continue;
+                        _ptEmailNotificationID =
+                            item._PK_ptEmailNotification_ID,
 
-                    var reminderItems = await _context.GetTaggedItems
-                        .Where(p =>
-                            p._ptDocNo == reminder.PONo &&
-                            p._ptHBLNo == reminder.HBLNo &&
-                            p._ptContainerNo == reminder.ContainerNo &&
-                            p._ptContainerETA == reminder.ContainerETA &&
-                            p._ptStatus == 1)
-                        .Select(p => new
-                        {
-                            p._ptDocNo,
-                            p._ptItemCode,
-                            p._ptItemDescription,
-                            p._ptPartialDelivered
+                        _ptReminderType =
+                            shipmentGroup.Key,
 
-                        }).ToListAsync();
+                        _ptLastSentDate =
+                            DateTime.Now,
 
-
-                    var itemRows = string.Join("",
-                        reminderItems.Select(x => $@"
-                        <tr>
-                            <td style='padding:4px 4px;'>{x._ptDocNo}</td>
-                            <td style='padding:4px 4px;'>{x._ptItemCode}</td>
-                            <td style='padding:4px 4px;'>{x._ptItemDescription ?? "-"}</td>
-                            <td style='padding:4px 4px;text-align:right;'>{x._ptPartialDelivered:N2}</td>
-                        </tr>"));
-
-
-                    var subject = reminder.ReminderType switch
-                    {
-                        "2WeeksReminder" => "DEDON ETA | 2 Weeks Notification",
-                        "DelaysReminder" => "DEDON ETA | Delayed Notification",
-                        _ => "Procurement Notification"
-                    };
-
-
-                    var message = reminder.ReminderType == "2WeeksReminder"
-                        ? "This is a friendly reminder that the following shipment is expected to arrive within the next <strong>14 days</strong>."
-                        : "This is to inform you that the ETA of the following shipment has already passed and requires immediate attention.";
-
-
-                    var daysUntilETA = (reminder.ContainerETA.Value.Date - DateTime.Today).Days;
-
-                    var status = daysUntilETA >= 0
-                        ? $"Arriving Within {daysUntilETA} Days"
-                        : $"Delayed by {Math.Abs(daysUntilETA)} Days";
-
-
-                    var action = reminder.ReminderType == "2WeeksReminder"
-                        ? "Please ensure the necessary preparations and coordination are completed prior to the shipment arrival."
-                        : "Kindly review the shipment status and take the necessary actions if follow-up is required.";
-
-                    var body = $@"
-                        <div style='font-family:'Segoe UI', Arial, sans-serif; font-size:12px; font-weight:400; line-height:1.5; color:#333333;'>
-
-                            <p>Dear Team,</p>
-
-                            <p>
-                                {message}
-                            </p>
-
-
-                            <table>
-
-                                <tr>
-                                    <th style='text-align:left;'>HBL No</th>
-                                    <td>: {reminder.HBLNo}</td>
-                                </tr>
-
-                                <tr>
-                                    <th style='text-align:left;'>Container No</th>
-                                    <td>: {reminder.ContainerNo}</td>
-                                </tr>
-
-                                <tr>
-                                    <th style='text-align:left;'>Country Of Origin</th>
-                                    <td>: {reminder.CountryOfOrigin}</td>
-                                </tr>
-
-                                <tr>
-                                    <th style='text-align:left;'>Dedon ETA</th>
-                                    <td>: {reminder.ContainerETA:yyyy-MM-dd}</td>
-                                </tr>
-
-                                <tr>
-                                    <th style='text-align:left;'>Status</th>
-                                    <td>: {status}</td>
-                                </tr>
-
-                            </table>
-
-
-                            <p><strong>Purchase Order Details:</strong></p>
-
-
-                            <table border='1' cellpadding='4' cellspacing='0'
-                                    style='border-collapse:collapse;width:70%;'>
-
-                                <thead>
-                                    <tr>
-                                        <th style='text-align:left;'>PO No</th>
-                                        <th style='text-align:left;'>Item Code</th>
-                                        <th style='text-align:left;'>Item Description</th>
-                                        <th style='text-align:right;'>Expected Qty</th>
-                                    </tr>
-                                </thead>
-
-                                <tbody>
-                                    {itemRows}
-                                </tbody>
-
-                            </table>
-
-                            <p>
-                                {action}
-                            </p>
-                            <p>
-                                Should you encounter any issues or require further assistance,
-                                please do not hesitate to contact the IT Team.
-                            </p>
-
-                            <hr />
-
-                            <small>
-                                This is a system-generated email. Please do not reply.
-                            </small>
-
-                        </div>"
-                    ;
-
-                    var recipients = reminder.RecipientEmail
-                        .Split(new[] { ';', ',' }, StringSplitOptions.RemoveEmptyEntries)
-                        .Select(x => x.Trim())
-                        .ToList();
-
-
-                    await _emailService.SendEmailAsync(
-                        recipients,
-                        subject,
-                        body,
-                        EmailModules.ShipmentNotification
-                    );
-
-
-                    reminder.EmailStatus = "Sent";
-                    reminder.SentDate = DateTime.Now;
-                }
-                catch
-                {
-                    reminder.EmailStatus = "Failed";
-                }
+                        _ptCreatedDate =
+                            DateTime.Now
+                    });
             }
 
+
             await _context.SaveChangesAsync();
+        }
+
+
+
+        private string GetShipmentMessage(string status)
+        {
+            return status switch
+            {
+                "Upcoming" =>
+                "This is to inform you that the following shipment is scheduled to arrive soon. Please review the shipment details below and prepare accordingly.",
+
+
+                "Due" =>
+                "This is to inform you that the following shipment is expected to arrive within the next few days. Please ensure all necessary preparations are completed.",
+
+
+                "Overdue" =>
+                "This is to inform you that the following shipment has passed its expected arrival date. Please coordinate with the relevant parties for an update.",
+
+
+                "Delayed" =>
+                "This is to inform you that the following shipment is significantly delayed beyond the expected arrival date. Please take the necessary follow-up actions.",
+
+
+                _ =>
+                "This is to inform you of the latest shipment status update."
+            };
         }
     }
 }

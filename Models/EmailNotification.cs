@@ -15,7 +15,10 @@ namespace PlanningTool.NavExtension.Models
         public bool _ptProcurement { get; set; }
 
         public bool _pt2WeeksReminder { get; set; }
+        public string _pt2WeeksTrigger { get; set; }
+
         public bool _ptDelaysReminder { get; set; }
+        public string _ptDelaysTrigger { get; set; }
 
         public string _ptUserType { get; set; }
 
@@ -23,8 +26,7 @@ namespace PlanningTool.NavExtension.Models
 
 
         public DateTime? _ptCreatedDate { get; set; }
-        public DateTime? _ptUpdatedDate { get; set; }
-
+        public DateTime? _ptUpdatedDate { get; set; }        
 
     }
 }

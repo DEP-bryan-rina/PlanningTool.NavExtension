@@ -4,14 +4,14 @@
 	ViewBag.Title = "Warehouse Dashboard";
 
 	var today = DateTime.Today;
-	var next14 = today.AddDays(14);
 
 	var upcoming = Model.ProcurementTagged
-		.Where(x => x._ptContainerETA.HasValue &&
-					x._ptStatus == 1 &&
-					x._ptContainerETA.Value.Date >= today &&
-					x._ptContainerETA.Value.Date <= next14)
-		.OrderBy(x => x._ptContainerETA);
+		.Where(x =>
+			x._ptContainerETA.HasValue &&
+			x._ptStatus == 1 &&
+			x._ptContainerETA.Value.Date <= today.AddDays(14))
+		.OrderBy(x => x._ptContainerETA)
+		.ToList();
 
 	var totalPO = upcoming.Count();
 	var totalContainer = upcoming.Select(x => x._ptContainerNo).Distinct().Count();
@@ -116,7 +116,7 @@
 				<th>Dedon ETA</th>
 				<th>Country of Origin</th>
 				<th>Remarks</th>
-				<th>Status</th>
+				<th class="text-center">Status</th>
 			</tr>
 
 		</thead>
@@ -127,18 +127,33 @@
 			{
 				var days = (item._ptContainerETA.Value.Date - today).Days;
 
-				string badge = "bg-success";
-				string text = $"{days} Days";
+				string badge;
+				string text;
 
-				if (days == 0)
+				if (days <= -7)
 				{
 					badge = "bg-danger";
-					text = "Today";
+					text = $"Delayed {Math.Abs(days)} Days";
 				}
-				else if (days <= 3)
+				else if (days < 0)
 				{
 					badge = "bg-warning";
-					text = $"{days} Days";
+					text = $"Due {Math.Abs(days)} Days Overdue";
+				}
+				else if (days >= 1 && days <= 14)
+				{
+					badge = "bg-success";
+					text = $"Upcoming in {days} Days";
+				}
+				else if (days == 0)
+				{
+					badge = "bg-success";
+					text = "Due Today";
+				}
+				else
+				{
+					badge = "bg-success";
+					text = $"Upcoming in {days} Days";
 				}
 
 				<tr style="font-size: 0.8em">
@@ -156,7 +171,7 @@
 					</td>
 					<td>@item._ptCountryOfOrigin</td>
 					<td>@item._ptRemarks</td>
-					<td>
+					<td class="text-center">
 
 						<span class="badge @badge">
 
@@ -214,6 +229,8 @@
 
 				destroy: true,
 
+				// Sort Container ETA earliest first
+				order: [[9, 'asc']],
 
 				dom: 'Bfrtip',
 

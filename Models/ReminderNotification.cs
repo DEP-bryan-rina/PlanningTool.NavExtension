@@ -18,5 +18,7 @@ namespace PlanningTool.NavExtension.Models
         public DateTime CreatedDate { get; set; }
         public DateTime? SentDate { get; set; }
 
+        public int EmailCount { get; set; } = 0;
+
     }
 }
