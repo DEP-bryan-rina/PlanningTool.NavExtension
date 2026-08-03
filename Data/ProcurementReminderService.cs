@@ -68,9 +68,11 @@ namespace PlanningTool.NavExtension.Services
 
                 var body = await BuildEmailBodyAsync(shipmentGroup);
 
+                var items = shipmentGroup
+                .DistinctBy(x => x.PK_ptProcID)
+                .ToList();
 
-                // Generate Excel attachment
-                var excelBytes = GenerateShipmentExcel(shipmentGroup);
+                var excelBytes = GenerateShipmentExcel(items);
 
                 var fileName = $"{GetShipmentStatusText(shipmentGroup.Key)}_{DateTime.Now:yyyy-MM-dd}.xlsx";
 
@@ -148,16 +150,7 @@ namespace PlanningTool.NavExtension.Services
                     x._ptContainerETA,
                     x._ptPartialDelivered
                 })
-                .ToList();
-
-
-                var etaList = string.Join(", ",
-                    shipmentGroup
-                        .Select(x => x._ptContainerETA)
-                        .Distinct()
-                        .Select(x => x?.ToString("yyyy-MM-dd"))
-                );
-            
+                .ToList();                       
 
             return $@"
                 <div style='font-family:'Segoe UI', Arial, sans-serif; font-size:12px; font-weight:400; line-height:1.5; color:#333333;'>
@@ -268,22 +261,30 @@ namespace PlanningTool.NavExtension.Services
 
             var worksheet = workbook.Worksheets.Add("Shipment Details");
 
-            // Headers
-            worksheet.Cell(1, 1).Value = "PO No";
-            worksheet.Cell(1, 2).Value = "HBL No";
-            worksheet.Cell(1, 3).Value = "Container No";
-            worksheet.Cell(1, 4).Value = "Vendor";
-            worksheet.Cell(1, 5).Value = "Item Code";
-            worksheet.Cell(1, 6).Value = "Item Description";
-            worksheet.Cell(1, 7).Value = "Country";
-            worksheet.Cell(1, 8).Value = "DEDON ETA";
-            worksheet.Cell(1, 9).Value = "Tagged Qty";
+            var headers = new[]
+            {
+                "PO No",
+                "HBL No",
+                "Container No",
+                "Vendor",
+                "Item Code",
+                "Item Description",
+                "Country",
+                "DEDON ETA",
+                "Tagged Qty"
+            };
+
+            for (var i = 0; i < headers.Length; i++)
+            {
+                worksheet.Cell(1, i + 1).Value = headers[i];
+            }
 
             var header = worksheet.Range("A1:I1");
             header.Style.Font.Bold = true;
             header.Style.Fill.BackgroundColor = XLColor.LightGray;
 
-            int row = 2;
+
+            var row = 2;
 
             foreach (var x in items)
             {
@@ -294,7 +295,7 @@ namespace PlanningTool.NavExtension.Services
                 worksheet.Cell(row, 5).Value = x._ptItemCode ?? "-";
                 worksheet.Cell(row, 6).Value = x._ptItemDescription ?? "-";
                 worksheet.Cell(row, 7).Value = x._ptCountryOfOrigin ?? "-";
-                worksheet.Cell(row, 8).Value = x._ptContainerETA?.ToString("yyyy-MM-dd");
+                worksheet.Cell(row, 8).Value = x._ptContainerETA?.ToString("yyyy-MM-dd") ?? "-";
                 worksheet.Cell(row, 9).Value = x._ptPartialDelivered;
 
                 row++;
