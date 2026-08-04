@@ -1,5 +1,4 @@
 ﻿using ClosedXML.Excel;
-using DocumentFormat.OpenXml.Wordprocessing;
 using Microsoft.EntityFrameworkCore;
 using PlanningTool.NavExtension.Constants;
 using PlanningTool.NavExtension.Data;
@@ -30,11 +29,7 @@ namespace PlanningTool.NavExtension.Services
                 return;
 
 
-            var statusGroups = notifications
-                .GroupBy(x => x.ShipmentStatus);
-
-
-            foreach (var group in statusGroups)
+            foreach (var group in notifications.GroupBy(x => x.ShipmentStatus))
             {
                 await SendBatchEmailAsync(group);
             }
@@ -56,27 +51,35 @@ namespace PlanningTool.NavExtension.Services
             {
                 var recipients = shipmentGroup
                     .Select(x => x._ptEmailAddress)
-                    .Where(email => !string.IsNullOrWhiteSpace(email))
+                    .Where(x => !string.IsNullOrWhiteSpace(x))
                     .Distinct()
                     .ToList();
+
 
                 if (!recipients.Any())
                     return;
 
 
-                var subject = GetSubject(shipmentGroup.Key);
+                var status = shipmentGroup.Key;
 
-                var body = await BuildEmailBodyAsync(shipmentGroup);
+                var subject = GetSubject(status);
+
+                var body = BuildEmailBody(shipmentGroup);
+
 
                 var items = shipmentGroup
-                .DistinctBy(x => x.PK_ptProcID)
-                .ToList();
+                    .DistinctBy(x => x.PK_ptProcID)
+                    .ToList();
+
 
                 var excelBytes = GenerateShipmentExcel(items);
 
-                var fileName = $"{GetShipmentStatusText(shipmentGroup.Key)}_{DateTime.Now:yyyy-MM-dd}.xlsx";
 
-                var attachment = new Attachment(
+                var fileName =
+                    $"{GetShipmentStatusText(status)}_{DateTime.Now:yyyy-MM-dd}.xlsx";
+
+
+                using var attachment = new Attachment(
                     new MemoryStream(excelBytes),
                     fileName,
                     "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
@@ -92,13 +95,16 @@ namespace PlanningTool.NavExtension.Services
                 );
 
 
+                await SaveReminderTrackingAsync(shipmentGroup);
+
                 await SaveEmailHistoryAsync(shipmentGroup);
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Shipment notification failed: {ex.Message}");
+                Console.WriteLine(
+                    $"Shipment notification failed: {ex.Message}");
             }
-        }
+        }      
 
         private string GetSubject(string status)
         {
@@ -110,7 +116,7 @@ namespace PlanningTool.NavExtension.Services
                 "Shipment Today" =>
                     "DEDON ETA | Shipment Arriving Today Notification",
 
-                "Due" =>
+                "Overdue" =>
                     "DEDON ETA | Shipment Due Notification",
 
                 "Delayed" =>
@@ -124,34 +130,17 @@ namespace PlanningTool.NavExtension.Services
         {
             return status switch
             {
-                "Today" => "Shipment_Arriving_Today",
-                "Upcoming" => "Upcoming _Shipment_Arrival",
+                "Shipment Today" => "Shipment_Arriving_Today",
+                "Upcoming" => "Upcoming_Shipment_Arrival",
                 "Overdue" => "Shipment_Overdue",
                 "Delayed" => "Shipment_Delayed",
                 _ => status
             };
         }
 
-        private async Task<string> BuildEmailBodyAsync(
+        private string BuildEmailBody(
             IGrouping<string, vw_ProcurementETAEmailNotification> shipmentGroup)
         {
-
-            var items = shipmentGroup
-                .GroupBy(x => x.PK_ptProcID)
-                .Select(g => g.First())
-                .Select(x => new
-                {
-                    x._ptDocNo,
-                    x._ptHBLNo,
-                    x._ptContainerNo,
-                    x._ptVendorName,
-                    x._ptItemDescription,
-                    x._ptCountryOfOrigin,
-                    x._ptContainerETA,
-                    x._ptPartialDelivered
-                })
-                .ToList();                       
-
             return $@"
                 <div style='font-family:'Segoe UI', Arial, sans-serif; font-size:12px; font-weight:400; line-height:1.5; color:#333333;'>
 
@@ -178,9 +167,8 @@ namespace PlanningTool.NavExtension.Services
             ";
         }
 
-
-        private async Task SaveEmailHistoryAsync(
-        IGrouping<string, vw_ProcurementETAEmailNotification> shipmentGroup)
+        private async Task SaveReminderTrackingAsync(
+            IGrouping<string, vw_ProcurementETAEmailNotification> shipmentGroup)
         {
             var items = shipmentGroup
                 .GroupBy(x => new
@@ -188,8 +176,76 @@ namespace PlanningTool.NavExtension.Services
                     x.PK_ptProcID,
                     x._PK_ptEmailNotification_ID
                 })
-                .Select(g => g.First())
+                .Select(x => x.First())
                 .ToList();
+
+
+            foreach (var item in items)
+            {
+                var tracking =
+                    await _context.ShipmentReminderTracking
+                    .FirstOrDefaultAsync(x =>
+                        x._ptProcID == item.PK_ptProcID &&
+                        x._ptEmailNotificationID ==
+                            item._PK_ptEmailNotification_ID &&
+                        x._ptReminderType ==
+                            shipmentGroup.Key);
+
+
+                if (tracking == null)
+                {
+                    _context.ShipmentReminderTracking.Add(
+                        new ShipmentReminderTracking
+                        {
+                            _ptProcID = item.PK_ptProcID,
+
+                            _ptEmailNotificationID =
+                                item._PK_ptEmailNotification_ID,
+
+                            _ptReminderType =
+                                shipmentGroup.Key,
+
+                            _ptFirstTriggerDate =
+                                DateTime.Today,
+
+                            _ptLastSentDate =
+                                DateTime.Today,
+
+                            _ptSendCount = 1,
+
+                            _ptStatus = "Active",
+
+                            _ptCreatedDate = DateTime.Now
+                        });
+                }
+                else
+                {
+                    tracking._ptLastSentDate =
+                        DateTime.Today;
+
+                    tracking._ptSendCount++;
+
+                    tracking._ptUpdatedDate =
+                        DateTime.Now;
+                }
+            }
+
+
+            await _context.SaveChangesAsync();
+        }
+
+
+        private async Task SaveEmailHistoryAsync(
+        IGrouping<string, vw_ProcurementETAEmailNotification> shipmentGroup)
+        {
+            var items = shipmentGroup
+               .GroupBy(x => new
+               {
+                   x.PK_ptProcID,
+                   x._PK_ptEmailNotification_ID
+               })
+               .Select(x => x.First())
+               .ToList();
 
 
             foreach (var item in items)

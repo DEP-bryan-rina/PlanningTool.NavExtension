@@ -35,7 +35,7 @@ namespace PlanningTool.NavExtension.Data
 
         public DbSet<ShipmentEmailHistory> ShipmentEmailHistory { get; set; }
 
-
+        public DbSet<ShipmentReminderTracking> ShipmentReminderTracking { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<UserModel>()
@@ -65,6 +65,9 @@ namespace PlanningTool.NavExtension.Data
 
             modelBuilder.Entity<ShipmentEmailHistory>()
                 .ToTable("_tblShipmentEmailHistory");
+
+            modelBuilder.Entity<ShipmentReminderTracking>()
+                .ToTable("_tblShipmentReminderTracking");
 
 
             base.OnModelCreating(modelBuilder);
