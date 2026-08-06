@@ -160,23 +160,7 @@ namespace PlanningTool.NavExtension.Pages.ImPex
                             <strong>HBL entry</strong> has been successfully created and is now available in the system.
                         </p>
 
-                        <table>
-                            <tr>
-                                <th style='text-align:left;'>HBL No</th>
-                                <td>: {Impex._ptHBLNo}</td>
-                            </tr>
-                            <tr>
-                                <th style='text-align:left;'>Container No</th>
-                                <td>: {Impex._ptContainerNo}</td>
-                            </tr>
-                            <tr>
-                                <th style='text-align:left;'>Dedon ETA</th>
-                                <td>: {Impex._ptContainerETA:MMM dd, yyyy}</td>
-                            </tr>
- <tr>
-                                <th style='text-align:left;'>Status</th>
-                                <td>: {Impex._ptCountryOfOrigin}</td>
-                            </tr>
+                        <table>                           
                             <tr>
                                 <th style='text-align:left;'>Status</th>
                                 <td>: New</td>
@@ -214,12 +198,7 @@ namespace PlanningTool.NavExtension.Pages.ImPex
                                     <td>{Impex._ptCountryOfOrigin}</td>
                                 </tr>
                             </tbody>
-                        </table>
-
-                        <p>
-                            The shipment record is now ready for use and reference within the
-                            ImPEx Monitoring System.
-                        </p>
+                        </table>                     
 
                         <p>
                             Should you encounter any issues or require further assistance,
