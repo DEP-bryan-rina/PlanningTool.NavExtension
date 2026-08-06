@@ -15,10 +15,6 @@
 		}
 	}
 
-	
-
-	
-
 </style>
 <div class="container-fluid">
 	<!-- Page Header -->
@@ -105,7 +101,8 @@
 															data-hbl="@item._ptHBLNo"
 															data-container="@item._ptContainerNo"
 															data-eta="@item._ptContainerETA?.ToString("yyyy-MM-dd")"
-															data-origin="@item._ptCountryOfOrigin">
+															data-origin="@item._ptCountryOfOrigin"
+															data-remarks="@item._ptRemarks">
 														@item._ptHBLNo
 													</option>
 												}
@@ -375,12 +372,13 @@
 							data-bs-dismiss="modal">
 					</button>
 				</div>
-				<div class="modal-body">
+				<div class="modal-body" style="">
 
 					<!-- Shipment Information -->
-					<div class="card border mb-3">
-						<div class="card-header bg-white fw-semibold">
-							Shipment Information
+					<div class="card shadow-sm border-0 mb-3">
+						<div class="card-header bg-primary text-white fw-semibold">
+							<i class="bi bi-box-seam me-2"></i>
+							ImPex Shipment Information 
 						</div>
 
 						<div class="card-body">
@@ -418,32 +416,35 @@
 								</div>
 								<div class="col-md-3">
 									<label class="form-label small fw-semibold">
-										Dedon ETA
+										DEDON ETA
 									</label>
 
 									<input id="modalDedonETA" name="ParamCETA"
 										   class="form-control form-control-sm bg-light"
 										   readonly />
 								</div>
-
 								<div class="col-md-12">
-									<label class="form-label small fw-semibold">
-										Remarks
+									<label class="text-muted small d-block mb-1">
+										ImPex Shipment Remarks
 									</label>
 
-									<textarea id="modalRemarks"
-											  class="form-control form-control-sm"
-											  rows="3"
-											  placeholder="Enter shipment remarks..."></textarea>
+									<input id="modalImPexRemarks" name="ParamRemarks"
+										   class="form-control form-control-sm bg-light" style="height: 50px;"
+										   readonly />
 								</div>
 
+								
 							</div>
 
 						</div>
 					</div>
 					<!-- For Tagging -->
-					<div class="card border">
-						<div class="card-body p-0">
+					<div class="card shadow-sm border-0 mb-3">
+						<div class="card-header bg-primary text-white fw-semibold">
+							<i class="bi bi-tags me-2"></i>
+							Select Purchase Orders for Tagging
+						</div>
+						<div class="card-body p-0" style="max-height:300px; overflow:auto;">
 
 							<table id="tblSelected"
 								   class="table table-sm table-hover table-bordered mb-0 align-middle">
@@ -473,28 +474,38 @@
 							</table>
 
 						</div>
+						<br />
+						<div class="col-md-12">
+							<label class="form-label small fw-semibold">
+								Additional Tagging Remarks
+							</label>
 
-					</div>
-
+							<textarea id="modalRemarks"
+									  class="form-control form-control-sm"
+									  rows="3"
+									  placeholder="Enter tag remarks..."></textarea>
+						</div>
+					</<div>
 				</div>
+			</div>
+			<!-- Footer -->
+			<div class="modal-footer bg-light">
 
-				<!-- Footer -->
-				<div class="modal-footer bg-light">
+				<button type="button" class="btn btn-primary erp-btn"
+						data-bs-dismiss="modal">
+					<i class="fas fa-times me-1 text-danger"></i>
+					Cancel
+				</button>
 
-					<button type="button" class="btn btn-primary erp-btn"
-							data-bs-dismiss="modal">
-						<i class="fas fa-times me-1"></i>
-						Cancel
-					</button>
+				<button id="btnProceed" type="submit" asp-page-handler="Tag"
+						class="btn btn-success erp-btn">
+					<i class="fas fa-save me-1 text-success"></i>
+					Proceed
+				</button>
 
-					<button id="btnProceed" type="submit" asp-page-handler="Tag"
-							class="btn btn-success erp-btn">
-						<i class="fas fa-save me-1"></i>
-						Proceed
-					</button>
+			</div>
 
-				</div>
-
+		</div>
 			</div>
 		</div>
 	</div>
@@ -537,6 +548,7 @@
 			$('#modalContainer').val($selected.data('container') || '');
 			$('#modalCountryOfOrigin').val($selected.data('origin') || '');
 			$('#modalDedonETA').val($selected.data('eta') || '');
+			$('#modalImPexRemarks').val($selected.data('remarks') || '');
 		}
 
 		/* ==============================
@@ -1103,6 +1115,10 @@
 
 				},300);
 
+		});
+
+		$('#tagModal').on('shown.bs.modal', function () {
+			$('#modalRemarks').trigger('focus');
 		});
 
 	</script>

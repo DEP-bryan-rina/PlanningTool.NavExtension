@@ -354,7 +354,9 @@ namespace PlanningTool.NavExtension.Pages.Procurement
                     _ptHBLNo = x._ptHBLNo,
                     _ptContainerNo = x._ptContainerNo,
                     _ptCountryOfOrigin = x._ptCountryOfOrigin,
-                    _ptContainerETA = x._ptContainerETA
+                    _ptContainerETA = x._ptContainerETA,
+                    _ptRemarks = x._ptRemarks
+
                 })
                 .ToList();
         }        
