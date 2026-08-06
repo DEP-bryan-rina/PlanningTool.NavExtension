@@ -124,6 +124,7 @@ namespace PlanningTool.NavExtension.Pages.Procurement
                     : null;
 
                 string? etaDisplay = eta?.ToString("MMM dd, yyyy");
+                string countryofOrigin = Request.Form["CountryOfOrigin"];
 
                 int updatedCount = 0;
 
@@ -224,6 +225,10 @@ namespace PlanningTool.NavExtension.Pages.Procurement
                             <tr>
                                 <th style='text-align:left;'>Dedon ETA</th>
                                 <td>: {etaDisplay}</td>
+                            </tr>
+                            <tr>
+                                <th style='text-align:left;'>Country Of Origin</th>
+                                <td>: {countryofOrigin}</td>
                             </tr>
                             <tr>
                                 <th style='text-align:left;'>Status</th>
