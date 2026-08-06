@@ -428,81 +428,6 @@ table th {
 		transform: rotate(-360deg);
 	}
 }
-/* ========================================
-   DataTables Filter
-======================================== */
-.dataTables_filter {
-	float: right !important;
-	display: flex;
-	align-items: center;
-	margin-bottom: 8px;
-	padding-top: 15px;
-}
-
-.dataTables_length {
-	padding-top: 15px;
-}
-
-/* ========================================
-   Search Input & Column Filter
-======================================== */
-.dataTables_filter input,
-.columnFilter {
-	height: 31px;
-	font-size: 13px;
-	border: 1px solid #c8c8c8;
-	box-sizing: border-box;
-	background: #fff;
-}
-
-/* Search Box */
-.dataTables_filter input {
-	width: 180px;
-	margin: 0 !important;
-	border-right: 0;
-	border-radius: 2px 0 0 2px;
-}
-
-/* Dropdown */
-.columnFilter {
-	width: 170px;
-	padding: 0;
-	cursor: pointer;
-	border-radius: 0 2px 2px 0;
-}
-
-	/* Remove Hover/Focus Effects */
-	.dataTables_filter input:hover,
-	.dataTables_filter input:focus,
-	.columnFilter:hover,
-	.columnFilter:focus {
-		background: #fff;
-		border-color: #c8c8c8;
-		outline: none;
-		box-shadow: none;
-	}
-.status-badge {
-	font-size: 0.8em;
-	padding: 4px 8px;
-	border-radius: 4px;
-	font-weight: 600;
-	color: #fff;
-}
-
-
-.dataTables_filter {
-	display: flex;
-	align-items: center;
-	justify-content: flex-end;
-	gap: 0;
-	margin-bottom: 10px;
-}
-
-	.dataTables_filter label {
-		display: flex;
-		align-items: center;
-		margin: 0;
-	}
 
 /* Export Button Container */
 .dt-buttons {
@@ -614,3 +539,67 @@ table th {
 		.ribbon-btn.active i {
 			color: white;
 		}
+
+
+
+/* Search Area */
+.dataTables_filter {
+	display: flex;
+	justify-content: flex-end;
+	align-items: center;
+	gap: 0;
+	margin-bottom: 10px;
+	padding-top: 15px;
+}
+
+	.dataTables_filter label {
+		display: flex;
+		align-items: center;
+		margin: 0;
+	}
+
+	/* Search Input */
+	.dataTables_filter input {
+		width: 180px;
+		height: 31px;
+		padding: 0 8px;
+		border: 1px solid #c8c8c8;
+		border-right: none;
+		border-radius: 2px 0 0 2px;
+		background: #fff;
+		font-size: 13px;
+		outline: none;
+	}
+
+/* Dropdown */
+.columnFilter {
+	width: 150px;
+	height: 31px;
+	padding: 0 28px 0 8px;
+	border: 1px solid #c8c8c8;
+	border-radius: 0 2px 2px 0;
+	background-color: #fff;
+	font-size: 13px;
+	cursor: pointer;
+	outline: none;
+	/* Custom arrow */
+	appearance: none;
+	-webkit-appearance: none;
+	-moz-appearance: none;
+	background-image: linear-gradient(45deg, transparent 50%, #666 50%), linear-gradient(135deg, #666 50%, transparent 50%);
+	background-position: calc(100% - 14px) 12px, calc(100% - 9px) 12px;
+	background-size: 5px 5px;
+	background-repeat: no-repeat;
+}
+
+	/* Remove blue outline */
+	.columnFilter:hover,
+	.columnFilter:focus,
+	.dataTables_filter input:hover,
+	.dataTables_filter input:focus {
+		border-color: #c8c8c8;
+		background: #fff;
+		box-shadow: none;
+		outline: none;
+	}
+
