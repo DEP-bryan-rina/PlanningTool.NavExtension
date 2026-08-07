@@ -168,10 +168,13 @@ public class ProcurementReminderService
             reminderType);
     }
 
+    public enum ReminderType
+    {
+        Upcoming,
+        Delayed
+    }
 
-
-    private async Task<List<EmailRecipient>> GetRecipientsAsync(
-    string reminderType)
+    private async Task<List<EmailRecipient>> GetRecipientsAsync(string reminderType)
     {
         return await _context.EmailNotifications
             .Where(x =>
@@ -191,14 +194,14 @@ public class ProcurementReminderService
 
 
 
-    private string GetSubject(string type)
+    private string GetSubject(ReminderType type)
     {
         return type switch
         {
-            "Upcoming" =>
+            ReminderType.Upcoming =>
                 "DEDON ETA | Upcoming Shipment Notification",
 
-            "Delayed" =>
+            ReminderType.Delayed =>
                 "DEDON ETA | Delayed Shipment Notification",
 
             _ =>
