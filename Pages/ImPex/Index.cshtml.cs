@@ -188,6 +188,7 @@ namespace PlanningTool.NavExtension.Pages.ImPex
                                     <th style='text-align:left;'>Container No</th>
                                     <th style='text-align:left;'>DEDON ETA</th>
                                     <th style='text-align:left;'>Country Of Origin</th>
+                                    <th style='text-align:left;'>Remarks</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -196,6 +197,7 @@ namespace PlanningTool.NavExtension.Pages.ImPex
                                     <td>{Impex._ptContainerNo}</td>
                                     <td>{Impex._ptContainerETA:MMM dd, yyyy}</td>
                                     <td>{Impex._ptCountryOfOrigin}</td>
+                                    <td>{Impex._ptRemarks ?? "NA"}</td>
                                 </tr>
                             </tbody>
                         </table>                     

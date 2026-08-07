@@ -61,8 +61,7 @@ public class ProcurementReminderService
 
 
 
-    private List<ProcurementCenterBalance>GetUpcomingShipments(
-        List<ProcurementCenterBalance> shipments)
+    private List<ProcurementCenterBalance>GetUpcomingShipments(List<ProcurementCenterBalance> shipments)
     {
         var today = DateTime.Today;
 
@@ -92,8 +91,7 @@ public class ProcurementReminderService
     }
 
 
-    private List<ProcurementCenterBalance> GetDelayedShipments(
-    List<ProcurementCenterBalance> shipments)
+    private List<ProcurementCenterBalance> GetDelayedShipments(List<ProcurementCenterBalance> shipments)
     {
         var today = DateTime.Today;
 
@@ -106,9 +104,7 @@ public class ProcurementReminderService
     }
 
 
-    private async Task SendShipmentEmailAsync(
-        List<ProcurementCenterBalance> shipments,
-        string reminderType)
+    private async Task SendShipmentEmailAsync(List<ProcurementCenterBalance> shipments,string reminderType)
     {
         var recipientUsers = await GetRecipientsAsync(reminderType);
 
