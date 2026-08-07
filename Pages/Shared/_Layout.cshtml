@@ -198,14 +198,19 @@
 		<div class="container-fluid">
 			<div class="row small">
 
-				<div class="col-md-4 text-start">
-					<i class="fas fa-industry me-1"></i>
-					DEDONPH <span id="liveDate"></span>
-				</div>
-				<div class="col-md-4 text-center">					
+				<div class="col-md-8 text-start">				
+
+					<div class="col-md-4 d-flex align-items-center">
+						<i class="fas fa-building me-2 text-light"></i>
+						
+						<span class="fw-semibold" style="color: darkorange;">DEDONPH</span>
+						<span class="ms-3" id="liveDate"></span>
+						<span class="ms-3">@currentUser</span>
+					</div>
 				</div>
 				<div class="col-md-4 text-end">
-					Planning Tool |	NAV Extension version 2026.0.1
+					<span class="fw-semibold" style="color: darkorange;">Planning Tool</span> |	
+					NAV Extension version v2026.0.1
 				</div>
 
 			</div>
@@ -256,18 +261,16 @@
 		}).show();
 		});
 
-		// Live Clock
+		// Live Date
 		function updateClock() {
 		const now = new Date();
 
-		const formatted =
-		now.toLocaleDateString("en-GB", {
-		day: "2-digit",
-		month: "short",
+		const formatted = now.toLocaleDateString("en-US", {
+		weekday: "long",
+		month: "long",
+		day: "numeric",
 		year: "numeric"
-		}) +
-		" " +
-		now.toLocaleTimeString();
+		});
 
 		const liveDate = document.getElementById("liveDate");
 
@@ -277,7 +280,9 @@
 		}
 
 		updateClock();
-		setInterval(updateClock, 1000);
+
+		// Refresh every minute (date only changes once a day)
+		setInterval(updateClock, 60000);
 
 		// Show Loader on Navigation
 		document.addEventListener("click", function (e) {
