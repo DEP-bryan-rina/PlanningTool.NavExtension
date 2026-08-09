@@ -181,7 +181,7 @@ namespace PlanningTool.NavExtension.Pages.ImPex
                         <table border='1'
                                 cellpadding='4'
                                 cellspacing='0'
-                                style='border-collapse:collapse; width:50%;'>
+                                style='border-collapse:collapse; width:70%;'>
                             <thead>
                                 <tr>
                                     <th style='text-align:left;'>HBL No</th>
