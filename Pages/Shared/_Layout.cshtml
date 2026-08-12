@@ -1,5 +1,11 @@
-﻿@using PlanningTool.NavExtension.Services
+﻿@using System.Linq
+@using Microsoft.EntityFrameworkCore
+@using PlanningTool.NavExtension.Data
+@using PlanningTool.NavExtension.Models
+@using PlanningTool.NavExtension.Services
+
 @inject IUserPermissionService PermissionService
+@inject AppDbContext _context
 
 @{
 	var currentPath = Context.Request.Path.Value ?? "";
@@ -8,6 +14,27 @@
 	var permission = string.IsNullOrWhiteSpace(currentUser)
 		? null
 		: await PermissionService.GetUserPermissionAsync(currentUser.ToUpperInvariant());
+
+
+	var today = DateTime.Today;
+	var tomorrow = today.AddDays(1);
+
+	var todayImpex = await _context.tblImPexCenter
+		.Where(x => x._ptCreatedDate >= today &&
+					x._ptCreatedDate < tomorrow)
+		.ToListAsync();
+
+	var impexCreatedToday = todayImpex.Count;
+
+	
+	var todayShipments = await _context.GetTaggedItems
+	.Where(x =>
+		x._ptContainerETA >= today &&
+		x._ptContainerETA < tomorrow &&
+		x._ptStatus == 1)
+	.ToListAsync();
+
+	var upcomingCount = todayShipments.Count;
 }
 
 <!DOCTYPE html>
@@ -169,8 +196,163 @@
 				</li>
 
 			</ul>
+			@* Shipments Today Notification *@
+			<div class="position-relative shipment-notification me-3">
+				@{
+					var shipmentDetails = todayShipments
+						.Select(x => new
+						{
+							HBL = x._ptHBLNo,
+							Container = x._ptContainerNo,
+							Origin = x._ptCountryOfOrigin
+						})
+						.ToList();
+				}
+				<button class="btn btn-link text-white p-0 position-relative"
+						type="button"
+						onclick="window.location.href='/WHS/Index'">
 
+					<i class="fas fa-ship"></i>
 
+					@if (upcomingCount > 0)
+					{
+						<span class="shipment-badge">
+							@upcomingCount
+						</span>
+					}
+				</button>
+
+				<div class="shipment-tooltip">
+
+					<div class="shipment-header">
+						<i class="fas fa-ship"></i>
+						<span>Today's Shipments</span>
+					</div>
+
+					@foreach (var shipment in todayShipments)
+					{
+						<div class="shipment-row">
+
+							<div class="shipment-hbl">
+								<i class="fas fa-file-invoice me-1"></i>
+								HBL No. : @shipment._ptHBLNo
+							</div>
+
+							<div class="shipment-info">
+
+								<span>
+									<i class="fas fa-file-alt"></i>
+									@shipment._ptDocNo
+								</span>
+
+								<span>
+									<i class="fas fa-barcode"></i>
+									@shipment._ptItemCode
+								</span>
+
+								<span>
+									<i class="fas fa-box-open"></i>
+									@shipment._ptItemDescription
+								</span>
+
+								<span>
+									<i class="fas fa-truck-loading"></i>
+									Partial Delivered: @shipment._ptPartialDelivered
+								</span>
+
+							</div>
+
+						</div>
+					}
+
+					@if (upcomingCount == 0)
+					{
+						<div class="shipment-empty">
+							No shipments today
+						</div>
+					}
+
+				</div>
+			</div>
+
+			@* HBL Notification *@
+			<div class="position-relative me-3 impex-notification">
+				@{
+					var hblNumbers = string.Join(", ",
+						todayImpex
+							.Where(x => !string.IsNullOrWhiteSpace(x._ptHBLNo))
+							.Select(x => x._ptHBLNo));
+				}
+
+				<button class="btn btn-link text-white p-0 position-relative"
+						type="button">
+
+					<i class="fas fa-bell"></i>
+
+					@if (impexCreatedToday > 0)
+					{
+						<span class="impex-badge">
+							@impexCreatedToday
+						</span>
+					}
+				</button>
+
+				<div class="impex-tooltip">
+
+					<div class="impex-header">
+						<i class="fas fa-bell"></i>
+						<span>New HBL Created Today</span>
+					</div>
+
+					@if (todayImpex.Any())
+					{
+						foreach (var item in todayImpex)
+						{
+							<div class="impex-row">
+
+								<div class="impex-hbl">
+									@item._ptHBLNo
+								</div>
+
+								<div class="impex-info">
+
+									<span>
+										<i class="fas fa-box"></i>
+										@item._ptContainerNo
+									</span>
+
+									<span>
+										<i class="fas fa-calendar-alt"></i>
+										@item._ptContainerETA?.ToString("yyyy-MM-dd")
+									</span>
+
+									<span>
+										<i class="fas fa-globe-asia"></i>
+										@item._ptCountryOfOrigin
+									</span>
+
+									<span>
+										<i class="fas fa-comment-alt"></i>
+										@item._ptRemarks
+									</span>
+
+								</div>
+
+							</div>
+						}
+					}
+					else
+					{
+						<div class="impex-empty">
+							No new HBL today
+						</div>
+					}
+
+				</div>
+
+			</div>
+
+			@* Display User *@
 			<div class="d-flex align-items-center text-white">
 
 				<button id="btnRefresh"
