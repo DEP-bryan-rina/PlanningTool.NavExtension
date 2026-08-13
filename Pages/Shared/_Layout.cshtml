@@ -36,17 +36,6 @@
 
 	var upcomingCount = todayShipments.Count;
 }
-<style>
-	@@keyframes sail {
-		0%, 100% {
-			transform: translateX(0);
-		}
-
-		50% {
-			transform: translateX(5px);
-		}
-	}
-</style>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -222,7 +211,7 @@
 						type="button"
 						onclick="window.location.href='/WHS/Index'">
 
-					<i class="fas fa-ship" style="display:inline-block; animation:pulse 2s ease-in-out infinite;"></i>
+					<i class="fas fa-ship"></i>
 
 					@if (upcomingCount > 0)
 					{
