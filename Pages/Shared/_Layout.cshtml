@@ -19,7 +19,7 @@
 	var today = DateTime.Today;
 	var tomorrow = today.AddDays(1);
 
-	var todayImpex = await _context.tblImPexCenter
+	var todayImpex = await _context.GetImPexItems
 		.Where(x => x._ptCreatedDate >= today &&
 					x._ptCreatedDate < tomorrow)
 		.ToListAsync();
@@ -36,7 +36,17 @@
 
 	var upcomingCount = todayShipments.Count;
 }
+<style>
+	@@keyframes sail {
+		0%, 100% {
+			transform: translateX(0);
+		}
 
+		50% {
+			transform: translateX(5px);
+		}
+	}
+</style>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -212,7 +222,7 @@
 						type="button"
 						onclick="window.location.href='/WHS/Index'">
 
-					<i class="fas fa-ship"></i>
+					<i class="fas fa-ship" style="display:inline-block; animation:pulse 2s ease-in-out infinite;"></i>
 
 					@if (upcomingCount > 0)
 					{
@@ -257,7 +267,7 @@
 
 								<span>
 									<i class="fas fa-truck-loading"></i>
-									Partial Delivered: @shipment._ptPartialDelivered
+									Tagged Qty: @shipment._ptPartialDelivered
 								</span>
 
 							</div>
@@ -332,8 +342,16 @@
 									</span>
 
 									<span>
-										<i class="fas fa-comment-alt"></i>
-										@item._ptRemarks
+										@if (string.IsNullOrWhiteSpace(item._ptRemarks))
+										{
+											<i class="fas fa-comment-slash text-muted"></i>
+											<span class="text-muted">No Remarks</span>
+										}
+										else
+										{
+											<i class="fas fa-comment-alt"></i>
+											<span>@item._ptRemarks</span>
+										}
 									</span>
 
 								</div>

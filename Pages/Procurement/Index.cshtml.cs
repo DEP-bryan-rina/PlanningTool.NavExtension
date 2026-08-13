@@ -346,7 +346,7 @@ namespace PlanningTool.NavExtension.Pages.Procurement
 
         private void LoadImpex()
         {
-            ImpexList = _context.tblImPexCenter
+            ImpexList = _context.GetImPexItems
                 .Where(x => x._ptStatus != 2)
                 .Select(x => new ImPexCenterModel
                 {
@@ -458,7 +458,7 @@ namespace PlanningTool.NavExtension.Pages.Procurement
                 // Get related ImPex records
                 // ==============================
 
-                var impexRecords = _context.tblImPexCenter
+                var impexRecords = _context.GetImPexItems
                     .Where(x => hblNumbers.Contains(x._ptHBLNo))
                     .ToList();
 

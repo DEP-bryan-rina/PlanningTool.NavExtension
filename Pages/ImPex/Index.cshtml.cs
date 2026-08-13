@@ -29,7 +29,8 @@ namespace PlanningTool.NavExtension.Pages.ImPex
         }
         [BindProperty] public ImPexCenterModel Impex { get; set; }
 
-        public List<ImPexCenterModel> ImpexList { get; set; } = new List<ImPexCenterModel>();
+        public List<ImPexCenterModel> ImpexOpenList { get; set; } = new List<ImPexCenterModel>();
+        public List<ImPexCenterModel> ImpexCompletedList { get; set; } = new List<ImPexCenterModel>();
 
         public List<ProcurementCenterModel> ProcurementList { get; set; } = new();
         public List<SelectListItem> CountryList { get; set; } = new();
@@ -48,14 +49,32 @@ namespace PlanningTool.NavExtension.Pages.ImPex
                 return RedirectToPage("/AccessDenied");
             }
 
-            this.ImpexList = _context.tblImPexCenter.ToList();
+            // ---------------------------------------------------------
+            // First display: Status 0 and 1, ordered by status (0 first)
+            // ---------------------------------------------------------
+
+            ImpexOpenList = await _context.GetImPexItems
+                    .Where(x => x._ptStatus == 0 || x._ptStatus == 1)
+                    .OrderBy(x => x._ptStatus)
+                    .ToListAsync();
+
+
+            // ---------------------------------------------------------
+            // // Second display: Status 2
+            // ---------------------------------------------------------
+
+            ImpexCompletedList = await _context.GetImPexItems
+                    .Where(x => x._ptStatus == 2)
+                    .ToListAsync();
+
+
             ProcurementList = await _context.GetTaggedItems.ToListAsync();
 
             this.LoadCountries();
 
             if (id.HasValue)
             {
-                Impex = await _context.tblImPexCenter
+                Impex = await _context.GetImPexItems
                     .FirstOrDefaultAsync(x => x.PK_ptImpexID == id.Value);
 
                 if (Impex == null)
@@ -127,13 +146,13 @@ namespace PlanningTool.NavExtension.Pages.ImPex
                 // ADD Function
                 if (Impex.PK_ptImpexID == 0)
                 {
-                    bool impexExists = _context.tblImPexCenter.AsNoTracking()
+                    bool impexExists = _context.GetImPexItems.AsNoTracking()
                        .Any(x => x._ptHBLNo == Impex._ptHBLNo);
 
                     if (impexExists)
                     {
                         TempData["ErrorMessage"] = "HBL No already exists.";
-                        ImpexList = _context.tblImPexCenter.ToList();
+                        ImpexOpenList = _context.GetImPexItems.ToList();
                         return Page();
                     }
 
@@ -143,7 +162,7 @@ namespace PlanningTool.NavExtension.Pages.ImPex
                     Impex._ptCreatedDate = DateTime.Now;
                     Impex._ptStatus = 0;
 
-                    _context.tblImPexCenter.Add(Impex);
+                    _context.GetImPexItems.Add(Impex);
                     _context.SaveChanges();
                     TempData["SuccessMessage"] = "BHL No :  " + Impex._ptHBLNo + " Successfully created!";
 
@@ -230,21 +249,21 @@ namespace PlanningTool.NavExtension.Pages.ImPex
                 // UPDATE Function
                 else
                 {
-                    var existing = _context.tblImPexCenter
+                    var existing = _context.GetImPexItems
                         .FirstOrDefault(x => x.PK_ptImpexID ==
                                              Impex.PK_ptImpexID);
 
 
                     if (existing != null)
                     {
-                        bool emailExists = _context.tblImPexCenter.Any(x =>
+                        bool emailExists = _context.GetImPexItems.Any(x =>
                            x._ptHBLNo == Impex._ptHBLNo &&
                            x.PK_ptImpexID != Impex.PK_ptImpexID);
 
                         if (emailExists)
                         {
                             TempData["ErrorMessage"] = "HBL No " + Impex._ptHBLNo + " already exists.";
-                            ImpexList = _context.tblImPexCenter.ToList();
+                            ImpexOpenList = _context.GetImPexItems.ToList();
                             return Page();
                         }
                         // ✅ STORE OLD VALUES
@@ -447,7 +466,7 @@ namespace PlanningTool.NavExtension.Pages.ImPex
                     else
                     {
                         TempData["ErrorMessage"] = "Record not found for update.";
-                        ImpexList = _context.tblImPexCenter.ToList();
+                        ImpexOpenList = _context.GetImPexItems.ToList();
                         return Page();
                     }
 
@@ -456,7 +475,7 @@ namespace PlanningTool.NavExtension.Pages.ImPex
             catch (Exception ex)
             {
                 TempData["ErrorMessage"] = "An error occurred: " + ex.Message;
-                ImpexList = _context.tblImPexCenter.ToList();
+                ImpexOpenList = _context.GetImPexItems.ToList();
                 return Page();
             }
 
@@ -466,7 +485,7 @@ namespace PlanningTool.NavExtension.Pages.ImPex
         public async Task<JsonResult> OnGetCheckHblAsync(string hblNo)
         {
 
-            bool exists = await _context.tblImPexCenter
+            bool exists = await _context.GetImPexItems
                     .AnyAsync(x => x._ptHBLNo == hblNo);
 
             return new JsonResult(exists);

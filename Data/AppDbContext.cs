@@ -9,7 +9,7 @@ namespace PlanningTool.NavExtension.Data
         {
         }
         public DbSet<UserModel> tblUserCenter { get; set; }
-        public DbSet<ImPexCenterModel> tblImPexCenter { get; set; }
+        public DbSet<ImPexCenterModel> GetImPexItems { get; set; }
         public DbSet<ProcurementCenterModel> GetTaggedItems { get; set; }
         public DbSet<ReminderNotification> tblReminderNotification { get; set; }
         public DbSet<EmailNotication> tblEmailNotification { get; set; }

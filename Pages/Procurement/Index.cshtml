@@ -608,21 +608,17 @@
 				scrollY: getTableHeight(),
 				scrollCollapse: true,
 				autoWidth: false,
-				fixedHeader: true,
-				responsive: true,
-
-				// Sort Container ETA earliest first
-				order: [[9, 'asc']],
+				fixedHeader: false,
+				responsive: false,
 
 				dom: 'Bfrtip',
 
 				buttons: [{
 					extend: 'excelHtml5',
-					text: '<i class="fa fa-file-excel-o"></i> Export Excel',
+					text: '<i class="fas fa-file-excel"></i> Export Excel',
 					className: 'btn btn-sm erp-btn',
-
 					title: null,
-					filename: filename,
+					filename,
 
 					exportOptions: {
 						columns: ':visible:not(.no-export)',
@@ -650,7 +646,6 @@
 								button,
 								config
 							);
-
 						}
 					}
 				}]
@@ -658,7 +653,7 @@
 		}
 
 		/* ==============================
-			addColumnFilter filter
+		   Column Filter
 		============================== */
 
 		function addColumnFilter(table, tableId) {
@@ -672,20 +667,17 @@
 				.filter((_, node) => node.nodeType === 3)
 				.remove();
 
-			$searchInput.attr(
-				'placeholder',
-				'Type to filter (F3)'
-			);
+			$searchInput.attr('placeholder', 'Type to filter (F3)');
 
 			table.columns().every(function (index) {
 
 				const title = $(this.header()).text().trim();
 
-				if (!title) return;
-
-				$columnFilter.append(
-					`<option value="${index}">${title}</option>`
-				);
+				if (title) {
+					$columnFilter.append(
+						`<option value="${index}">${title}</option>`
+					);
+				}
 			});
 
 			$searchInput.after($columnFilter);
@@ -695,13 +687,17 @@
 				table.columns().search('');
 
 				table
-					.column(+$columnFilter.val())
+					.column(Number($columnFilter.val()))
 					.search($searchInput.val())
 					.draw();
 			};
 
 			$searchInput.on('input', filterData);
 			$columnFilter.on('change', filterData);
+
+			// Move Export Button
+			const $buttons = $(`${tableId}_wrapper .dt-buttons`);
+			$columnFilter.after($buttons);
 		}
 
 		/* ==============================
