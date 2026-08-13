@@ -17,10 +17,10 @@ namespace PlanningTool.NavExtension.Pages.WHS
 
 
         public void OnGet()
-        {
+        {            
             // Load Tagged POs
             ProcurementTagged = _context.ProcurementCenterBalanceView
-            .Where(x => x._ptStatus == 1)
+            .Where(x => x._ptStatus == 1).OrderBy(x => x._ptContainerETA)
             .ToList();
         }
 

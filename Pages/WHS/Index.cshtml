@@ -8,7 +8,7 @@
 	var upcoming = Model.ProcurementTagged
 		.Where(x =>
 			x._ptContainerETA.HasValue &&
-			x._ptStatus == 1)
+			x._ptStatus == 1).OrderBy(x => x._ptContainerETA)
 		.ToList();
 
 	var totalPO = upcoming.Count();
@@ -135,7 +135,7 @@
 				else if (days < 0)
 				{
 					badge = "bg-warning";
-					text = $"Due {Math.Abs(days)} Days Overdue";
+					text = $"{Math.Abs(days)} Day(s) Overdue";
 				}
 				else if (days >= 1 && days <= 14)
 				{
@@ -213,6 +213,7 @@
 				autoWidth: false,
 				fixedHeader: false,
 				responsive: false,
+				order: [[9, 'asc']],
 
 				dom: 'Bfrtip',
 
