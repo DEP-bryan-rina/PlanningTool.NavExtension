@@ -75,10 +75,10 @@ app.MapRazorPages()
 // Manual test execution
 //using (var scope = app.Services.CreateScope())
 //{
-//    var reminderService = scope.ServiceProvider
+//    var reminderservice = scope.ServiceProvider
 //        .GetRequiredService<ProcurementReminderService>();
 
-//    reminderService.ProcessProcurementReminders().GetAwaiter().GetResult();
+//    reminderservice.ProcessProcurementReminders().GetAwaiter().GetResult();
 //}
 
 app.Run();
