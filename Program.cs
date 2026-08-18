@@ -38,7 +38,7 @@ builder.Services.AddAuthentication(NegotiateDefaults.AuthenticationScheme)
 builder.Services.AddAuthorization(options =>
 {
     options.FallbackPolicy = options.DefaultPolicy;
-});
+}); 
 
 // Services
 builder.Services.AddScoped<EmailService>();

@@ -58,7 +58,6 @@
 					</button>
 				</div>
 			</li>
-
 		</ul>
 
 	</div>
@@ -324,7 +323,7 @@
 									<th>Date Created</th>
 									<th>Modified By</th>
 									<th>Date Modified</th>
-									@* <th>PO No Tagged</th> *@
+									<th>PO No Tagged</th>
 									<th class="text-center">Status</th>
 
 								</tr>
@@ -352,6 +351,24 @@
 											<td>@item._ptCreatedDate</td>
 											<td>@item._ptModifiedBy</td>
 											<td>@item._ptModifiedDate</td>
+
+											<td>
+												@{
+													var poNos = Model.ProcurementList
+														.Where(p => p._ptHBLNo == item._ptHBLNo && p._ptStatus == 2)
+														.Select(p => p._ptDocNo)
+														.Where(po => !string.IsNullOrEmpty(po))
+														.Distinct();
+												}
+
+												@foreach (var poNo in poNos)
+												{
+													<span class="badge rounded-pill bg-primary me-1 mb-1 px-2 py-1">
+														<i class="fas fa-file-alt me-1"></i>@poNo
+													</span>
+												}
+											</td>										
+
 											<td class="text-center">
 												@{
 													string statusText;
@@ -683,9 +700,9 @@
 				$.fn.dataTable
 					.tables({ visible: true, api: true })
 					.columns.adjust();
-			});
-
-		});
+			});			
+			
+		});		
 
 	</script>
 }

@@ -61,31 +61,25 @@ public class ProcurementReminderService
 
 
 
-    private List<ProcurementCenterBalance>GetUpcomingShipments(List<ProcurementCenterBalance> shipments)
+    private List<ProcurementCenterBalance> GetUpcomingShipments(
+    List<ProcurementCenterBalance> shipments)
     {
         var today = DateTime.Today;
 
+        var shouldSend =
+            today.DayOfWeek == DayOfWeek.Friday ||
+            shipments.Any(x =>
+                x._ptContainerETA.HasValue &&
+                x._ptContainerETA.Value.Date == today.AddDays(14));
 
-        bool triggerReached = shipments.Any(x =>
-            x._ptContainerETA.HasValue &&
-            x._ptContainerETA.Value.Date == today.AddDays(14)
-        );
-
-
-        bool isFriday =
-            today.DayOfWeek == DayOfWeek.Friday;
-
-
-        if (!triggerReached && !isFriday)
-            return new List<ProcurementCenterBalance>();
-
+        if (!shouldSend)
+            return [];
 
         return shipments
             .Where(x =>
                 x._ptContainerETA.HasValue &&
                 x._ptContainerETA.Value.Date >= today &&
-                x._ptContainerETA.Value.Date <= today.AddDays(14)
-            )
+                x._ptContainerETA.Value.Date <= today.AddDays(14))
             .DistinctBy(x => x.PK_ptProcID)
             .ToList();
     }
