@@ -190,7 +190,7 @@
 							<th class="text-center">No</th>
 							<th>HBL No</th>
 							<th>Container No</th>
-							<th>Dedon ETA</th>
+							<th>DEDON ETA</th>
 							<th>Country Of Origin</th>
 							<th>Remarks</th>
 							<th>Created By</th>
@@ -315,15 +315,14 @@
 									<th class="text-center">No</th>
 									<th>HBL No</th>
 									<th>Container No</th>
-									<th>Dedon ETA</th>
+									<th>DEDON ETA</th>
 									<th>Country Of Origin</th>
 									<th>Remarks</th>
 									<th>Created By</th>
 									<th>Date Created</th>
 									<th>Modified By</th>
 									<th>Date Modified</th>
-									<th>PO No Tagged</th>
-									<th class="text-center">Status</th>
+									<th class="text-center"> PO No Tagged</th>								
 
 								</tr>
 							</thead>
@@ -338,7 +337,7 @@
 								{
 									foreach (var item in Model.ImpexCompletedList)
 									{
-										<tr style="font-size: 0.8em">
+										<tr style="font-size: 0.8em; vertical-align: middle;">
 											<td class="text-center">@counterCompleted</td>
 
 											<td>@item._ptHBLNo</td>
@@ -351,56 +350,34 @@
 											<td>@item._ptModifiedBy</td>
 											<td>@item._ptModifiedDate</td>
 
-											<td>
+											<td class="text-center">
 												@{
 													var poNos = Model.ProcurementList
 														.Where(p => p._ptHBLNo == item._ptHBLNo && p._ptStatus == 2)
 														.Select(p => p._ptDocNo)
-														.Where(po => !string.IsNullOrEmpty(po))
-														.Distinct();
+														.Where(po => !string.IsNullOrWhiteSpace(po))
+														.Distinct()
+														.ToList();
 												}
 
-												@foreach (var poNo in poNos)
+												@if (poNos.Any())
 												{
-													<span class="badge rounded-pill bg-primary me-1 mb-1 px-2 py-1">
-														<i class="fas fa-file-alt me-1"></i>@poNo
+													<span class="d-flex flex-column gap-1">
+														@foreach (var poNo in poNos)
+														{
+															<a href="#"
+															   class="text-primary text-decoration-none">
+																<span class="px-1">
+																	@poNo
+																</span>
+															</a>
+														}
 													</span>
 												}
-											</td>										
-
-											<td class="text-center">
-												@{
-													string statusText;
-													string statusIcon;
-													string statusColor;
-
-													switch (item._ptStatus)
-													{
-														case 1:
-															statusText = "Tagged";
-															statusIcon = "fa-tag";
-															statusColor = "bg-primary";
-															break;
-
-														case 2:
-															statusText = "Completed";
-															statusIcon = "fa-check-circle";
-															statusColor = "bg-success";
-															break;
-
-														default:
-															statusText = "For Tagging";
-															statusIcon = "fa-clock";
-															statusColor = "bg-warning";
-															break;
-													}
+												else
+												{
+													<span class="text-muted">—</span>
 												}
-
-												<span class="badge @statusColor text-dark status-badge">
-													<i class="fas @statusIcon me-1"></i>
-													@statusText
-												</span>
-
 											</td>
 
 										</tr>

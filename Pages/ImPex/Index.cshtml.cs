@@ -332,7 +332,7 @@ namespace PlanningTool.NavExtension.Pages.ImPex
                         {
                             changeRows.Add($@"
                             <tr>
-                                <td>Dedon ETA</td>
+                                <td>DEDON ETA</td>
                                 <td>{oldETA:MMM dd, yyyy}</td>
                                 <td>{existing._ptContainerETA:MMM dd, yyyy}</td>
                             </tr>");

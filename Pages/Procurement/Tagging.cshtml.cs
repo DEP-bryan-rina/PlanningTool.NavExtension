@@ -172,7 +172,7 @@ namespace PlanningTool.NavExtension.Pages.Procurement
                                 <td>: {containerNo}</td>
                             </tr>
                             <tr>
-                                <th style='text-align:left;'>Dedon ETA</th>
+                                <th style='text-align:left;'>DEDON ETA</th>
                                 <td>: {etaDisplay}</td>
                             </tr>
                             <tr>
@@ -315,7 +315,7 @@ namespace PlanningTool.NavExtension.Pages.Procurement
                                 </tr>
 
                                 <tr>
-                                    <th style='text-align:left;'>Dedon ETA</th>
+                                    <th style='text-align:left;'>DEDON ETA</th>
                                     <td>: {etaDisplay}</td>
                                 </tr>
 
