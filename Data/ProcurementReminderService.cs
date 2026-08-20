@@ -132,8 +132,8 @@ public class ProcurementReminderService
              .ToList();
 
         var fileName = etaDates.Any()
-            ? $"{reminderType}_Shipment_ETA_{etaDates.Min():yyyy-MM-dd}_to_{etaDates.Max():yyyy-MM-dd}.xlsx"
-            : $"{reminderType}_Shipment_{DateTime.Now:yyyy-MM-dd}.xlsx";
+            ? $"{reminderType}_Shipment_Arrival_ETA_{etaDates.Min():yyyy-MM-dd}_to_{etaDates.Max():yyyy-MM-dd}.xlsx"
+            : $"{reminderType}_Shipment_Arrival_{DateTime.Now:yyyy-MM-dd}.xlsx";
 
         using var attachment = new Attachment(
             new MemoryStream(excel),
@@ -147,7 +147,8 @@ public class ProcurementReminderService
             subject,
             body,
             EmailModules.ShipmentNotification,
-            attachment
+            attachment,
+            reminderType == "Delayed"
         );
 
 
@@ -185,7 +186,7 @@ public class ProcurementReminderService
                 "DEDONPH | Upcoming Shipment Notification",
 
             "Delayed" =>
-                "DEDONPH | Delayed Shipment Notification",
+                "DEDONPH | Delayed Arrival Notification",
 
             _ =>
                 "DEDONPH | Procurement Notification"
@@ -212,9 +213,11 @@ public class ProcurementReminderService
                 This is an automated notification to inform you that the following shipment has been delayed by more than seven (7) days 
                 beyond its expected arrival date.
                 <br/><br/>
-                Please refer to the attached Excel file for the shipment details and review the information accordingly. 
-                Kindly coordinate with the concerned parties and take the necessary follow-up actions to 
-                determine the updated shipment status and minimize any potential impact on operations.
+                <b>
+                    Please refer to the attached Excel file for the shipment details and review the information accordingly. 
+                    Kindly coordinate with the concerned parties and take the necessary follow-up actions to 
+                    determine the updated shipment status and minimize any potential impact on operations.
+                </b>
             """,
 
 
@@ -270,13 +273,9 @@ public class ProcurementReminderService
                     new ShipmentEmailHistory
                     {
                         _ptProcID = shipment.PK_ptProcID,
-
                         _ptEmailNotificationID = recipient.Id,
-
                         _ptReminderType = type,
-
                         _ptLastSentDate = DateTime.Now,
-
                         _ptCreatedDate = DateTime.Now
                     });
             }
