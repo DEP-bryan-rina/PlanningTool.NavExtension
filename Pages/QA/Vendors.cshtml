@@ -347,92 +347,59 @@
 		}
 
 		/* ==============================
-		DataTables
+		   DataTables
 		============================== */
 
 		function createDataTable(selector, filename) {
 
 			return $(selector).DataTable({
-
 				pageLength: 25,
-
 				paging: false,
-
 				scrollX: true,
-
 				scrollY: getTableHeight(),
-
 				scrollCollapse: true,
-
 				autoWidth: false,
-
-				fixedHeader: true,
-
+				fixedHeader: false,
 				responsive: false,
-
-				stateSave: false,
-
-				destroy: true,
-
 
 				dom: 'Bfrtip',
 
+				buttons: [{
+					extend: 'excelHtml5',
+					text: '<i class="fas fa-file-excel"></i> Export Excel',
+					className: 'btn btn-sm erp-btn',
+					title: null,
+					filename,
 
-				buttons: [
-
-					{
-						extend: 'excelHtml5',
-
-						text: '<i class="fa fa-file-excel-o"></i> Export Excel',
-
-						className: 'btn btn-sm erp-btn',
-
-
-						title: null,
-
-						filename: filename,
-
-
-						exportOptions: {
-
-							columns: ':visible:not(.no-export)',
-
-							modifier: {
-								search: 'applied',
-								order: 'applied'
-							}
-
-						},
-
-
-						action: function (e, dt, button, config) {
-
-							const fileName = `${config.filename}.xlsx`;
-
-							const message =
-								`Export data to Excel?\n\n` +
-								`File:\n${fileName}\n\n` +
-								`The save location is controlled by your browser settings.`;
-
-
-							if (confirm(message)) {
-
-								$.fn.dataTable.ext.buttons.excelHtml5.action.call(
-									this,
-									e,
-									dt,
-									button,
-									config
-								);
-
-							}
-
+					exportOptions: {
+						columns: ':visible:not(.no-export)',
+						modifier: {
+							search: 'applied',
+							order: 'applied'
 						}
+					},
 
+					action: function (e, dt, button, config) {
+
+						const fileName = `${config.filename}.xlsx`;
+
+						const message =
+							`Export data to Excel?\n\n` +
+							`File:\n${fileName}\n\n` +
+							`The save location is controlled by your browser settings.`;
+
+						if (confirm(message)) {
+
+							$.fn.dataTable.ext.buttons.excelHtml5.action.call(
+								this,
+								e,
+								dt,
+								button,
+								config
+							);
+						}
 					}
-
-				]
-
+				}]
 			});
 		}
 
@@ -444,49 +411,46 @@
 		function addColumnFilter(table, tableId) {
 
 			const $filter = $(`${tableId}_filter`);
-
-			if (!$filter.length) return;
-
-
 			const $searchInput = $filter.find('input');
+			const $columnFilter = $('<select class="columnFilter"></select>');
 
-			const $columnFilter = $('<select>', {
-				class: 'columnFilter form-select form-select-sm'
-			});
-
-
-			// Remove default "Search:"
 			$filter.find('label')
 				.contents()
 				.filter((_, node) => node.nodeType === 3)
 				.remove();
 
-
-			$searchInput.attr(
-				'placeholder',
-				'Type to filter (F3)'
-			);
-
+			$searchInput.attr('placeholder', 'Type to filter (F3)');
 
 			table.columns().every(function (index) {
 
-				const title = $(this.header())
-					.text()
-					.trim();
-
+				const title = $(this.header()).text().trim();
 
 				if (title) {
-
 					$columnFilter.append(
-						$('<option>', {
-							value: index,
-							text: title
-						})
+						`<option value="${index}">${title}</option>`
 					);
-
 				}
-
 			});
+
+			$searchInput.after($columnFilter);
+
+			const filterData = () => {
+
+				table.columns().search('');
+
+				table
+					.column(Number($columnFilter.val()))
+					.search($searchInput.val())
+					.draw();
+			};
+
+			$searchInput.on('input', filterData);
+			$columnFilter.on('change', filterData);
+
+			// Move Export Button
+			const $buttons = $(`${tableId}_wrapper .dt-buttons`);
+			$columnFilter.after($buttons);
+		}
 
 
 			$searchInput.after($columnFilter);
