@@ -154,33 +154,33 @@
 				</div>
 				<br />
 				<div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
+					<div class="col-4">
+						@if (Model.Impex != null && Model.Impex.PK_ptImpexID > 0)
+						{
+							<button id="btnUpdate"
+									type="submit"
+									class="btn btn-success px-4 shadow-sm erp-btn"
+									style="display:none;">
+								<i class="fas fa-save me-1 text-success"></i>
+								Update
+							</button>
 
-					@if (Model.Impex != null && Model.Impex.PK_ptImpexID > 0)
-					{
-						<button id="btnUpdate"
-								type="submit"
-								class="btn btn-success px-4 shadow-sm erp-btn"
-								style="display:none;">
-							<i class="fas fa-save me-1"></i>
-							Update
-						</button>
-
-						<a asp-page="./Index"
-						   class="btn btn-outline-secondary px-4 erp-btn">
-							<i class="fas fa-times me-1"></i>
-							Cancel
-						</a>
-					}
-					else
-					{
-						<button id="btnAdd"
-								type="submit"
-								class="btn btn-primary px-4 shadow-sm erp-btn">
-							<i class="fas fa-plus-circle me-1"></i>
-							Add New Record
-						</button>
-					}
-
+							<a asp-page="./Index"
+							   class="btn btn-outline-secondary px-4 erp-btn">
+								<i class="fas fa-times me-1 text-danger"></i>
+								Cancel
+							</a>
+						}
+						else
+						{
+							<button id="btnAdd"
+									type="submit"
+									class="btn btn-primary px-4 shadow-sm erp-btn">
+								<i class="fas fa-plus-circle me-1 text-success"></i>
+								Add New Record
+							</button>
+						}
+					</div>
 					<!-- ETA Legend -->
 					<div class="d-flex align-items-center gap-2 small">
 
