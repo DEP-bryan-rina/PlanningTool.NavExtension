@@ -183,7 +183,7 @@ namespace PlanningTool.NavExtension.Pages.Procurement
 
                         <p><strong>Tagged Purchase Order Details:</strong></p>
 
-                        <table border='1' cellpadding='4' cellspacing='0' style='border-collapse:collapse; width:80%;'>
+                        <table border='1' cellpadding='4' cellspacing='0' style='border-collapse:collapse; width:100%;'>
                             <thead>
                                 <tr>
                                     <th style='text-align:left;'>PO No</th>

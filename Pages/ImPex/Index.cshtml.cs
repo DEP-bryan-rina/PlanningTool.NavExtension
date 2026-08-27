@@ -200,7 +200,7 @@ namespace PlanningTool.NavExtension.Pages.ImPex
                         <table border='1'
                                 cellpadding='4'
                                 cellspacing='0'
-                                style='border-collapse:collapse; width:70%;'>
+                                style='border-collapse:collapse; width:100%;'>
                             <thead>
                                 <tr>
                                     <th style='text-align:left;'>HBL No</th>
@@ -353,7 +353,7 @@ namespace PlanningTool.NavExtension.Pages.ImPex
                             <table border='1'
                                     cellpadding='4'
                                     cellspacing='0'
-                                    style='border-collapse:collapse; width:80%;'>
+                                    style='border-collapse:collapse; width:100%;'>
 
                                 <thead>
                                     <tr>
