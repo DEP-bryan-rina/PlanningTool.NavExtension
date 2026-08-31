@@ -10,7 +10,7 @@ namespace PlanningTool.NavExtension.Pages.QA
 {
     public class VendorsModel : PageModel
     {
-        private readonly AppDbContext _context;
+        private readonly AppDbContext   _context;
         private readonly IConfiguration _config;
 
         public List<VendorQA> VendorReport { get; set; } = new();
@@ -18,8 +18,8 @@ namespace PlanningTool.NavExtension.Pages.QA
 
         public VendorsModel(AppDbContext context, IConfiguration config)
         {
-            _context = context;
-            _config = config;
+            _context    = context;
+            _config     = config;
         }
         public void OnGet()
         {
@@ -27,8 +27,8 @@ namespace PlanningTool.NavExtension.Pages.QA
 
 
             using SqlConnection con = new SqlConnection(_config.GetConnectionString("DevConnection"));
+            using SqlCommand cmd    = new SqlCommand("_spGetVendorOverview", con);
 
-            using SqlCommand cmd = new SqlCommand("_spGetVendorOverview", con);
             cmd.CommandType = CommandType.StoredProcedure;
 
             con.Open();
@@ -40,33 +40,20 @@ namespace PlanningTool.NavExtension.Pages.QA
                 VendorView.Add(new VendorOverview
                 {
                     // Vendor Information
-                    VendorCode = dr["VendorCode"]?.ToString(),
-
-                    VendorName = dr["VendorName"]?.ToString(),
-
-                    ContactPerson = dr["ContactPerson"]?.ToString(),
-
-                    PhoneNo = dr["PhoneNo"]?.ToString(),
-
-                    Email = dr["Email"]?.ToString(),
-
-                    Address = dr["Address"]?.ToString(),
-
-                    City = dr["City"]?.ToString(),
-
-                    Country = dr["Country"]?.ToString(),
-
-                    Buyer = dr["Buyer"]?.ToString(),
-
-                    VendorGroup = dr["VendorGroup"]?.ToString(),
-
-                    PaymentTerms = dr["PaymentTerms"]?.ToString(),
-
-                    Currency = dr["Currency"]?.ToString(),
-
-                    LeadTime = dr["LeadTime"]?.ToString(),
-
-                    Status = dr["Status"]?.ToString(),
+                    VendorCode      = dr["VendorCode"]?.ToString(),
+                    VendorName      = dr["VendorName"]?.ToString(),
+                    ContactPerson   = dr["ContactPerson"]?.ToString(),
+                    PhoneNo         = dr["PhoneNo"]?.ToString(),
+                    Email           = dr["Email"]?.ToString(),
+                    Address         = dr["Address"]?.ToString(),
+                    City            = dr["City"]?.ToString(),
+                    Country         = dr["Country"]?.ToString(),
+                    Buyer           = dr["Buyer"]?.ToString(),
+                    VendorGroup     = dr["VendorGroup"]?.ToString(),
+                    PaymentTerms    = dr["PaymentTerms"]?.ToString(),
+                    Currency        = dr["Currency"]?.ToString(),
+                    LeadTime        = dr["LeadTime"]?.ToString(),
+                    Status          = dr["Status"]?.ToString(),
 
                 });
             }
@@ -80,79 +67,32 @@ namespace PlanningTool.NavExtension.Pages.QA
             _config.GetConnectionString("DevConnection")))
             {
 
-
-                SqlCommand cmd =
-                new SqlCommand(
-                "_spGetVendorQADashboard",
-                con);
-
-
-                cmd.CommandType =
-                CommandType.StoredProcedure;
-
-
+                SqlCommand cmd  = new SqlCommand("_spGetVendorQADashboard",con);
+                cmd.CommandType = CommandType.StoredProcedure;
                 con.Open();
 
-
-                SqlDataReader dr =
-                cmd.ExecuteReader();
-
-
+                SqlDataReader dr = cmd.ExecuteReader();
 
                 while (dr.Read())
                 {
-
                     result.Add(new VendorQA
                     {
-
-                        VendorName =
-                        dr["VendorName"].ToString(),
-
-
-                        QtyReceived =
-                        dr["QtyReceived"] == DBNull.Value
-                        ? 0
-                        : Convert.ToDecimal(dr["QtyReceived"]),
-
-                        QtyGood =
-                        dr["QtyGood"] == DBNull.Value
-                        ? 0
-                        : Convert.ToDecimal(dr["QtyGood"]),
-
-                        QtyRepair =
-                        dr["QtyRepair"] == DBNull.Value
-                        ? 0
-                        : Convert.ToDecimal(dr["QtyRepair"]),
-
-
-                        QtyReject =
-                        dr["QtyReject"] == DBNull.Value
-                        ? 0
-                        : Convert.ToDecimal(dr["QtyReject"]),
-
-
-                        DefectRate =
-                        dr["DefectRate"] == DBNull.Value
-                        ? 0
-                        : Convert.ToDecimal(dr["DefectRate"])
-
+                        VendorName  = dr["VendorName"].ToString(),
+                        QtyReceived = dr["QtyReceived"] == DBNull.Value ? 0 : Convert.ToDecimal(dr["QtyReceived"]),
+                        QtyGood     = dr["QtyGood"]     == DBNull.Value ? 0 : Convert.ToDecimal(dr["QtyGood"]),
+                        QtyRepair   = dr["QtyRepair"]   == DBNull.Value ? 0 : Convert.ToDecimal(dr["QtyRepair"]),
+                        QtyReject   = dr["QtyReject"]   == DBNull.Value ? 0 : Convert.ToDecimal(dr["QtyReject"]),
+                        DefectRate  = dr["DefectRate"]  == DBNull.Value ? 0 : Convert.ToDecimal(dr["DefectRate"])
                     });
-
                 }
-
-
             }
-
-
             return new JsonResult(result);
 
         }
         public void GetVendorsCalculation()
-        {
-            
+        {    
             using SqlConnection con = new SqlConnection(_config.GetConnectionString("DevConnection"));
-
-            using SqlCommand cmd = new SqlCommand("_spGetVendorQADashboard", con);
+            using SqlCommand cmd    = new SqlCommand("_spGetVendorQADashboard", con);
             cmd.CommandType = CommandType.StoredProcedure;
 
             con.Open();
@@ -164,39 +104,13 @@ namespace PlanningTool.NavExtension.Pages.QA
                 VendorReport.Add(new VendorQA
                 {
                     // Vendor Information
-                    VendorName =
-                        dr["VendorName"].ToString(),
-
-
-                    QtyReceived =
-                        dr["QtyReceived"] == DBNull.Value
-                        ? 0
-                        : Convert.ToDecimal(dr["QtyReceived"]),
-
-                    QtyGood =
-                        dr["QtyGood"] == DBNull.Value
-                        ? 0
-                        : Convert.ToDecimal(dr["QtyGood"]),
-
-                    QtyRepair =
-                        dr["QtyRepair"] == DBNull.Value
-                        ? 0
-                        : Convert.ToDecimal(dr["QtyRepair"]),
-
-
-                    QtyReject =
-                        dr["QtyReject"] == DBNull.Value
-                        ? 0
-                        : Convert.ToDecimal(dr["QtyReject"]),
-
-
-                    DefectRate =
-                        dr["DefectRate"] == DBNull.Value
-                        ? 0
-                        : Convert.ToDecimal(dr["DefectRate"])
-
+                    VendorName  = dr["VendorName"].ToString(),
+                    QtyReceived = dr["QtyReceived"] == DBNull.Value ? 0 : Convert.ToDecimal(dr["QtyReceived"]),
+                    QtyGood     = dr["QtyGood"]     == DBNull.Value ? 0 : Convert.ToDecimal(dr["QtyGood"]),
+                    QtyRepair   = dr["QtyRepair"]   == DBNull.Value ? 0 : Convert.ToDecimal(dr["QtyRepair"]),
+                    QtyReject   = dr["QtyReject"]   == DBNull.Value ? 0 : Convert.ToDecimal(dr["QtyReject"]),
+                    DefectRate  = dr["DefectRate"]  == DBNull.Value ? 0 : Convert.ToDecimal(dr["DefectRate"])
                 });
-
             }            
         }
 
@@ -214,33 +128,19 @@ namespace PlanningTool.NavExtension.Pages.QA
         public class VendorOverview
         {
             public string VendorCode { get; set; }
-
             public string VendorName { get; set; }
-
             public string ContactPerson { get; set; }
-
             public string PhoneNo { get; set; }
-
             public string Email { get; set; }
-
             public string Address { get; set; }
-
             public string City { get; set; }
-
             public string Country { get; set; }
-
             public string Buyer { get; set; }
-
             public string VendorGroup { get; set; }
-
             public string PaymentTerms { get; set; }
-
             public string Currency { get; set; }
-
             public string LeadTime { get; set; }
-
             public DateTime? LastModified { get; set; }
-
             public string Status { get; set; }
         }
     }

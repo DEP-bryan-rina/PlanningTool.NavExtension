@@ -57,7 +57,7 @@ namespace PlanningTool.NavExtension.Pages.Account
         {
             try
             {
-                // ADD
+                // Add New Record
                 if (EmailNotification._PK_ptEmailNotification_ID == 0)
                 {
                     bool emailExists = _context.EmailNotifications
@@ -70,27 +70,15 @@ namespace PlanningTool.NavExtension.Pages.Account
                         return Page();
                     }
 
-                    EmailNotification._ptStatus = "Active";
-                    EmailNotification._ptCreatedDate = DateTime.Now;                   
-
+                    EmailNotification._ptStatus         = "Active";
+                    EmailNotification._ptCreatedDate    = DateTime.Now;          
 
                     _context.EmailNotifications.Add(EmailNotification);
-
-                    try
-                    {
-                        _context.SaveChanges();
-                    }
-                    catch (Exception ex)
-                    {
-                        TempData["ErrorMessage"] = ex.InnerException?.Message ?? ex.Message;
-
-                        NotificationList = _context.EmailNotifications.ToList();
-                        return Page();
-                    }
+                    _context.SaveChanges(); // Save changes to the database
 
                     TempData["SuccessMessage"] = EmailNotification._ptEmailAddress + "added successfully";
                 }
-                // UPDATE
+                // Update Records
                 else
                 {
                     var existing = _context.EmailNotifications
@@ -110,23 +98,19 @@ namespace PlanningTool.NavExtension.Pages.Account
                             return Page();
                         }
 
-                        existing._ptEmailAddress = EmailNotification._ptEmailAddress;
-                        existing._ptImPex = EmailNotification._ptImPex;
-                        existing._ptProcurement = EmailNotification._ptProcurement;
+                        existing._ptEmailAddress    = EmailNotification._ptEmailAddress;
+                        existing._ptImPex           = EmailNotification._ptImPex;
+                        existing._ptProcurement     = EmailNotification._ptProcurement;
+                        existing._pt2WeeksReminder  = EmailNotification._pt2WeeksReminder;
+                        existing._pt2WeeksTrigger   = EmailNotification._pt2WeeksTrigger;
+                        existing._ptDelaysReminder  = EmailNotification._ptDelaysReminder;
+                        existing._ptDelaysTrigger   = EmailNotification._ptDelaysTrigger;
+                        existing._ptUserType        = EmailNotification._ptUserType;
+                        existing._ptUpdatedDate     = DateTime.Now;
 
-                        existing._pt2WeeksReminder = EmailNotification._pt2WeeksReminder;
-                        existing._pt2WeeksTrigger = EmailNotification._pt2WeeksTrigger;
+                        _context.SaveChanges(); // Save changes to the database
 
-                        existing._ptDelaysReminder = EmailNotification._ptDelaysReminder;
-                        existing._ptDelaysTrigger = EmailNotification._ptDelaysTrigger;
-
-                        existing._ptUserType = EmailNotification._ptUserType;
-                        existing._ptUpdatedDate = DateTime.Now;
-
-
-                        _context.SaveChanges();
-
-                        TempData["SuccessMessage"] = existing._ptEmailAddress + " updated successfully";
+                        TempData["SuccessMessage"]  = existing._ptEmailAddress + " updated successfully";
                     }
                 }
 
@@ -148,7 +132,7 @@ namespace PlanningTool.NavExtension.Pages.Account
             if (data != null)
             {
                 data._ptStatus = "Inactive";
-                _context.SaveChanges();
+                _context.SaveChanges(); // Save changes to the database
             }
 
             TempData["Success"] = "Marked as inactive successfully";
@@ -163,7 +147,7 @@ namespace PlanningTool.NavExtension.Pages.Account
             if (data != null)
             {
                 data._ptStatus = "Active";
-                _context.SaveChanges();
+                _context.SaveChanges(); // Save changes to the database
             }
 
             TempData["Success"] = "Activated successfully";
@@ -202,30 +186,30 @@ namespace PlanningTool.NavExtension.Pages.Account
             }
 
             return $@"
-                <p>Hello Team,</p>
+            <p>Hello Team,</p>
 
-                <p>
-                    The following shipment has exceeded its expected arrival date.
-                </p>
+            <p>
+                The following shipment has exceeded its expected arrival date.
+            </p>
 
-                <table border='1' cellpadding='5'>
-                    <tr>
-                        <td><b>PO No</b></td>
-                        <td>{reminder.PONo}</td>
-                    </tr>
-                    <tr>
-                        <td><b>HBL No</b></td>
-                        <td>{reminder.HBLNo}</td>
-                    </tr>
-                    <tr>
-                        <td><b>Container No</b></td>
-                        <td>{reminder.ContainerNo}</td>
-                    </tr>
-                    <tr>
-                        <td><b>ETA</b></td>
-                        <td>{reminder.ContainerETA:MMMM dd, yyyy}</td>
-                    </tr>
-                </table>";
+            <table border='1' cellpadding='5'>
+                <tr>
+                    <td><b>PO No</b></td>
+                    <td>{reminder.PONo}</td>
+                </tr>
+                <tr>
+                    <td><b>HBL No</b></td>
+                    <td>{reminder.HBLNo}</td>
+                </tr>
+                <tr>
+                    <td><b>Container No</b></td>
+                    <td>{reminder.ContainerNo}</td>
+                </tr>
+                <tr>
+                    <td><b>ETA</b></td>
+                    <td>{reminder.ContainerETA:MMMM dd, yyyy}</td>
+                </tr>
+            </table>";
         }
     }
 }

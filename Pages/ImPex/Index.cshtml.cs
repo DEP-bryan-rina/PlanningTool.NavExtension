@@ -112,8 +112,8 @@ namespace PlanningTool.NavExtension.Pages.ImPex
             {
                 this.CountryList.Add(new SelectListItem
                 {
-                    Value = dr["Name"].ToString(), // or dr["Code"].ToString()
-                    Text = $"{dr["Code"]} - {dr["Name"]}"
+                    Value   = dr["Name"].ToString(), // or dr["Code"].ToString()
+                    Text    = $"{dr["Code"]} - {dr["Name"]}"
                 });
             }
         }
@@ -158,9 +158,9 @@ namespace PlanningTool.NavExtension.Pages.ImPex
 
                     string user = GetUser();
 
-                    Impex._ptCreatedBy = user;
-                    Impex._ptCreatedDate = DateTime.Now;
-                    Impex._ptStatus = 0;
+                    Impex._ptCreatedBy        = user;
+                    Impex._ptCreatedDate      = DateTime.Now;
+                    Impex._ptStatus           = 0;
 
                     _context.GetImPexItems.Add(Impex);
                     _context.SaveChanges();
@@ -267,20 +267,20 @@ namespace PlanningTool.NavExtension.Pages.ImPex
                             return Page();
                         }
                         // ✅ STORE OLD VALUES
-                        var oldHBL = existing._ptHBLNo;
-                        var oldContainer = existing._ptContainerNo;
-                        var oldETA = existing._ptContainerETA;
-                        var oldRemarks = existing._ptRemarks;
-                        var oldCOO = existing._ptCountryOfOrigin;
+                        var oldHBL          = existing._ptHBLNo;
+                        var oldContainer    = existing._ptContainerNo;
+                        var oldETA          = existing._ptContainerETA;
+                        var oldRemarks      = existing._ptRemarks;
+                        var oldCOO          = existing._ptCountryOfOrigin;
 
                         // ✅ UPDATE EXISTING RECORD
-                        existing._ptHBLNo = Impex._ptHBLNo;
-                        existing._ptContainerNo = Impex._ptContainerNo;
-                        existing._ptContainerETA = Impex._ptContainerETA;
-                        existing._ptCountryOfOrigin = Impex._ptCountryOfOrigin;
-                        existing._ptRemarks = Impex._ptRemarks;
-                        existing._ptModifiedBy = GetUser();
-                        existing._ptModifiedDate = DateTime.Now;
+                        existing._ptHBLNo             = Impex._ptHBLNo;
+                        existing._ptContainerNo       = Impex._ptContainerNo;
+                        existing._ptContainerETA      = Impex._ptContainerETA;
+                        existing._ptCountryOfOrigin   = Impex._ptCountryOfOrigin;
+                        existing._ptRemarks           = Impex._ptRemarks;
+                        existing._ptModifiedBy        = GetUser();
+                        existing._ptModifiedDate      = DateTime.Now;
 
 
                         // ✅ Update tagged procurement records
@@ -291,13 +291,12 @@ namespace PlanningTool.NavExtension.Pages.ImPex
 
                         foreach (var record in procurementRecords)
                         {
-                            record._ptHBLNo = Impex._ptHBLNo;
-                            record._ptContainerNo = Impex._ptContainerNo;
-                            record._ptContainerETA = Impex._ptContainerETA;
-                            record._ptCountryOfOrigin = Impex._ptCountryOfOrigin;
-
-                            record._ptModifiedBy = GetUser();
-                            record._ptModifiedDate = DateTime.Now;
+                            record._ptHBLNo             = Impex._ptHBLNo;
+                            record._ptContainerNo       = Impex._ptContainerNo;
+                            record._ptContainerETA      = Impex._ptContainerETA;
+                            record._ptCountryOfOrigin   = Impex._ptCountryOfOrigin;
+                            record._ptModifiedBy        = GetUser();
+                            record._ptModifiedDate      = DateTime.Now;
 
                             _context.Entry(record).State = EntityState.Modified;
                         }                   

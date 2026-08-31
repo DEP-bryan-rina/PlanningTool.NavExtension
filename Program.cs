@@ -21,6 +21,9 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(
         builder.Configuration.GetConnectionString("DevConnection")));
 
+builder.Services.Configure<EmailSettings>(
+    builder.Configuration.GetSection("EmailSettings"));
+
 // Session
 builder.Services.AddDistributedMemoryCache();
 

@@ -1,48 +1,55 @@
-﻿using System.Net;
+﻿using Microsoft.Extensions.Options;
+using PlanningTool.NavExtension.Data;
+using System.Net;
 using System.Net.Mail;
 
-namespace PlanningTool.NavExtension.Data
-{    
-    public class EmailService
+public class EmailService
+{
+    private readonly EmailSettings _settings;
+
+    public EmailService(IOptions<EmailSettings> settings)
     {
-        public async Task SendEmailAsync(
-            List<string> recipients,
-            string subject,
-            string body,
-            string fromName,
-            Attachment? attachment = null,
-            bool isHighImportance = false)
+        _settings = settings.Value;
+    }
+
+    public async Task SendEmailAsync(
+        List<string> recipients,
+        string subject,
+        string body,
+        string fromName,
+        Attachment? attachment = null,
+        bool isHighImportance = false)
+    {
+        using var smtpClient = new SmtpClient(_settings.Host)
         {
-            using var smtpClient = new SmtpClient("smtp.office365.com")
-            {
-                Port = 587,
-                EnableSsl = true,
-                Credentials = new NetworkCredential(
-                    "no-reply@dedon.ph",
-                    "Ayk,Dhbfi1990bBD")
-            };
+            Port = _settings.Port,
+            EnableSsl = true,
+            Credentials = new NetworkCredential(
+                _settings.Username,
+                _settings.Password)
+        };
 
-            using var mailMessage = new MailMessage
-            {
-                From = new MailAddress("no-reply@dedon.ph", fromName),
-                Subject = subject,
-                Body = body,
-                IsBodyHtml = true,
+        using var mailMessage = new MailMessage
+        {
+            From = new MailAddress(_settings.Username, fromName),
+            Subject = subject,
+            Body = body,
+            IsBodyHtml = true,
+            Priority = isHighImportance
+                ? MailPriority.High
+                : MailPriority.Normal
+        };
 
-                // Set High Importance
-                Priority = isHighImportance
-                    ? MailPriority.High
-                    : MailPriority.Normal
-            };
-
-            recipients.ForEach(mailMessage.To.Add);
-
-            if (attachment != null)
-            {
-                mailMessage.Attachments.Add(attachment);
-            }
-
-            await smtpClient.SendMailAsync(mailMessage);
+        foreach (var recipient in recipients.Distinct())
+        {
+            mailMessage.To.Add(recipient);
         }
+
+        if (attachment != null)
+        {
+            mailMessage.Attachments.Add(attachment);
+        }
+
+        await smtpClient.SendMailAsync(mailMessage);
     }
 }

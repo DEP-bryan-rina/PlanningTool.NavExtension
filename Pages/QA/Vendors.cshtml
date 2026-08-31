@@ -150,18 +150,13 @@
 											{
 												<tr>
 
-													<td>
-														@i
-													</td>
-
+													<td>@i</td>
 													<td>@item.VendorName</td>
 													<td class="text-end">@item.QtyReceived.ToString("N0")</td>
 													<td class="text-end">@item.QtyGood.ToString("N0")</td>
 													<td class="text-end">@item.QtyRepair.ToString("N0")</td>
 													<td class="text-end">@item.QtyReject.ToString("N0")</td>
-
 													<td class="text-end">
-
 														<span class="badge
 															@(item.DefectRate >= 5
 																	  ? "bg-danger"
@@ -172,12 +167,8 @@
 															@item.DefectRate.ToString("N2")%
 
 														</span>
-
 													</td>
-
-
 												</tr>
-
 												i++;
 											}
 										}
@@ -189,14 +180,11 @@
 												</td>
 											</tr>
 										}
-
 									</tbody>
-
 								</table>
 							</div>
 						</div>
 					</div>
-
 				</div>
 			</div>
 		</div>
@@ -225,9 +213,7 @@
 						</tr>
 					</thead>
 
-
 					<tbody style="font-size:0.75rem;">
-
 						@if (Model.VendorView != null && Model.VendorView.Any())
 						{
 							var i = 1;
@@ -235,65 +221,17 @@
 							foreach (var item in Model.VendorView)
 							{
 								<tr>
-
-									<td>
-										@i
-									</td>
-
-
-									<td>
-										@item.VendorCode
-									</td>
-
-
-									<td>
-										@item.VendorName
-
-									</td>
-
-
-									<td>
-										@item.ContactPerson
-									</td>
-
-
-									<td>
-										@item.PhoneNo
-									</td>
-
-
-									<td>
-										<a href="mailto:@item.Email">
-											@item.Email
-										</a>
-									</td>
-
-
-									<td>
-										@item.City
-									</td>
-
-
-									<td>
-										@item.Country
-									</td>
-
-
-									<td>
-										@item.Buyer
-									</td>
-
-
-									<td>
-										@item.PaymentTerms
-									</td>
-
-
-									<td>
-										@item.Currency
-									</td>
-
-
+									<td>@i</td>
+									<td>@item.VendorCode</td>
+									<td>@item.VendorName</td>
+									<td>@item.ContactPerson</td>
+									<td>@item.PhoneNo</td>
+									<td><a href="mailto:@item.Email">@item.Email</a></td>
+									<td>@item.City</td>
+									<td>@item.Country</td>
+									<td>@item.Buyer</td>
+									<td>@item.PaymentTerms</td>
+									<td>@item.Currency</td>
 									<td>
 										<span class="badge
 											@(item.Status == "Active"
@@ -301,18 +239,10 @@
 														  : "bg-danger")">
 
 											@item.Status
-
 										</span>
 									</td>
-
-
-									<td>
-										@(item.LastModified?.ToString("yyyy-MM-dd") ?? "-")
-									</td>
-
-
+									<td>@(item.LastModified?.ToString("yyyy-MM-dd") ?? "-")</td>
 								</tr>
-
 								i++;
 							}
 						}
@@ -324,15 +254,10 @@
 								</td>
 							</tr>
 						}
-
 					</tbody>
-
 				</table>
-
 			</div>
-
 		</div>
-
 	</div>
 </div>
 @section Scripts

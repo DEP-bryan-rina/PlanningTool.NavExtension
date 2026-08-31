@@ -28,10 +28,10 @@ namespace PlanningTool.NavExtension.Pages.Procurement
         public IndexModel(AppDbContext context, IConfiguration config, EmailService emailService, IUserPermissionService userPermissionService)
         {
 
-            _context = context;
-            _emailService = emailService;
-            _userPermissionService = userPermissionService;
-            this.conStr = config.GetConnectionString("DevConnection");
+            _context                = context;
+            _emailService           = emailService;
+            _userPermissionService  = userPermissionService;
+            this.conStr             = config.GetConnectionString("DevConnection");
         }
         public List<ImPexCenterModel> ImpexList { get; set; } = new();
 
@@ -114,8 +114,8 @@ namespace PlanningTool.NavExtension.Pages.Procurement
         {
             try
             {
-                string hblNo = Request.Form["HBLNo"];
-                string containerNo = Request.Form["ContainerNo"];
+                string hblNo        = Request.Form["HBLNo"];
+                string containerNo  = Request.Form["ContainerNo"];
 
                 DateTime? eta = DateTime.TryParse(
                     Request.Form["ParamCETA"],
@@ -123,10 +123,10 @@ namespace PlanningTool.NavExtension.Pages.Procurement
                     ? tempEta
                     : null;
 
-                string? etaDisplay = eta?.ToString("MMM dd, yyyy");
-                string countryofOrigin = Request.Form["CountryOfOrigin"];
+                string? etaDisplay      = eta?.ToString("MMM dd, yyyy");
+                string countryofOrigin  = Request.Form["CountryOfOrigin"];
 
-                int updatedCount = 0;
+                int updatedCount        = 0;
 
                 var taggedItems = new List<(
                     string DocNo,
@@ -327,20 +327,20 @@ namespace PlanningTool.NavExtension.Pages.Procurement
         {
             return new ProcurementCenterDto
             {
-                IDDocType = Convert.ToInt32(reader["IDDocType"]),
-                IDDocNo = reader["IDDocNo"].ToString(),
-                IDLineNo = Convert.ToInt32(reader["IDLineNo"]),
-                VendorName = reader["VendorName"].ToString(),
-                ItemCode = reader["ItemCode"].ToString(),
-                ItemDescription = reader["ItemDescription"].ToString(),
-                OutstandingQty = reader["OutstandingQty"] == DBNull.Value ? 0 : Convert.ToDecimal(reader["OutstandingQty"]),
-                ptPartialDelivered = reader["ptPartialDelivered"] == DBNull.Value ? 0 : Convert.ToDecimal(reader["ptPartialDelivered"]),
-                ptBalanceQty = reader["ptBalanceQty"] == DBNull.Value ? 0 : Convert.ToDecimal(reader["ptBalanceQty"]),
-                ptHBLNo = reader["ptHBLNo"].ToString(),
-                ptContainerNo = reader["ptContainerNo"].ToString(),
-                ptContainerETA = reader["ptContainerETA"] == DBNull.Value ? (DateTime?)null : Convert.ToDateTime(reader["ptContainerETA"]),
-                ptCountryOfOrigin = reader["ptCountryOfOrigin"]?.ToString() ?? "",
-                ptRemarks = reader["ptRemarks"]?.ToString() ?? ""
+                IDDocType           = Convert.ToInt32(reader["IDDocType"]),
+                IDDocNo             = reader["IDDocNo"].ToString(),
+                IDLineNo            = Convert.ToInt32(reader["IDLineNo"]),
+                VendorName          = reader["VendorName"].ToString(),
+                ItemCode            = reader["ItemCode"].ToString(),
+                ItemDescription     = reader["ItemDescription"].ToString(),
+                OutstandingQty      = reader["OutstandingQty"] == DBNull.Value ? 0 : Convert.ToDecimal(reader["OutstandingQty"]),
+                ptPartialDelivered  = reader["ptPartialDelivered"] == DBNull.Value ? 0 : Convert.ToDecimal(reader["ptPartialDelivered"]),
+                ptBalanceQty        = reader["ptBalanceQty"] == DBNull.Value ? 0 : Convert.ToDecimal(reader["ptBalanceQty"]),
+                ptHBLNo             = reader["ptHBLNo"].ToString(),
+                ptContainerNo       = reader["ptContainerNo"].ToString(),
+                ptContainerETA      = reader["ptContainerETA"] == DBNull.Value ? (DateTime?)null : Convert.ToDateTime(reader["ptContainerETA"]),
+                ptCountryOfOrigin   = reader["ptCountryOfOrigin"]?.ToString() ?? "",
+                ptRemarks           = reader["ptRemarks"]?.ToString() ?? ""
             };
         }
 
@@ -350,12 +350,12 @@ namespace PlanningTool.NavExtension.Pages.Procurement
                 .Where(x => x._ptStatus != 2)
                 .Select(x => new ImPexCenterModel
                 {
-                    PK_ptImpexID = x.PK_ptImpexID,
-                    _ptHBLNo = x._ptHBLNo,
-                    _ptContainerNo = x._ptContainerNo,
-                    _ptCountryOfOrigin = x._ptCountryOfOrigin,
-                    _ptContainerETA = x._ptContainerETA,
-                    _ptRemarks = x._ptRemarks
+                    PK_ptImpexID        = x.PK_ptImpexID,
+                    _ptHBLNo            = x._ptHBLNo,
+                    _ptContainerNo      = x._ptContainerNo,
+                    _ptCountryOfOrigin  = x._ptCountryOfOrigin,
+                    _ptContainerETA     = x._ptContainerETA,
+                    _ptRemarks          = x._ptRemarks
 
                 })
                 .ToList();
@@ -413,14 +413,12 @@ namespace PlanningTool.NavExtension.Pages.Procurement
 
             foreach (var item in selectedRecords)
             {
-                item._ptPartialDelivered = 0;
-                item._ptStatus = 0;
-                item._ptModifiedBy = user;
-                item._ptModifiedDate = now;
+                item._ptPartialDelivered    = 0;
+                item._ptStatus              = 0;
+                item._ptModifiedBy          = user;
+                item._ptModifiedDate        = now;
             }
-
-
-            _context.SaveChanges();
+            _context.SaveChanges(); // Save changes to the database
 
 
             // ==============================
@@ -479,8 +477,7 @@ namespace PlanningTool.NavExtension.Pages.Procurement
                         impex._ptModifiedDate = now;
                     }
                 }
-
-                _context.SaveChanges();
+                _context.SaveChanges(); // Save changes to the database
 
             }
 
@@ -596,17 +593,13 @@ namespace PlanningTool.NavExtension.Pages.Procurement
 
                     if (record != null)
                     {
-                        record._ptPartialDelivered = item.PartialDelivered;
-
-                        record._ptBalanceQty =
-                            record._ptOutstandingQty - item.PartialDelivered;
-
-                        record._ptModifiedBy = GetUser();
-                        record._ptModifiedDate = DateTime.Now;
+                        record._ptPartialDelivered  = item.PartialDelivered;
+                        record._ptBalanceQty        = record._ptOutstandingQty - item.PartialDelivered;
+                        record._ptModifiedBy        = GetUser();
+                        record._ptModifiedDate      = DateTime.Now;
                     }
                 }
-
-                await _context.SaveChangesAsync();
+                await _context.SaveChangesAsync(); // Save changes to the database
             }
 
             TempData["SuccessMessage"] = "Tagged records updated successfully.";
