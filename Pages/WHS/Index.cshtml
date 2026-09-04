@@ -11,10 +11,25 @@
 			x._ptStatus == 1).OrderBy(x => x._ptContainerETA)
 		.ToList();
 
-	var totalPO = upcoming.Count();
-	var totalContainer = upcoming.Select(x => x._ptContainerNo).Distinct().Count();
-	var totalHBL = upcoming.Select(x => x._ptHBLNo).Distinct().Count();
-	var totalVendor = upcoming.Select(x => x._ptVendorName).Distinct().Count();
+	var totalPO = upcoming.Select(x => x._ptDocNo)
+					  .Where(x => !string.IsNullOrWhiteSpace(x))
+					  .Distinct()
+					  .Count();
+
+	var totalContainer = upcoming.Select(x => x._ptContainerNo)
+								 .Where(x => !string.IsNullOrWhiteSpace(x))
+								 .Distinct()
+								 .Count();
+
+	var totalHBL = upcoming.Select(x => x._ptHBLNo)
+						   .Where(x => !string.IsNullOrWhiteSpace(x))
+						   .Distinct()
+						   .Count();
+
+	var totalVendor = upcoming.Select(x => x._ptVendorName)
+							  .Where(x => !string.IsNullOrWhiteSpace(x))
+							  .Distinct()
+							  .Count();
 }
 <style>
 	@@keyframes sail {
