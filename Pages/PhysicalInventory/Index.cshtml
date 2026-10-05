@@ -1,0 +1,1216 @@
+﻿@page
+@model PlanningTool.NavExtension.Pages.PhysicalInventory.IndexModel
+
+@{
+    ViewData["Title"] = "Physical Inventory Count";
+}
+
+@Html.AntiForgeryToken()
+
+<style>
+    @@keyframes pulse {
+        0%, 100% {
+            transform: scale(1);
+        }
+
+        50% {
+            transform: scale(1.15);
+        }
+    }
+
+    .inventory-filter {
+        display: flex;
+        align-items: end;
+        gap: 15px;
+        flex-wrap: wrap;
+    }
+
+    .inventory-filter-group {
+        min-width: 160px;
+    }
+
+    .inventory-filter-label {
+        display: block;
+        margin-bottom: 4px;
+        color: #6c757d;
+        font-size: 0.72rem;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+
+    .inventory-table {
+        vertical-align: middle;
+    }
+
+        .inventory-table thead th {
+            white-space: nowrap;
+            vertical-align: middle;
+        }
+
+        .inventory-table tbody td {
+            white-space: nowrap;
+            vertical-align: middle;
+        }
+
+    .description-cell {
+        min-width: 250px;
+        max-width: 350px;
+        white-space: normal !important;
+    }
+
+    .extended-text-cell {
+        min-width: 180px;
+        max-width: 280px;
+        white-space: normal !important;
+    }
+
+    .count-tag-cell {
+        min-width: 155px;
+        padding: 2px !important;
+    }
+
+    .count-tag-input {
+        width: 145px;
+        padding: 3px 6px;
+        border: 1px solid #ced4da;
+        border-radius: 3px;
+        background-color: #fff;
+        text-align: center;
+        font-size: 0.8rem;
+    }
+
+        .count-tag-input:focus {
+            border-color: #86b7fe;
+            outline: 0;
+            box-shadow: 0 0 0 .15rem rgba(13, 110, 253, .15);
+        }
+
+        .count-tag-input.invalid {
+            border-color: #dc3545;
+            background-color: #f8d7da;
+        }
+
+    .counter-cell {
+        min-width: 95px;
+        padding: 2px !important;
+    }
+
+    .counter-input {
+        width: 90px;
+        padding: 3px 6px;
+        border: 1px solid transparent;
+        border-radius: 3px;
+        background: transparent;
+        text-align: right;
+        font-size: 0.8rem;
+    }
+
+        .counter-input:focus {
+            border-color: #86b7fe;
+            background-color: #fff;
+            outline: 0;
+            box-shadow: 0 0 0 .15rem rgba(13, 110, 253, .15);
+        }
+
+        .counter-input.saving {
+            background-color: #fff3cd;
+        }
+
+        .counter-input.saved {
+            background-color: #d1e7dd;
+        }
+
+        .counter-input.save-error {
+            background-color: #f8d7da;
+        }
+
+    .count-total {
+        min-width: 100px;
+        background-color: #fff !important;
+        text-align: right;
+        font-weight: 700;
+    }
+</style>
+
+<div class="container-fluid">
+
+    <div class="row mb-3">
+        <div class="col-md-12">
+
+            <h3 class="fw-bold d-inline me-4">
+                Physical Inventory Count
+            </h3>
+
+            <h6 class="mb-3 text-secondary d-inline">
+
+                <i class="fas fa-boxes-stacked me-2 text-success"
+                   style="display:inline-block; animation:pulse 2s ease-in-out infinite;">
+                </i>
+
+                Warehouse Physical Inventory
+
+            </h6>
+
+            <hr />
+
+        </div>
+    </div>
+
+    <div class="row mb-3">
+        <div class="col-md-12">
+
+            <form method="get"
+                  id="inventoryFilter"
+                  class="inventory-filter">
+
+                <div class="inventory-filter-group">
+
+                    <label class="inventory-filter-label">
+                        Count Year
+                    </label>
+
+                    <select asp-for="CountYear"
+                            class="form-select erp-control erp-dropdown"
+                            onchange="this.form.submit()">
+
+                        @for (int year = DateTime.Now.Year - 2;
+                             year <= DateTime.Now.Year + 1;
+                             year++)
+                        {
+                            <option value="@year">
+                                @year
+                            </option>
+                        }
+
+                    </select>
+
+                </div>
+
+                <div class="inventory-filter-group">
+
+                    <label class="inventory-filter-label">
+                        Location Code
+                    </label>
+
+                    <select asp-for="LocationCode"
+                            class="form-select erp-control erp-dropdown"
+                            onchange="changeLocation()">
+
+                        @foreach (string location in Model.Locations)
+                        {
+                            <option value="@location">
+                                @location
+                            </option>
+                        }
+
+                    </select>
+
+                </div>
+
+                <div class="inventory-filter-group">
+
+                    <label class="inventory-filter-label">
+                        Inventory Group
+                    </label>
+
+                    <select asp-for="InventoryGroup"
+                            class="form-select erp-control erp-dropdown"
+                            onchange="this.form.submit()">
+
+                        <option value="">
+                            All Inventory Groups
+                        </option>
+
+                        @foreach (string group in Model.InventoryGroups)
+                        {
+                            <option value="@group">
+                                @group
+                            </option>
+                        }
+
+                    </select>
+
+                </div>
+
+                <div class="inventory-filter-group">
+
+                    <label class="inventory-filter-label">
+                        Zone Code
+                    </label>
+
+                    <select asp-for="ZoneCode"
+                            class="form-select erp-control erp-dropdown"
+                            onchange="this.form.submit()">
+
+                        @foreach (string zone in Model.Zones)
+                        {
+                            <option value="@zone">
+                                @zone
+                            </option>
+                        }
+
+                    </select>
+
+                </div>
+
+                <div class="inventory-filter-group">
+
+                    <label class="inventory-filter-label">
+                        Bin Code
+                    </label>
+
+                    <select asp-for="BinCode"
+                            class="form-select erp-control erp-dropdown"
+                            onchange="this.form.submit()">
+
+                        <option value="">
+                            All Bins
+                        </option>
+
+                        @foreach (string bin in Model.Bins)
+                        {
+                            <option value="@bin">
+                                @bin
+                            </option>
+                        }
+
+                    </select>
+
+                </div>
+
+                <div class="ms-auto">
+
+                    <span class="badge bg-secondary px-3 py-2">
+
+                        <i class="fas fa-list me-1"></i>
+
+                        @Model.Inventory.Count Line(s)
+
+                    </span>
+
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+
+    <div class="table-responsive">
+
+        <table id="tblPhysicalInventory"
+               class="table table-hover w-100 inventory-table">
+
+            <thead class="sticky-top bg-white table-bordered"
+                   style="font-size:0.80rem;">
+
+                <tr>
+
+                    <th class="text-center">
+                        No
+                    </th>
+
+                    <th>
+                        BIN Code
+                    </th>
+
+                    <th>
+                        Item No
+                    </th>
+
+                    <th style="width:300px; min-width:300px; max-width:300px;">
+                        Description
+                    </th>
+
+                    <th>
+                        Extended Text
+                    </th>
+
+                    <th>
+                        Color Code
+                    </th>
+
+                    <th>
+                        Color for PC / Cushion
+                    </th>
+
+                    <th>
+                        Lot No.
+                    </th>
+
+                    <th>
+                        Expiration Date
+                    </th>
+
+                    <th>
+                        UoM
+                    </th>
+
+                    <th class="text-center">
+                        Count Tag No.
+                    </th>
+
+                    <th class="text-end">
+                        Total Count
+                    </th>
+
+                    @for (int i = 1; i <= 20; i++)
+                    {
+                        <th class="text-center">
+                            Counter @i
+                        </th>
+                    }
+
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+                @{
+                    int rowNo = 1;
+                }
+
+                @foreach (var item in Model.Inventory)
+                {
+                    decimal?[] counters =
+                    {
+                        item.Counter1,
+                        item.Counter2,
+                        item.Counter3,
+                        item.Counter4,
+                        item.Counter5,
+                        item.Counter6,
+                        item.Counter7,
+                        item.Counter8,
+                        item.Counter9,
+                        item.Counter10,
+                        item.Counter11,
+                        item.Counter12,
+                        item.Counter13,
+                        item.Counter14,
+                        item.Counter15,
+                        item.Counter16,
+                        item.Counter17,
+                        item.Counter18,
+                        item.Counter19,
+                        item.Counter20
+                    };
+
+                    <tr style="font-size:0.8em;"
+                        data-bin="@item.BinCode"
+                        data-item="@item.ItemNo"
+                        data-lot="@item.LotNo">
+
+                        <td class="text-center">
+                            @rowNo
+                        </td>
+
+                        <td>
+                            @item.BinCode
+                        </td>
+
+                        <td class="fw-semibold">
+                            @item.ItemNo
+                        </td>
+
+                        <td class="description-cell">
+                            @item.Description
+                        </td>
+
+                        <td class="extended-text-cell">
+                            @item.ExtendedText
+                        </td>
+
+                        <td>
+                            @item.ColorCode
+                        </td>
+
+                        <td>
+                            @item.ColorForPC
+                        </td>
+
+                        <td>
+                            @item.LotNo
+                        </td>
+
+                        <td>
+                            @(item.ExpirationDate?.ToString("yyyy-MM-dd"))
+                        </td>
+
+                        <td class="text-center">
+                            @item.UoM
+                        </td>
+
+                        <td class="count-tag-cell">
+
+                            <input type="text"
+                                   class="count-tag-input"
+                                   value="@item.CountTagNo"
+                                   maxlength="20"
+                                   inputmode="numeric"
+                                   pattern="[0-9]*"
+                                   title="Enter Count Tag No."
+                                   autocomplete="off" />
+
+                        </td>
+
+                        <td class="count-total">
+                            @item.CounterTotal.ToString("N2")
+                        </td>
+
+                        @for (int i = 0; i < counters.Length; i++)
+                        {
+                            <td class="counter-cell">
+
+                                <input type="number"
+                                       class="counter-input"
+                                       min="0"
+                                       step="0.01"
+                                       data-counter="@(i + 1)"
+                                       value="@(counters[i]?.ToString("0.##"))"
+                                       autocomplete="off" />
+
+                            </td>
+                        }
+
+                    </tr>
+
+                    rowNo++;
+                }
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+@section Scripts {
+
+    <script>
+        let physicalInventoryTable;
+
+        function getTableHeight() {
+
+            return `${$(window).height() * 0.60}px`;
+        }
+
+        function formatQuantity(value) {
+
+            return value.toLocaleString(
+                undefined,
+                {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                }
+            );
+        }
+
+        function changeLocation() {
+
+            const form =
+                document.getElementById(
+                    'inventoryFilter'
+                );
+
+            const zone =
+                form.querySelector(
+                    '[name="ZoneCode"]'
+                );
+
+            if (zone) {
+                zone.value = '';
+            }
+
+            form.submit();
+        }
+
+        function createInventoryTable() {
+
+            const table =
+                $('#tblPhysicalInventory');
+
+            if ($.fn.DataTable.isDataTable(table)) {
+                table.DataTable().destroy();
+            }
+
+            return table.DataTable({
+
+                paging: true,
+
+                pageLength: 100,
+
+                lengthMenu: [
+                    [25, 50, 100, 250, 500],
+                    [25, 50, 100, 250, 500]
+                ],
+
+                pagingType: 'full_numbers',
+
+                deferRender: true,
+                processing: true,
+
+                scrollX: true,
+                scrollY: getTableHeight(),
+                scrollCollapse: true,
+
+                autoWidth: false,
+                fixedHeader: false,
+                responsive: false,
+
+                fixedColumns: {
+                    left: 4
+                },
+
+                searching: true,
+                searchDelay: 400,
+
+                ordering: true,
+                order: [],
+
+                info: true,
+
+                language: {
+
+                    processing:
+                        'Loading inventory...',
+
+                    search:
+                        'Search:',
+
+                    lengthMenu:
+                        'Show _MENU_ rows',
+
+                    info:
+                        'Showing _START_ to _END_ of _TOTAL_ inventory records',
+
+                    infoEmpty:
+                        'No inventory records found',
+
+                    infoFiltered:
+                        '(filtered from _MAX_ total records)',
+
+                    zeroRecords:
+                        'No matching inventory records found',
+
+                    emptyTable:
+                        'No inventory records available',
+
+                    paginate: {
+                        first: 'First',
+                        previous: 'Previous',
+                        next: 'Next',
+                        last: 'Last'
+                    }
+                },
+
+                dom:
+                    "<'row align-items-center mb-2'" +
+                        "<'col-md-6'B>" +
+                        "<'col-md-6 text-md-end'f>" +
+                    ">" +
+
+                    "<'row mb-2'" +
+                        "<'col-md-6'l>" +
+                        "<'col-md-6 text-md-end'i>" +
+                    ">" +
+
+                    "rt" +
+
+                    "<'row mt-2'" +
+                        "<'col-md-6'i>" +
+                        "<'col-md-6'p>" +
+                    ">",
+
+                buttons: [
+                    {
+                        extend: 'excelHtml5',
+
+                        text:
+                            '<i class="fas fa-file-excel"></i> Export Excel',
+
+                        className:
+                            'btn btn-sm erp-btn',
+
+                        title: null,
+
+                        filename:
+                            `Physical_Inventory_@Model.LocationCode` +
+                            `_@Model.ZoneCode` +
+                            `_@Model.CountYear`,
+
+                        exportOptions: {
+
+                            columns:
+                                ':visible',
+
+                            modifier: {
+                                search: 'applied',
+                                order: 'applied',
+                                page: 'all'
+                            },
+
+                            format: {
+
+                                body: function (
+                                    data,
+                                    row,
+                                    column,
+                                    node
+                                ) {
+
+                                    const input =
+                                        $('input', node);
+
+                                    if (input.length) {
+
+                                        const value =
+                                            input.val();
+
+                                        return value ?? '';
+                                    }
+
+                                    return $(node)
+                                        .text()
+                                        .replace(/\s+/g, ' ')
+                                        .trim();
+                                }
+                            }
+                        },
+
+                        action: function (
+                            e,
+                            dt,
+                            button,
+                            config
+                        ) {
+
+                            const fileName =
+                                `${config.filename}.xlsx`;
+
+                            const message =
+                                `Export Physical Inventory to Excel?\n\n` +
+                                `File:\n${fileName}\n\n` +
+                                `Current search/filter will be applied.\n` +
+                                `All filtered rows will be exported.\n\n` +
+                                `The save location is controlled by your browser settings.`;
+
+                            if (!confirm(message)) {
+                                return;
+                            }
+
+                            $.fn.dataTable
+                                .ext
+                                .buttons
+                                .excelHtml5
+                                .action
+                                .call(
+                                    this,
+                                    e,
+                                    dt,
+                                    button,
+                                    config
+                                );
+                        }
+                    }
+                ],
+
+                initComplete: function () {
+
+                    const api =
+                        this.api();
+
+                    api.columns.adjust();
+
+                    if (api.fixedColumns) {
+                        api.fixedColumns().relayout();
+                    }
+                }
+            });
+        }
+
+        function addColumnFilter(
+            table,
+            tableId
+        ) {
+
+            const $filter =
+                $(`${tableId}_filter`);
+
+            const $searchInput =
+                $filter.find('input');
+
+            const $columnFilter =
+                $('<select class="columnFilter"></select>');
+
+            $filter
+                .find('label')
+                .contents()
+                .filter(
+                    (_, node) =>
+                        node.nodeType === 3
+                )
+                .remove();
+
+            $searchInput.attr(
+                'placeholder',
+                'Type to filter (F3)'
+            );
+
+            table.columns().every(
+                function (index) {
+
+                    const title =
+                        $(this.header())
+                            .text()
+                            .trim();
+
+                    if (title) {
+
+                        $columnFilter.append(
+                            `<option value="${index}">${title}</option>`
+                        );
+                    }
+                }
+            );
+
+            $searchInput.after(
+                $columnFilter
+            );
+
+            const filterData =
+                () => {
+
+                    table
+                        .columns()
+                        .search('');
+
+                    table
+                        .column(
+                            Number(
+                                $columnFilter.val()
+                            )
+                        )
+                        .search(
+                            $searchInput.val()
+                        )
+                        .draw();
+                };
+
+            $searchInput.on(
+                'input',
+                filterData
+            );
+
+            $columnFilter.on(
+                'change',
+                filterData
+            );
+
+            const $buttons =
+                $(`${tableId}_wrapper .dt-buttons`);
+
+            $columnFilter.after(
+                $buttons
+            );
+        }
+
+        function calculateRow(row) {
+
+            let countTotal = 0;
+
+            row
+                .querySelectorAll(
+                    '.counter-input'
+                )
+                .forEach(
+                    function (input) {
+
+                        const value =
+                            parseFloat(
+                                input.value
+                            );
+
+                        if (!isNaN(value)) {
+                            countTotal += value;
+                        }
+                    }
+                );
+
+            const totalCell =
+                row.querySelector(
+                    '.count-total'
+                );
+
+            if (totalCell) {
+
+                totalCell.textContent =
+                    formatQuantity(
+                        countTotal
+                    );
+            }
+        }
+
+        function validateCountTag(
+            countTagInput
+        ) {
+
+            const countTagNo =
+                countTagInput.value.trim();
+
+            countTagInput.classList.remove(
+                'invalid'
+            );
+
+            if (countTagNo === '') {
+
+                countTagInput.classList.add(
+                    'invalid'
+                );
+
+                alert(
+                    'Count Tag No. is required.'
+                );
+
+                countTagInput.focus();
+
+                return false;
+            }
+
+            if (!/^\d+$/.test(countTagNo)) {
+
+                countTagInput.classList.add(
+                    'invalid'
+                );
+
+                alert(
+                    'Count Tag No. must contain numbers only.'
+                );
+
+                countTagInput.focus();
+
+                return false;
+            }
+
+            if (countTagNo.length > 20) {
+
+                countTagInput.classList.add(
+                    'invalid'
+                );
+
+                alert(
+                    'Count Tag No. cannot exceed 20 digits.'
+                );
+
+                countTagInput.focus();
+
+                return false;
+            }
+
+            return true;
+        }
+
+        async function saveCounter(event) {
+
+            const input =
+                event.target;
+
+            const row =
+                input.closest('tr');
+
+            if (!row) {
+                return;
+            }
+
+            const countTagInput =
+                row.querySelector(
+                    '.count-tag-input'
+                );
+
+            if (!countTagInput) {
+
+                alert(
+                    'Count Tag No. field is missing.'
+                );
+
+                return;
+            }
+
+            if (!validateCountTag(countTagInput)) {
+                return;
+            }
+
+            const countTagNo =
+                countTagInput.value.trim();
+
+            const itemNo =
+                row.dataset.item || '';
+
+            const counterNo =
+                Number(
+                    input.dataset.counter
+                );
+
+            const quantityText =
+                input.value.trim();
+
+            if (quantityText === '') {
+                return;
+            }
+
+            const quantity =
+                Number(quantityText);
+
+            if (!itemNo) {
+
+                alert(
+                    'Item No. is missing.'
+                );
+
+                return;
+            }
+
+            if (
+                counterNo < 1 ||
+                counterNo > 20
+            ) {
+
+                alert(
+                    'Invalid counter number.'
+                );
+
+                return;
+            }
+
+            if (
+                isNaN(quantity) ||
+                quantity < 0
+            ) {
+
+                alert(
+                    'Counter quantity cannot be negative.'
+                );
+
+                return;
+            }
+
+            calculateRow(row);
+
+            input.classList.remove(
+                'saved',
+                'save-error'
+            );
+
+            input.classList.add(
+                'saving'
+            );
+
+            const token =
+                document.querySelector(
+                    'input[name="__RequestVerificationToken"]'
+                );
+
+            const formData =
+                new FormData();
+
+            formData.append(
+                'locationCode',
+                '@Model.LocationCode'
+            );
+
+            formData.append(
+                'zoneCode',
+                '@Model.ZoneCode'
+            );
+
+            formData.append(
+                'binCode',
+                row.dataset.bin || ''
+            );
+
+            formData.append(
+                'itemNo',
+                itemNo
+            );
+
+            formData.append(
+                'lotNo',
+                row.dataset.lot || ''
+            );
+
+            formData.append(
+                'countTagNo',
+                countTagNo
+            );
+
+            formData.append(
+                'counterNo',
+                counterNo
+            );
+
+            formData.append(
+                'quantity',
+                quantity
+            );
+
+            formData.append(
+                'countYear',
+                '@Model.CountYear'
+            );
+
+            try {
+
+                const response =
+                    await fetch(
+                        '?handler=SaveCount',
+                        {
+                            method: 'POST',
+
+                            headers: {
+                                'RequestVerificationToken':
+                                    token.value
+                            },
+
+                            body: formData
+                        }
+                    );
+
+                if (!response.ok) {
+
+                    const message =
+                        await response.text();
+
+                    throw new Error(
+                        message
+                    );
+                }
+
+                input.classList.remove(
+                    'saving'
+                );
+
+                input.classList.add(
+                    'saved'
+                );
+
+                countTagInput.classList.remove(
+                    'invalid'
+                );
+
+                setTimeout(
+                    function () {
+
+                        input.classList.remove(
+                            'saved'
+                        );
+                    },
+                    1000
+                );
+            }
+            catch (error) {
+
+                console.error(
+                    'Physical Inventory Save Error:',
+                    error
+                );
+
+                input.classList.remove(
+                    'saving'
+                );
+
+                input.classList.add(
+                    'save-error'
+                );
+
+                alert(
+                    error.message ||
+                    'Unable to save physical inventory count.'
+                );
+            }
+        }
+
+        $(document).ready(
+            function () {
+
+                physicalInventoryTable =
+                    createInventoryTable();
+
+                addColumnFilter(
+                    physicalInventoryTable,
+                    '#tblPhysicalInventory'
+                );
+
+                $(document).on(
+                    'change',
+                    '.counter-input',
+                    saveCounter
+                );
+
+                $(document).on(
+                    'input',
+                    '.counter-input',
+                    function () {
+
+                        const row =
+                            this.closest('tr');
+
+                        if (row) {
+                            calculateRow(row);
+                        }
+                    }
+                );
+
+                $(document).on(
+                    'input',
+                    '.count-tag-input',
+                    function () {
+
+                        this.value =
+                            this.value
+                                .replace(/\D/g, '')
+                                .substring(0, 20);
+
+                        this.classList.remove(
+                            'invalid'
+                        );
+                    }
+                );
+
+                setTimeout(
+                    function () {
+
+                        physicalInventoryTable
+                            .columns
+                            .adjust();
+                    },
+                    300
+                );
+
+                $(window).on(
+                    'resize',
+                    function () {
+
+                        physicalInventoryTable
+                            .columns
+                            .adjust();
+                    }
+                );
+
+                $(document).on(
+                    'keydown',
+                    function (event) {
+
+                        if (event.key === 'F3') {
+
+                            event.preventDefault();
+
+                            $('#tblPhysicalInventory_filter input')
+                                .trigger('focus');
+                        }
+                    }
+                );
+            }
+        );
+    </script>
+}

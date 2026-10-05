@@ -20,8 +20,9 @@
 	<!-- Page Header -->
 	<div class="row mb-3">
 		<div class="col-md-12">
-			<h3 class="fw-bold">				
-				QA Dashboard
+			<h3 class="fw-bold">		
+				<i class="fas fa-tachometer-alt text-success"></i>
+				Raw Material Quality Inspection Dashboard
 			</h3>
 
 			<h6 class="mb-3 text-secondary">
@@ -98,7 +99,7 @@
 	<div class="table-responsive qa-table-container">
 		<table id="tblQA" class="table table-hover w-100">
 			<thead class="sticky-top bg-white table-bordered" style="font-size:0.75rem;">
-				<tr>
+				<tr>					
 					<th>Item Code</th>
 					<th>Description</th>
 					<th>Date Received</th>
@@ -107,15 +108,14 @@
 					<th class="text-center">Status</th>
 					<th class="text-center">Qty Good</th>
 					<th class="text-center">Qty Reject</th>
-					<th class="text-center">Qty Repair</th>
-					<th class="text-center">Earliest WK Required</th>
-					<th class="text-center">Lead Time (Days)</th>		
-					<th class="text-center">Qty For Repair</th>
+					<th class="text-center">Qty Repair</th>					
+					<th class="text-center">MRP For Repair</th>
+					<th class="text-center">Repair WK Required</th>
+					<th class="text-center">Lead Time (Days)</th>							
 				</tr>
 			</thead>
 
 			<tbody style="font-size:0.75rem;">
-
 				@if (Model.Items?.Any() == true)
 				{
 					@foreach (var item in Model.Items)
@@ -128,7 +128,7 @@
 							_ => "status-na"
 						};
 
-						<tr>
+						<tr>							
 							<td><strong>@item.ItemCode</strong></td>
 							<td>@item.Description</td>
 							<td>@item.DateReceived?.ToString("yyyy-MM-dd")</td>
@@ -171,36 +171,22 @@
 									@item.QtyRepair.ToString("N0")
 								}
 							</td>
+
 							<td class="text-center">
-								@item.EarliestWKRequired
-							</td>						
+								@item.AllocationForRepair.ToString("N0")
+							</td>
+
+							<td class="text-center">
+								@item.RepairWKRequired
+							</td>
 
 							<td class="text-center" style="width:100px;">
-								@(item.LeadTimeDays > 0 ? item.LeadTimeDays.ToString() : "")
-							</td>
-							
-							<td class="text-center">
-								@if (item.QtyRepair > 0)
-								{
-									<span class="badge bg-primary">
-										@item.QtyRepair.ToString("N0")
-									</span>
-								}
-								else
-								{
-									@item.QtyRepair.ToString("N0")
-								}
+								@(item.LeadTimeDays > 0
+									? item.LeadTimeDays.ToString()
+									: "")
 							</td>
 						</tr>
 					}
-				}
-				else
-				{
-					<tr>
-						<td colspan="11" class="text-center">
-							No records found.
-						</td>
-					</tr>
 				}
 
 			</tbody>
@@ -234,6 +220,10 @@
 				autoWidth: false,
 				fixedHeader: false,
 				responsive: false,
+
+				language: {
+					emptyTable: "No records found."
+				},
 
 				dom: 'Bfrtip',
 
@@ -378,8 +368,6 @@
 
 
 		});
-
-		
 	  
 
 	</script>	

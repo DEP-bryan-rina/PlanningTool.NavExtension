@@ -6,6 +6,7 @@ namespace PlanningTool.NavExtension.Models
     [Keyless]
     public class QADashboardItem
     {        
+        public string RRNo { get; set; }
         public string ItemCode { get; set; }
         public string Description { get; set; }
         public DateTime? DateReceived { get; set; }
@@ -19,9 +20,10 @@ namespace PlanningTool.NavExtension.Models
         public decimal QtyReject { get; set; }
         public decimal QtyRepair { get; set; }
 
-        public string EarliestWKRequired { get; set; }
+        public decimal AllocationForRepair { get; set; }
 
-        public DateTime? InspectionCompletionDate { get; set; }
+        public string RepairWKRequired { get; set; }
+        
         public int? LeadTimeDays { get; set; }
     }
 }

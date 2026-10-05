@@ -77,22 +77,42 @@
 </style>
 <div class="container-fluid">
 	<!-- Page Header -->
-	<div class="row mb-3">
-		<div class="col-md-12">
-			<h3 class="fw-bold">
-				<i class="fas fa-chart-line text-success"></i>
-				Vendor Quality Performance
-			</h3>
 
-			<h6 class="mb-3 text-secondary">
-				<i class="fas fa-clipboard-check me-2 text-success"
-				   style="display:inline-block; animation:pulse 2s ease-in-out infinite;"></i>
-				Raw Materials & Vendor Quality Performance Report
-			</h6>
+    <div class="col-md-12">
 
-			<hr />
-		</div>
-	</div>
+        <div class="d-flex justify-content-between align-items-start">
+
+            <!-- Title -->
+            <div>
+                <h3 class="fw-bold">
+                    <i class="fas fa-chart-line text-success"></i>
+                    Vendor Quality Performance
+                </h3>
+
+                <h6 class="mb-3 text-secondary">
+                    <i class="fas fa-clipboard-check me-2 text-success"
+                       style="display:inline-block; animation:pulse 2s ease-in-out infinite;">
+                    </i>
+                    Raw Materials & Vendor Quality Performance Report
+                </h6>
+            </div>
+
+            <!-- Back Button -->
+            <div>
+                <a asp-page="/QA/Index"
+                   class="btn btn-sm btn-outline-secondary"
+                   title="Back to QA Dashboard">
+                    <i class="fas fa-arrow-left me-1"></i>
+                    Back
+                </a>
+            </div>
+
+        </div>
+
+        <hr />
+
+    </div>
+
 	<div class="accordion" id="vendorsKPI">
 		<div class="accordion-item">
 			<h2 class="accordion-header" id="headingVendorKPI">
@@ -107,9 +127,9 @@
 			</h2>
 
 			<div id="collapseVendorKPI"
-				 class="accordion-collapse collapse show"
-				 aria-labelledby="headingVendorKPI"
-				 data-bs-parent="#VendorKPIAccordion">
+                 class="accordion-collapse collapse show"
+                 aria-labelledby="headingVendorKPI"
+                 data-bs-parent="#vendorsKPI">
 
 				<div class="accordion-body">
 					<div class="row mb-3">
@@ -262,251 +282,360 @@
 </div>
 @section Scripts
 {
-	<script>
-		/* ==============================
-			Utilities
-		============================== */
-
-		function getTableHeight() {
-			return `${$(window).height() * 0.6}px`;
-		}
-
-		/* ==============================
-		   DataTables
-		============================== */
-
-		function createDataTable(selector, filename) {
-
-			return $(selector).DataTable({
-				pageLength: 25,
-				paging: false,
-				scrollX: true,
-				scrollY: getTableHeight(),
-				scrollCollapse: true,
-				autoWidth: false,
-				fixedHeader: false,
-				responsive: false,
+    <script>
+
+        /* ============================================================
+           UTILITIES
+        ============================================================ */
+
+        function getTableHeight() {
+            return `${$(window).height() * 0.6}px`;
+        }
+
+
+        /* ============================================================
+           DATATABLE
+        ============================================================ */
 
-				dom: 'Bfrtip',
+        function createDataTable(selector, filename) {
 
-				buttons: [{
-					extend: 'excelHtml5',
-					text: '<i class="fas fa-file-excel"></i> Export Excel',
-					className: 'btn btn-sm erp-btn',
-					title: null,
-					filename,
+            return $(selector).DataTable({
+                pageLength: 25,
+                paging: false,
+                scrollX: true,
+                scrollY: getTableHeight(),
+                scrollCollapse: true,
+                autoWidth: false,
+                fixedHeader: false,
+                responsive: false,
 
-					exportOptions: {
-						columns: ':visible:not(.no-export)',
-						modifier: {
-							search: 'applied',
-							order: 'applied'
-						}
-					},
+                dom: 'Bfrtip',
 
-					action: function (e, dt, button, config) {
+                buttons: [
+                    {
+                        extend: 'excelHtml5',
+                        text: '<i class="fas fa-file-excel"></i> Export Excel',
+                        className: 'btn btn-sm erp-btn',
+                        title: null,
+                        filename: filename,
 
-						const fileName = `${config.filename}.xlsx`;
+                        exportOptions: {
+                            columns: ':visible:not(.no-export)',
+                            modifier: {
+                                search: 'applied',
+                                order: 'applied'
+                            }
+                        },
 
-						const message =
-							`Export data to Excel?\n\n` +
-							`File:\n${fileName}\n\n` +
-							`The save location is controlled by your browser settings.`;
+                        action: function (e, dt, button, config) {
 
-						if (confirm(message)) {
+                            const fileName = `${config.filename}.xlsx`;
 
-							$.fn.dataTable.ext.buttons.excelHtml5.action.call(
-								this,
-								e,
-								dt,
-								button,
-								config
-							);
-						}
-					}
-				}]
-			});
-		}
+                            const message =
+                                `Export data to Excel?\n\n` +
+                                `File:\n${fileName}\n\n` +
+                                `The save location is controlled by your browser settings.`;
 
+                            if (confirm(message)) {
 
-		/* ==============================
-		   Column Filter
-		============================== */
+                                $.fn.dataTable.ext.buttons.excelHtml5.action.call(
+                                    this,
+                                    e,
+                                    dt,
+                                    button,
+                                    config
+                                );
+                            }
+                        }
+                    }
+                ]
+            });
+        }
 
-		function addColumnFilter(table, tableId) {
 
-			const $filter = $(`${tableId}_filter`);
-			const $searchInput = $filter.find('input');
-			const $columnFilter = $('<select class="columnFilter"></select>');
+        /* ============================================================
+           COLUMN FILTER
+        ============================================================ */
 
-			$filter.find('label')
-				.contents()
-				.filter((_, node) => node.nodeType === 3)
-				.remove();
+        function addColumnFilter(table, tableId) {
 
-			$searchInput.attr('placeholder', 'Type to filter (F3)');
+            const $filter = $(`${tableId}_filter`);
+            const $searchInput = $filter.find('input');
 
-			table.columns().every(function (index) {
+            const $columnFilter =
+                $('<select class="columnFilter"></select>');
 
-				const title = $(this.header()).text().trim();
 
-				if (title) {
-					$columnFilter.append(
-						`<option value="${index}">${title}</option>`
-					);
-				}
-			});
+            // Remove default "Search:" text
+            $filter
+                .find('label')
+                .contents()
+                .filter((_, node) => node.nodeType === 3)
+                .remove();
 
-			$searchInput.after($columnFilter);
 
-			const filterData = () => {
+            // Search placeholder
+            $searchInput.attr(
+                'placeholder',
+                'Type to filter (F3)'
+            );
 
-				table.columns().search('');
 
-				table
-					.column(Number($columnFilter.val()))
-					.search($searchInput.val())
-					.draw();
-			};
+            // Create column options
+            table.columns().every(function (index) {
 
-			$searchInput.on('input', filterData);
-			$columnFilter.on('change', filterData);
+                const title = $(this.header())
+                    .text()
+                    .trim();
 
-			// Move Export Button
-			const $buttons = $(`${tableId}_wrapper .dt-buttons`);
-			$columnFilter.after($buttons);
-		}
+                if (title) {
+                    $columnFilter.append(
+                        `<option value="${index}">${title}</option>`
+                    );
+                }
+            });
 
 
-			$searchInput.after($columnFilter);
+            $searchInput.after($columnFilter);
 
 
-			function filterData() {
+            // Apply filter
+            function filterData() {
 
-				table.columns().search('');
+                table.columns().search('');
 
+                table
+                    .column(Number($columnFilter.val()))
+                    .search($searchInput.val())
+                    .draw();
+            }
 
-				table
-					.column(Number($columnFilter.val()))
-					.search($searchInput.val())
-					.draw();
 
-			}
+            $searchInput.on('input', filterData);
+            $columnFilter.on('change', filterData);
 
 
-			$searchInput.on('input', filterData);
+            // Move Excel button beside filter
+            const $buttons =
+                $(`${tableId}_wrapper .dt-buttons`);
 
-			$columnFilter.on('change', filterData);
+            $columnFilter.after($buttons);
+        }
 
-		}
 
+        /* ============================================================
+           VENDOR KPI CHART
+        ============================================================ */
 
-		/* ==============================
-		   Page Load
-		============================== */
+        async function loadVendorCharts() {
 
-		$(function () {
+            try {
 
+                const response = await fetch('?handler=VendorQA');
 
-			const today = new Date()
-				.toISOString()
-				.split('T')[0];
+                if (!response.ok) {
+                    throw new Error(
+                        `VendorQA request failed: ${response.status}`
+                    );
+                }
 
 
-			const taggedTable = createDataTable(
-				'#tblVendors',
-				`Vendors_List_${today}`
-			);
+                const data = await response.json();
 
+                console.log('Vendor QA Data:', data);
 
-			addColumnFilter(
-				taggedTable,
-				'#tblVendors'
-			);
 
+                if (!Array.isArray(data)) {
+                    throw new Error(
+                        'VendorQA returned invalid data.'
+                    );
+                }
 
-			if (typeof colorDuplicateHBL === 'function') {
 
-				colorDuplicateHBL();
+                /* ----------------------------------------------------
+                   Filter vendors that have defects
+                ---------------------------------------------------- */
 
-				taggedTable.on(
-					'draw',
-					colorDuplicateHBL
-				);
+                const vendors = data
+                    .filter(v =>
+                        Number(v.defectRate) > 0
+                    )
+                    .sort((a, b) =>
+                        Number(b.defectRate) -
+                        Number(a.defectRate)
+                    );
 
-			}
 
+                /* ----------------------------------------------------
+                   Get chart canvas
+                ---------------------------------------------------- */
 
-			$(window).on(
-				'resize',
-				function () {
+                const canvas =
+                    document.getElementById('chartMonth');
 
-					$.fn.dataTable
-						.tables({
-							visible: true,
-							api: true
-						})
-						.columns
-						.adjust();
+                if (!canvas) {
+                    console.error(
+                        'Vendor KPI chart canvas not found.'
+                    );
 
-				}
-			);
+                    return;
+                }
 
 
-		});
+                /* ----------------------------------------------------
+                   Chart Configuration
+                ---------------------------------------------------- */
 
+                const config = {
 
-		async function loadVendorCharts() {
-			const response = await fetch('?handler=VendorQA');
-			const data = await response.json();
+                    type: 'bar',
 
-			const vendors = data
-				.filter(v => Number(v.defectRate) > 0) // Exclude null, undefined, and 0
-				.sort((a, b) => b.defectRate - a.defectRate);
+                    data: {
 
-			const config = {
-				type: 'bar',
-				data: {
-					labels: vendors.map(v => v.vendorName),
-					datasets: [{
-						data: vendors.map(v => v.defectRate),
-						backgroundColor: '#5B9BD5',
-						borderColor: '#5B9BD5',
-						borderWidth: 1,
-						barThickness: 20
-					}]
-				},
-				options: {
-					indexAxis: 'y',
-					responsive: true,
-					maintainAspectRatio: false,
-					plugins: {
-						legend: {
-							display: false
-						}
-					},
-					scales: {
-						x: {
-							beginAtZero: true,
-							ticks: {
-								callback: value => `${value}%`
-							}
-						},
-						y: {
-							ticks: {
-								autoSkip: false,
-								padding: 8
-							}
-						}
-					}
-				}
-			};
+                        labels: vendors.map(
+                            v => v.vendorName
+                        ),
 
-			new Chart(document.getElementById('chartMonth'), config);
-			new Chart(document.getElementById('chartYear'), config);
-		}
+                        datasets: [
+                            {
+                                label: 'Defect Rate',
 
-		loadVendorCharts();
-	</script>
-	
+                                data: vendors.map(
+                                    v => Number(v.defectRate)
+                                ),
+
+                                backgroundColor: '#5B9BD5',
+                                borderColor: '#5B9BD5',
+                                borderWidth: 1,
+                                barThickness: 20
+                            }
+                        ]
+                    },
+
+                    options: {
+
+                        indexAxis: 'y',
+
+                        responsive: true,
+
+                        maintainAspectRatio: false,
+
+                        plugins: {
+
+                            legend: {
+                                display: false
+                            },
+
+                            tooltip: {
+
+                                callbacks: {
+
+                                    label: function (context) {
+
+                                        return `${Number(context.raw)
+                                            .toFixed(2)}%`;
+                                    }
+                                }
+                            }
+                        },
+
+                        scales: {
+
+                            x: {
+
+                                beginAtZero: true,
+
+                                ticks: {
+
+                                    callback: function (value) {
+                                        return `${value}%`;
+                                    }
+                                }
+                            },
+
+                            y: {
+
+                                ticks: {
+                                    autoSkip: false,
+                                    padding: 8
+                                }
+                            }
+                        }
+                    }
+                };
+
+
+                /* ----------------------------------------------------
+                   Render Chart
+                ---------------------------------------------------- */
+
+                new Chart(
+                    canvas,
+                    config
+                );
+
+            }
+            catch (error) {
+
+                console.error(
+                    'Error loading Vendor KPI:',
+                    error
+                );
+            }
+        }
+
+
+        /* ============================================================
+           PAGE LOAD
+        ============================================================ */
+
+        $(function () {
+
+            const today = new Date()
+                .toISOString()
+                .split('T')[0];
+
+
+            /* --------------------------------------------------------
+               Vendor Master List
+            -------------------------------------------------------- */
+
+            const vendorTable = createDataTable(
+                '#tblVendors',
+                `Vendors_List_${today}`
+            );
+
+
+            addColumnFilter(
+                vendorTable,
+                '#tblVendors'
+            );
+
+
+            /* --------------------------------------------------------
+               Vendor KPI
+            -------------------------------------------------------- */
+
+            loadVendorCharts();
+
+
+            /* --------------------------------------------------------
+               Resize DataTables
+            -------------------------------------------------------- */
+
+            $(window).on('resize', function () {
+
+                $.fn.dataTable
+                    .tables({
+                        visible: true,
+                        api: true
+                    })
+                    .columns
+                    .adjust();
+
+            });
+
+        });
+
+    </script>
 }
