@@ -79,5 +79,51 @@ namespace PlanningTool.NavExtension.Pages.QA
                 TempData["ErrorMessage"] = $"An error occurred: {ex.Message}";
             }
         }
+
+        public async Task<IActionResult> OnGetRepairMRPAsync(string itemCode)
+        {
+            if (string.IsNullOrWhiteSpace(itemCode))
+            {
+                return new JsonResult(new
+                {
+                    success = false,
+                    message = "Item Code is required."
+                });
+            }
+
+            try
+            {
+                var itemCodeParam = new SqlParameter(
+                    "@ItemCode",
+                    SqlDbType.NVarChar,
+                    20)
+                {
+                    Value = itemCode
+                };
+
+                var details = await _context
+                    .Set<QARepairMRPDetail>()
+                    .FromSqlRaw(
+                        "EXEC [PTNAVEX].[dbo].[_spGetQARepairMRPDetails] @ItemCode",
+                        itemCodeParam)
+                    .AsNoTracking()
+                    .ToListAsync();
+
+                return new JsonResult(new
+                {
+                    success = true,
+                    itemCode,
+                    data = details
+                });
+            }
+            catch (Exception ex)
+            {
+                return new JsonResult(new
+                {
+                    success = false,
+                    message = ex.Message
+                });
+            }
+        }
     }
 }

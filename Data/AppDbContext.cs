@@ -36,6 +36,9 @@ namespace PlanningTool.NavExtension.Data
         public DbSet<ShipmentEmailHistory> ShipmentEmailHistory { get; set; }
 
         public DbSet<ShipmentReminderTracking> ShipmentReminderTracking { get; set; }
+
+        public DbSet<QARepairMRPDetail> QARepairMRPDetails { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<UserModel>()
@@ -71,6 +74,14 @@ namespace PlanningTool.NavExtension.Data
 
 
             base.OnModelCreating(modelBuilder);
+
+            modelBuilder
+               .Entity<QADashboardItem>()
+               .HasNoKey();
+
+            modelBuilder
+                .Entity<QARepairMRPDetail>()
+                .HasNoKey();
         }
     }
 }
