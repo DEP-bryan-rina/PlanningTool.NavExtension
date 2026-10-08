@@ -19,11 +19,13 @@
     /* MRP clickable row */
     .qa-mrp-row {
         cursor: pointer;
-    }
+    }    
 
-        .qa-mrp-row:hover > td {
-            background-color: #fff3cd !important;
-        }
+    /* MRP detail total */
+    #tblMRPDetails tfoot {
+        background-color: #f8f9fa;
+        font-weight: 700;
+    }
 </style>
 
 
@@ -62,7 +64,6 @@
          KPI CARDS
     ====================================================== -->
     <div class="row mb-4">
-
 
         <!-- Defect Rate -->
         <div class="col-md-3 mb-3">
@@ -247,7 +248,7 @@
 
                 @if (Model.Items?.Any() == true)
                 {
-                    @foreach (var item in Model.Items)
+                    foreach (var item in Model.Items)
                     {
                         var statusClass = item.Status switch
                         {
@@ -257,13 +258,16 @@
                             _ => "status-na"
                         };
 
+                        var hasMRPRepair =
+                            item.AllocationForRepair > 0;
+
                         var rowClass =
-                            item.AllocationForRepair > 0
+                            hasMRPRepair
                                 ? "qa-mrp-row"
                                 : "";
 
                         var rowTitle =
-                            item.AllocationForRepair > 0
+                            hasMRPRepair
                                 ? "Click to view MRP repair details"
                                 : "";
 
@@ -271,7 +275,6 @@
                         <tr class="@rowClass"
                             data-item-code="@item.ItemCode"
                             title="@rowTitle">
-
 
                             <!-- RR No. -->
                             <td>
@@ -423,7 +426,9 @@
         <div class="modal-content">
 
 
-            <!-- Modal Header -->
+            <!-- =================================================
+                 MODAL HEADER
+            ================================================== -->
             <div class="modal-header">
 
                 <h5 class="modal-title"
@@ -435,6 +440,7 @@
 
                 </h5>
 
+
                 <button type="button"
                         class="btn-close"
                         data-bs-dismiss="modal"
@@ -444,7 +450,9 @@
             </div>
 
 
-            <!-- Modal Body -->
+            <!-- =================================================
+                 MODAL BODY
+            ================================================== -->
             <div class="modal-body">
 
 
@@ -462,13 +470,16 @@
                 </div>
 
 
-                <!-- Detail Table -->
+                <!-- =================================================
+                     MRP DETAIL TABLE
+                ================================================== -->
                 <div class="table-responsive">
 
                     <table id="tblMRPDetails"
-                           class="table table-sm table-hover table-bordered">
+                           class="table table-sm table-hover table-bordered mb-0">
 
-                        <thead class="table-light" style="font-size:0.75rem;">
+                        <thead class="table-light"
+                               style="font-size:0.75rem;">
 
                             <tr>
 
@@ -505,8 +516,42 @@
                         </thead>
 
 
-                        <tbody id="mrpDetailBody" style="font-size:0.75rem;">
+                        <!-- =========================================
+                             MRP DETAIL DATA
+                        ========================================== -->
+                        <tbody id="mrpDetailBody"
+                               style="font-size:0.75rem;">
                         </tbody>
+
+
+                        <!-- =========================================
+                             MRP TOTALS
+                        ========================================== -->
+                        <tfoot style="font-size:0.75rem;">
+
+                            <tr>
+
+                                <td colspan="3"
+                                    class="text-end fw-bold">
+                                    TOTAL:
+                                </td>
+
+                                <td id="mrpTotalQuantity"
+                                    class="text-end fw-bold">
+                                    0
+                                </td>
+
+                                <td colspan="2">
+                                </td>
+
+                                <td id="mrpTotalAllocation"
+                                    class="text-end fw-bold text-primary">
+                                    0
+                                </td>
+
+                            </tr>
+
+                        </tfoot>
 
                     </table>
 
@@ -515,14 +560,20 @@
             </div>
 
 
-            <!-- Modal Footer -->
+            <!-- =================================================
+                 MODAL FOOTER
+            ================================================== -->
             <div class="modal-footer">
-                
-				<button type="button" class="btn btn-primary erp-btn"
-						data-bs-dismiss="modal">
-					<i class="fas fa-times me-1 text-danger"></i>
-					Cancel
-				</button>
+
+                <button type="button"
+                        class="btn btn-primary erp-btn"
+                        data-bs-dismiss="modal">
+
+                    <i class="fas fa-times me-1 text-danger"></i>
+
+                    Cancel
+
+                </button>
 
             </div>
 
@@ -546,6 +597,7 @@
             return $('<div>')
                 .text(value ?? '')
                 .html();
+
         }
 
 
@@ -555,15 +607,20 @@
                 return '';
             }
 
-            const date = new Date(value);
+
+            const date =
+                new Date(value);
+
 
             if (isNaN(date.getTime())) {
                 return '';
             }
 
+
             return date
                 .toISOString()
                 .split('T')[0];
+
         }
 
 
@@ -572,18 +629,22 @@
             const number =
                 Number(value || 0);
 
+
             return number.toLocaleString(
                 undefined,
                 {
+                    minimumFractionDigits: 0,
                     maximumFractionDigits: 2
                 }
             );
+
         }
 
 
         function getTableHeight() {
 
             return `${$(window).height() * 0.6}px`;
+
         }
 
 
@@ -594,10 +655,16 @@
 
         function loadMRPRepairDetails(itemCode) {
 
+
+            /* -------------------------------------------------
+               GET MODAL
+            -------------------------------------------------- */
+
             const modalElement =
                 document.getElementById(
                     'mrpRepairModal'
                 );
+
 
             const modal =
                 bootstrap.Modal.getOrCreateInstance(
@@ -605,12 +672,33 @@
                 );
 
 
+            /* -------------------------------------------------
+               DISPLAY ITEM CODE
+            -------------------------------------------------- */
+
             $('#mrpItemCode')
                 .text(itemCode);
 
 
+            /* -------------------------------------------------
+               RESET TOTALS
+            -------------------------------------------------- */
+
+            $('#mrpTotalQuantity')
+                .text('0');
+
+
+            $('#mrpTotalAllocation')
+                .text('0');
+
+
+            /* -------------------------------------------------
+               LOADING MESSAGE
+            -------------------------------------------------- */
+
             $('#mrpDetailBody').html(`
                 <tr>
+
                     <td colspan="7"
                         class="text-center text-secondary py-4">
 
@@ -620,12 +708,21 @@
                         Loading MRP details...
 
                     </td>
+
                 </tr>
             `);
 
 
+            /* -------------------------------------------------
+               SHOW MODAL
+            -------------------------------------------------- */
+
             modal.show();
 
+
+            /* -------------------------------------------------
+               GET MRP DETAILS
+            -------------------------------------------------- */
 
             $.ajax({
 
@@ -640,15 +737,26 @@
                 },
 
 
+                /* =============================================
+                   AJAX SUCCESS
+                ============================================== */
+
                 success: function (result) {
+
 
                     const $body =
                         $('#mrpDetailBody');
 
+
                     $body.empty();
 
 
+                    /* -----------------------------------------
+                       REQUEST FAILED
+                    ------------------------------------------ */
+
                     if (!result.success) {
+
 
                         $body.html(`
                             <tr>
@@ -666,12 +774,28 @@
                             </tr>
                         `);
 
+
+                        $('#mrpTotalQuantity')
+                            .text('0');
+
+
+                        $('#mrpTotalAllocation')
+                            .text('0');
+
+
                         return;
                     }
 
 
-                    if (!result.data ||
-                        result.data.length === 0) {
+                    /* -----------------------------------------
+                       NO DATA
+                    ------------------------------------------ */
+
+                    if (
+                        !result.data ||
+                        result.data.length === 0
+                    ) {
+
 
                         $body.html(`
                             <tr>
@@ -686,13 +810,58 @@
                             </tr>
                         `);
 
+
+                        $('#mrpTotalQuantity')
+                            .text('0');
+
+
+                        $('#mrpTotalAllocation')
+                            .text('0');
+
+
                         return;
                     }
 
 
+                    /* -----------------------------------------
+                       INITIALIZE TOTALS
+                    ------------------------------------------ */
+
+                    let totalQuantity = 0;
+
+                    let totalAllocation = 0;
+
+
+                    /* -----------------------------------------
+                       BUILD DETAIL ROWS
+                    ------------------------------------------ */
+
                     result.data.forEach(
                         function (row) {
 
+
+                            const quantity =
+                                Number(
+                                    row.quantity || 0
+                                );
+
+
+                            const allocation =
+                                Number(
+                                    row.allocationForRepair || 0
+                                );
+
+
+                            /* Add to totals */
+                            totalQuantity +=
+                                quantity;
+
+
+                            totalAllocation +=
+                                allocation;
+
+
+                            /* Add table row */
                             $body.append(`
                                 <tr>
 
@@ -716,7 +885,7 @@
 
                                     <td class="text-end">
                                         ${formatMRPNumber(
-                                            row.quantity
+                                            quantity
                                         )}
                                     </td>
 
@@ -734,18 +903,49 @@
 
                                     <td class="text-end fw-bold text-primary">
                                         ${formatMRPNumber(
-                                            row.allocationForRepair
+                                            allocation
                                         )}
                                     </td>
 
                                 </tr>
                             `);
+
                         }
                     );
+
+
+                    /* -----------------------------------------
+                       DISPLAY TOTAL QUANTITY
+                    ------------------------------------------ */
+
+                    $('#mrpTotalQuantity')
+                        .text(
+                            formatMRPNumber(
+                                totalQuantity
+                            )
+                        );
+
+
+                    /* -----------------------------------------
+                       DISPLAY TOTAL QA REWORK ALLOCATION
+                    ------------------------------------------ */
+
+                    $('#mrpTotalAllocation')
+                        .text(
+                            formatMRPNumber(
+                                totalAllocation
+                            )
+                        );
+
                 },
 
 
+                /* =============================================
+                   AJAX ERROR
+                ============================================== */
+
                 error: function (xhr) {
+
 
                     let message =
                         'Unable to load MRP repair details.';
@@ -758,6 +958,7 @@
 
                         message =
                             xhr.responseJSON.message;
+
                     }
 
 
@@ -767,15 +968,27 @@
                             <td colspan="7"
                                 class="text-center text-danger py-4">
 
-                                ${escapeHtml(message)}
+                                ${escapeHtml(
+                                    message
+                                )}
 
                             </td>
 
                         </tr>
                     `);
+
+
+                    $('#mrpTotalQuantity')
+                        .text('0');
+
+
+                    $('#mrpTotalAllocation')
+                        .text('0');
+
                 }
 
             });
+
         }
 
 
@@ -789,28 +1002,47 @@
             filename
         ) {
 
+
             return $(selector).DataTable({
 
-                pageLength: 25,
 
-                paging: false,
+                pageLength:
+                    25,
 
-                scrollX: true,
 
-                scrollY: getTableHeight(),
+                paging:
+                    false,
 
-                scrollCollapse: true,
 
-                autoWidth: false,
+                scrollX:
+                    true,
 
-                fixedHeader: false,
 
-                responsive: false,
+                scrollY:
+                    getTableHeight(),
+
+
+                scrollCollapse:
+                    true,
+
+
+                autoWidth:
+                    false,
+
+
+                fixedHeader:
+                    false,
+
+
+                responsive:
+                    false,
 
 
                 language: {
+
                     emptyTable:
-                        "No records found."
+                        'No records found.'
+
                 },
 
 
@@ -819,18 +1051,24 @@
 
 
                 buttons: [
+
                     {
+
                         extend:
                             'excelHtml5',
+
 
                         text:
                             '<i class="fas fa-file-excel"></i> Export Excel',
 
+
                         className:
                             'btn btn-sm erp-btn',
 
+
                         title:
                             null,
+
 
                         filename:
                             filename,
@@ -838,16 +1076,21 @@
 
                         exportOptions: {
 
+
                             columns:
                                 ':visible:not(.no-export)',
 
+
                             modifier: {
+
                                 search:
                                     'applied',
 
                                 order:
                                     'applied'
+
                             }
+
                         },
 
 
@@ -857,6 +1100,7 @@
                             button,
                             config
                         ) {
+
 
                             const fileName =
                                 `${config.filename}.xlsx`;
@@ -868,7 +1112,9 @@
                                 `The save location is controlled by your browser settings.`;
 
 
+
                             if (confirm(message)) {
+
 
                                 $.fn.dataTable
                                     .ext
@@ -882,11 +1128,17 @@
                                         button,
                                         config
                                     );
+
                             }
+
                         }
+
                     }
+
                 ]
+
             });
+
         }
 
 
@@ -900,15 +1152,26 @@
             tableId
         ) {
 
+
             const $filter =
                 $(`${tableId}_filter`);
 
+
             const $searchInput =
-                $filter.find('input');
+                $filter.find(
+                    'input'
+                );
+
 
             const $columnFilter =
-                $('<select class="columnFilter"></select>');
+                $(
+                    '<select class="columnFilter"></select>'
+                );
 
+
+            /* -------------------------------------------------
+               REMOVE DEFAULT SEARCH LABEL
+            -------------------------------------------------- */
 
             $filter
                 .find('label')
@@ -920,14 +1183,23 @@
                 .remove();
 
 
+            /* -------------------------------------------------
+               SEARCH PLACEHOLDER
+            -------------------------------------------------- */
+
             $searchInput.attr(
                 'placeholder',
                 'Type to filter (F3)'
             );
 
 
+            /* -------------------------------------------------
+               ADD COLUMN OPTIONS
+            -------------------------------------------------- */
+
             table.columns().every(
                 function (index) {
+
 
                     const title =
                         $(this.header())
@@ -937,23 +1209,35 @@
 
                     if (title) {
 
+
                         $columnFilter.append(
                             `<option value="${index}">
                                 ${title}
                             </option>`
                         );
+
                     }
+
                 }
             );
 
+
+            /* -------------------------------------------------
+               ADD COLUMN FILTER
+            -------------------------------------------------- */
 
             $searchInput.after(
                 $columnFilter
             );
 
 
+            /* -------------------------------------------------
+               FILTER FUNCTION
+            -------------------------------------------------- */
+
             const filterData =
                 function () {
+
 
                     table
                         .columns()
@@ -970,8 +1254,13 @@
                             $searchInput.val()
                         )
                         .draw();
+
                 };
 
+
+            /* -------------------------------------------------
+               SEARCH EVENT
+            -------------------------------------------------- */
 
             $searchInput.on(
                 'input',
@@ -979,11 +1268,19 @@
             );
 
 
+            /* -------------------------------------------------
+               COLUMN CHANGE EVENT
+            -------------------------------------------------- */
+
             $columnFilter.on(
                 'change',
                 filterData
             );
 
+
+            /* -------------------------------------------------
+               MOVE EXPORT BUTTON
+            -------------------------------------------------- */
 
             const $buttons =
                 $(
@@ -994,6 +1291,7 @@
             $columnFilter.after(
                 $buttons
             );
+
         }
 
 
@@ -1005,18 +1303,21 @@
         $(function () {
 
 
-            /* -----------------------------------------------
+            /* ================================================
                MRP ROW CLICK
-            ------------------------------------------------ */
+            ================================================= */
 
             $(document).on(
                 'click',
                 '#tblQA tbody tr.qa-mrp-row',
                 function () {
 
+
                     const itemCode =
                         $(this)
-                            .data('item-code');
+                            .data(
+                                'item-code'
+                            );
 
 
                     if (!itemCode) {
@@ -1027,14 +1328,14 @@
                     loadMRPRepairDetails(
                         itemCode
                     );
+
                 }
             );
 
 
-
-            /* -----------------------------------------------
+            /* ================================================
                INITIALIZE QA DATATABLE
-            ------------------------------------------------ */
+            ================================================= */
 
             const today =
                 new Date()
@@ -1049,21 +1350,25 @@
                 );
 
 
+            /* ================================================
+               COLUMN FILTER
+            ================================================= */
+
             addColumnFilter(
                 taggedTable,
                 '#tblQA'
             );
 
 
-
-            /* -----------------------------------------------
-               EXISTING DUPLICATE COLOR LOGIC
-            ------------------------------------------------ */
+            /* ================================================
+               DUPLICATE COLOR LOGIC
+            ================================================= */
 
             if (
                 typeof colorDuplicateHBL ===
                 'function'
             ) {
+
 
                 colorDuplicateHBL();
 
@@ -1072,17 +1377,18 @@
                     'draw',
                     colorDuplicateHBL
                 );
+
             }
 
 
-
-            /* -----------------------------------------------
+            /* ================================================
                WINDOW RESIZE
-            ------------------------------------------------ */
+            ================================================= */
 
             $(window).on(
                 'resize',
                 function () {
+
 
                     $.fn.dataTable
                         .tables({
@@ -1094,6 +1400,7 @@
                         })
                         .columns
                         .adjust();
+
                 }
             );
 
