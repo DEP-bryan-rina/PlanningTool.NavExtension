@@ -20,8 +20,6 @@
         cursor: pointer;
     }
 
-    }
-
     #tblMRPDetails tfoot {
         background-color: #f8f9fa;
         font-weight: 700;
@@ -71,6 +69,7 @@
                        class="text-decoration-none text-black">
 
                         <div class="kpi-card">
+
                             <div class="kpi-value text-danger">
                                 @Model.DefectRate%
                             </div>
@@ -78,6 +77,7 @@
                             <div class="kpi-label">
                                 Defect Rate
                             </div>
+
                         </div>
 
                     </a>
@@ -95,6 +95,7 @@
                     <i class="bi bi-stopwatch text-success fs-1 me-3"></i>
 
                     <div>
+
                         <div class="kpi-value text-success">
                             @Model.Completion%
                         </div>
@@ -102,6 +103,7 @@
                         <div class="kpi-label">
                             Completion
                         </div>
+
                     </div>
 
                 </div>
@@ -117,6 +119,7 @@
                     <i class="bi bi-clipboard2-check text-primary fs-1 me-3"></i>
 
                     <div>
+
                         <div class="kpi-value text-primary">
                             @Model.QualityRating%
                         </div>
@@ -124,6 +127,7 @@
                         <div class="kpi-label">
                             Quality Rating
                         </div>
+
                     </div>
 
                 </div>
@@ -139,6 +143,7 @@
                     <i class="bi bi-calendar-check text-warning fs-1 me-3"></i>
 
                     <div>
+
                         <div class="kpi-value text-warning">
                             @Model.LeadTime
                         </div>
@@ -146,6 +151,7 @@
                         <div class="kpi-label">
                             Lead Time (Days)
                         </div>
+
                     </div>
 
                 </div>
@@ -183,7 +189,6 @@
 
             </thead>
 
-
             <tbody style="font-size:0.75rem;">
 
                 @if (Model.Items?.Any() == true)
@@ -211,11 +216,9 @@
                                 ? "Click to view MRP repair details"
                                 : string.Empty;
 
-
                         <tr class="@rowClass"
                             data-item-code="@item.ItemCode"
                             title="@rowTitle">
-
 
                             <!-- Item Code -->
                             <td>
@@ -224,12 +227,10 @@
                                 </strong>
                             </td>
 
-
                             <!-- Description -->
                             <td>
                                 @item.Description
                             </td>
-
 
                             <!-- Date Received -->
                             <td>
@@ -239,30 +240,25 @@
                                 }
                             </td>
 
-
                             <!-- UOM -->
                             <td>
                                 @item.UOM
                             </td>
-
 
                             <!-- Qty Received -->
                             <td class="text-center">
                                 @item.QtyReceived.ToString("N0")
                             </td>
 
-
                             <!-- Status -->
                             <td class="text-center @statusClass">
                                 @item.Status
                             </td>
 
-
                             <!-- Qty Good -->
                             <td class="text-center">
                                 @item.QtyGood.ToString("N0")
                             </td>
-
 
                             <!-- Qty Reject -->
                             <td class="text-center">
@@ -280,7 +276,6 @@
 
                             </td>
 
-
                             <!-- Qty Repair -->
                             <td class="text-center">
 
@@ -296,7 +291,6 @@
                                 }
 
                             </td>
-
 
                             <!-- MRP For Repair -->
                             <td class="text-center">
@@ -314,12 +308,10 @@
 
                             </td>
 
-
                             <!-- Repair Week Required -->
                             <td class="text-center">
                                 @item.RepairWKRequired
                             </td>
-
 
                             <!-- Lead Time -->
                             <td class="text-center"
@@ -358,9 +350,7 @@
 
         <div class="modal-content">
 
-            <!-- =================================================
-                 MODAL HEADER
-            ================================================== -->
+            <!-- Modal Header -->
             <div class="modal-header">
 
                 <h5 class="modal-title"
@@ -371,7 +361,6 @@
 
                 </h5>
 
-
                 <button type="button"
                         class="btn-close"
                         data-bs-dismiss="modal"
@@ -381,9 +370,7 @@
             </div>
 
 
-            <!-- =================================================
-                 MODAL BODY
-            ================================================== -->
+            <!-- Modal Body -->
             <div class="modal-body">
 
                 <!-- Selected Item -->
@@ -400,9 +387,7 @@
                 </div>
 
 
-                <!-- =================================================
-                     MRP DETAIL TABLE
-                ================================================== -->
+                <!-- MRP Detail Table -->
                 <div class="table-responsive">
 
                     <table id="tblMRPDetails"
@@ -423,16 +408,10 @@
 
                         </thead>
 
-
-                        <!-- MRP DETAILS -->
                         <tbody id="mrpDetailBody"
                                style="font-size:0.75rem;">
                         </tbody>
 
-
-                        <!-- =================================================
-                             TOTALS
-                        ================================================== -->
                         <tfoot class="table-light"
                                style="font-size:0.75rem;">
 
@@ -443,21 +422,16 @@
                                     TOTAL:
                                 </td>
 
-
-                                <!-- Total Quantity -->
                                 <td id="mrpTotalQuantity"
                                     class="text-end fw-bold">
                                     0
                                 </td>
-
 
                                 <td colspan="2"
                                     class="text-end fw-bold">
                                     TOTAL QA REWORK:
                                 </td>
 
-
-                                <!-- Total QA Rework Allocation -->
                                 <td id="mrpTotalAllocation"
                                     class="text-end fw-bold text-primary">
                                     0
@@ -474,11 +448,21 @@
             </div>
 
 
-            <!-- =================================================
-                 MODAL FOOTER
-            ================================================== -->
+            <!-- Modal Footer -->
             <div class="modal-footer">
 
+                <!-- Export Excel -->
+                <button type="button"
+                        id="btnExportMRPExcel"
+                        class="btn btn-success erp-btn"
+                        disabled>
+
+                    <i class="fas fa-file-excel me-1"></i>
+                    Export Excel
+
+                </button>
+
+                <!-- Close -->
                 <button type="button"
                         class="btn btn-primary erp-btn"
                         data-bs-dismiss="modal">
@@ -502,6 +486,13 @@
     <script>
 
         /* =====================================================
+           MRP EXPORT DATA
+        ====================================================== */
+
+        let currentMRPDetails = [];
+
+
+        /* =====================================================
            GENERAL UTILITIES
         ====================================================== */
 
@@ -510,7 +501,6 @@
             return $('<div>')
                 .text(value ?? '')
                 .html();
-
         }
 
 
@@ -520,8 +510,7 @@
                 return '';
             }
 
-            const date =
-                new Date(value);
+            const date = new Date(value);
 
             if (isNaN(date.getTime())) {
                 return '';
@@ -530,7 +519,6 @@
             return date
                 .toISOString()
                 .split('T')[0];
-
         }
 
 
@@ -546,14 +534,12 @@
                     maximumFractionDigits: 2
                 }
             );
-
         }
 
 
         function getTableHeight() {
 
             return `${$(window).height() * 0.6}px`;
-
         }
 
 
@@ -568,7 +554,6 @@
 
             $('#mrpTotalAllocation')
                 .text('0');
-
         }
 
 
@@ -585,18 +570,348 @@
                 <tr>
                     <td colspan="7"
                         class="text-center ${cssClass} py-4">
-
                         ${escapeHtml(message)}
-
                     </td>
                 </tr>
             `);
-
         }
 
 
         /* =====================================================
-           MRP REPAIR POPUP
+   EXPORT MRP DETAILS TO EXCEL
+====================================================== */
+
+function exportMRPDetailsToExcel() {
+
+    /* -------------------------------------------------
+       CHECK DATA
+    -------------------------------------------------- */
+
+    if (
+        !currentMRPDetails ||
+        currentMRPDetails.length === 0
+    ) {
+
+        alert(
+            'There are no MRP repair details to export.'
+        );
+
+        return;
+    }
+
+
+    /* -------------------------------------------------
+       SELECTED ITEM
+    -------------------------------------------------- */
+
+    const itemCode =
+        $('#mrpItemCode')
+            .text()
+            .trim() || 'MRP';
+
+
+    /* -------------------------------------------------
+       REPORT DATE
+    -------------------------------------------------- */
+
+    const today =
+        new Date()
+            .toISOString()
+            .split('T')[0];
+
+
+    /* -------------------------------------------------
+       FILE NAME
+    -------------------------------------------------- */
+
+    const fileName =
+        `MRP_Repair_${itemCode}_${today}.xlsx`;
+
+
+    /* -------------------------------------------------
+       EXPORT CONFIRMATION
+    -------------------------------------------------- */
+
+    const confirmMessage =
+        `Export MRP Repair Details to Excel?\n\n` +
+        `Item Code: ${itemCode}\n` +
+        `Records: ${currentMRPDetails.length}\n\n` +
+        `File:\n${fileName}\n\n` +
+        `The save location is controlled by your browser settings.`;
+
+
+    if (!confirm(confirmMessage)) {
+        return;
+    }
+
+
+    /* -------------------------------------------------
+       TOTAL VARIABLES
+    -------------------------------------------------- */
+
+    let totalQuantity = 0;
+    let totalAllocation = 0;
+
+
+    /* -------------------------------------------------
+       CREATE TEMPORARY EXPORT TABLE
+    -------------------------------------------------- */
+
+    const $exportTable = $(`
+        <table>
+
+            <thead>
+                <tr>
+                    <th>Sales Order No.</th>
+                    <th>Customer No.</th>
+                    <th>Shipment Date</th>
+                    <th>Quantity</th>
+                    <th>Sales Product Code</th>
+                    <th>Child Item No.</th>
+                    <th>QA Rework Allocation</th>
+                </tr>
+            </thead>
+
+            <tbody>
+            </tbody>
+
+        </table>
+    `);
+
+
+    const $exportBody =
+        $exportTable.find('tbody');
+
+
+    /* -------------------------------------------------
+       BUILD EXPORT ROWS
+    -------------------------------------------------- */
+
+    currentMRPDetails.forEach(
+        function (row) {
+
+            const quantity =
+                Number(
+                    row.quantity || 0
+                );
+
+            const allocation =
+                Number(
+                    row.allocationForRepair || 0
+                );
+
+
+            totalQuantity +=
+                quantity;
+
+            totalAllocation +=
+                allocation;
+
+
+            const $row =
+                $('<tr>');
+
+
+            $row.append(
+                $('<td>').text(
+                    row.salesOrderNo ?? ''
+                )
+            );
+
+
+            $row.append(
+                $('<td>').text(
+                    row.customerNo ?? ''
+                )
+            );
+
+
+            $row.append(
+                $('<td>').text(
+                    formatMRPDate(
+                        row.shipmentDate
+                    )
+                )
+            );
+
+
+            $row.append(
+                $('<td>').text(
+                    quantity
+                )
+            );
+
+
+            $row.append(
+                $('<td>').text(
+                    row.salesProductCode ?? ''
+                )
+            );
+
+
+            $row.append(
+                $('<td>').text(
+                    row.itemCode ?? ''
+                )
+            );
+
+
+            $row.append(
+                $('<td>').text(
+                    allocation
+                )
+            );
+
+
+            $exportBody.append(
+                $row
+            );
+
+        }
+    );
+
+
+    /* -------------------------------------------------
+       TOTAL ROW
+    -------------------------------------------------- */
+
+    const $totalRow =
+        $('<tr>');
+
+
+    $totalRow.append(
+        $('<td>').text('TOTAL')
+    );
+
+
+    $totalRow.append(
+        $('<td>').text('')
+    );
+
+
+    $totalRow.append(
+        $('<td>').text('')
+    );
+
+
+    $totalRow.append(
+        $('<td>').text(
+            totalQuantity
+        )
+    );
+
+
+    $totalRow.append(
+        $('<td>').text('')
+    );
+
+
+    $totalRow.append(
+        $('<td>').text(
+            'TOTAL QA REWORK'
+        )
+    );
+
+
+    $totalRow.append(
+        $('<td>').text(
+            totalAllocation
+        )
+    );
+
+
+    $exportBody.append(
+        $totalRow
+    );
+
+
+    /* -------------------------------------------------
+       ADD TEMPORARY TABLE
+    -------------------------------------------------- */
+
+    $exportTable.css({
+        position: 'absolute',
+        left: '-9999px',
+        top: '-9999px'
+    });
+
+
+    $('body').append(
+        $exportTable
+    );
+
+
+    /* -------------------------------------------------
+       CREATE TEMPORARY DATATABLE
+    -------------------------------------------------- */
+
+    const exportDataTable =
+        $exportTable.DataTable({
+
+            paging:
+                false,
+
+            searching:
+                false,
+
+            ordering:
+                false,
+
+            info:
+                false,
+
+            dom:
+                'B',
+
+            buttons: [
+                {
+                    extend:
+                        'excelHtml5',
+
+                    title:
+                        `MRP Repair Requirement - ${itemCode}`,
+
+                    filename:
+                        `MRP_Repair_${itemCode}_${today}`,
+
+                    exportOptions: {
+                        columns:
+                            ':visible'
+                    }
+                }
+            ]
+
+        });
+
+
+    /* -------------------------------------------------
+       EXPORT EXCEL
+    -------------------------------------------------- */
+
+    exportDataTable
+        .button(0)
+        .trigger();
+
+
+    /* -------------------------------------------------
+       CLEAN TEMPORARY TABLE
+    -------------------------------------------------- */
+
+    setTimeout(
+        function () {
+
+            exportDataTable.destroy();
+
+            $exportTable.remove();
+
+        },
+        500
+    );
+}
+
+
+        /* =====================================================
+           LOAD MRP REPAIR DETAILS
         ====================================================== */
 
         function loadMRPRepairDetails(itemCode) {
@@ -606,18 +921,34 @@
                     'mrpRepairModal'
                 );
 
+
             const modal =
                 bootstrap.Modal.getOrCreateInstance(
                     modalElement
                 );
+
 
             const $body =
                 $('#mrpDetailBody');
 
 
             /* -------------------------------------------------
+               RESET EXPORT
+            -------------------------------------------------- */
+
+            currentMRPDetails = [];
+
+            $('#btnExportMRPExcel')
+                .prop(
+                    'disabled',
+                    true
+                );
+
+
+            /* -------------------------------------------------
                SELECTED ITEM
             -------------------------------------------------- */
+
             $('#mrpItemCode')
                 .text(itemCode);
 
@@ -625,19 +956,22 @@
             /* -------------------------------------------------
                RESET TOTALS
             -------------------------------------------------- */
+
             resetMRPTotals();
 
 
             /* -------------------------------------------------
-               LOADING MESSAGE
+               LOADING
             -------------------------------------------------- */
+
             $body.html(`
                 <tr>
 
                     <td colspan="7"
                         class="text-center text-secondary py-4">
 
-                        <span class="spinner-border spinner-border-sm me-2"></span>
+                        <span class="spinner-border spinner-border-sm me-2">
+                        </span>
 
                         Loading MRP details...
 
@@ -650,12 +984,14 @@
             /* -------------------------------------------------
                SHOW MODAL
             -------------------------------------------------- */
+
             modal.show();
 
 
             /* -------------------------------------------------
-               LOAD DETAILS
+               AJAX
             -------------------------------------------------- */
+
             $.ajax({
 
                 url:
@@ -672,6 +1008,7 @@
                 /* =============================================
                    SUCCESS
                 ============================================== */
+
                 success: function (result) {
 
                     $body.empty();
@@ -682,7 +1019,16 @@
                     /* -----------------------------------------
                        REQUEST FAILED
                     ------------------------------------------ */
+
                     if (!result.success) {
+
+                        currentMRPDetails = [];
+
+                        $('#btnExportMRPExcel')
+                            .prop(
+                                'disabled',
+                                true
+                            );
 
                         showMRPMessage(
                             result.message ||
@@ -691,17 +1037,25 @@
                         );
 
                         return;
-
                     }
 
 
                     /* -----------------------------------------
                        NO RECORDS
                     ------------------------------------------ */
+
                     if (
                         !result.data ||
                         result.data.length === 0
                     ) {
+
+                        currentMRPDetails = [];
+
+                        $('#btnExportMRPExcel')
+                            .prop(
+                                'disabled',
+                                true
+                            );
 
                         showMRPMessage(
                             'No MRP repair details found.',
@@ -709,13 +1063,28 @@
                         );
 
                         return;
-
                     }
 
 
                     /* -----------------------------------------
-                       TOTAL VARIABLES
+                       SAVE EXPORT DATA
                     ------------------------------------------ */
+
+                    currentMRPDetails =
+                        result.data;
+
+
+                    $('#btnExportMRPExcel')
+                        .prop(
+                            'disabled',
+                            false
+                        );
+
+
+                    /* -----------------------------------------
+                       TOTALS
+                    ------------------------------------------ */
+
                     let totalQuantity = 0;
                     let totalAllocation = 0;
 
@@ -723,6 +1092,7 @@
                     /* -----------------------------------------
                        BUILD DETAIL ROWS
                     ------------------------------------------ */
+
                     result.data.forEach(
                         function (row) {
 
@@ -737,17 +1107,13 @@
                                 );
 
 
-                            /* Add Quantity */
                             totalQuantity +=
                                 quantity;
 
-
-                            /* Add QA Rework Allocation */
                             totalAllocation +=
                                 allocation;
 
 
-                            /* Add Detail Row */
                             $body.append(`
                                 <tr>
 
@@ -757,13 +1123,11 @@
                                         )}
                                     </td>
 
-
                                     <td>
                                         ${escapeHtml(
                                             row.customerNo
                                         )}
                                     </td>
-
 
                                     <td>
                                         ${formatMRPDate(
@@ -771,13 +1135,11 @@
                                         )}
                                     </td>
 
-
                                     <td class="text-end">
                                         ${formatMRPNumber(
                                             quantity
                                         )}
                                     </td>
-
 
                                     <td>
                                         ${escapeHtml(
@@ -785,13 +1147,11 @@
                                         )}
                                     </td>
 
-
                                     <td>
                                         ${escapeHtml(
                                             row.itemCode
                                         )}
                                     </td>
-
 
                                     <td class="text-end fw-bold text-primary">
                                         ${formatMRPNumber(
@@ -807,8 +1167,9 @@
 
 
                     /* -----------------------------------------
-                       DISPLAY TOTAL QUANTITY
+                       DISPLAY TOTALS
                     ------------------------------------------ */
+
                     $('#mrpTotalQuantity')
                         .text(
                             formatMRPNumber(
@@ -817,22 +1178,19 @@
                         );
 
 
-                    /* -----------------------------------------
-                       DISPLAY TOTAL QA REWORK
-                    ------------------------------------------ */
                     $('#mrpTotalAllocation')
                         .text(
                             formatMRPNumber(
                                 totalAllocation
                             )
                         );
-
                 },
 
 
                 /* =============================================
                    ERROR
                 ============================================== */
+
                 error: function (xhr) {
 
                     let message =
@@ -846,8 +1204,17 @@
 
                         message =
                             xhr.responseJSON.message;
-
                     }
+
+
+                    currentMRPDetails = [];
+
+
+                    $('#btnExportMRPExcel')
+                        .prop(
+                            'disabled',
+                            true
+                        );
 
 
                     resetMRPTotals();
@@ -857,11 +1224,9 @@
                         message,
                         'text-danger'
                     );
-
                 }
 
             });
-
         }
 
 
@@ -914,28 +1279,21 @@
 
 
                 buttons: [
-
                     {
-
                         extend:
                             'excelHtml5',
-
 
                         text:
                             '<i class="fas fa-file-excel"></i> Export Excel',
 
-
                         className:
                             'btn btn-sm erp-btn',
-
 
                         title:
                             null,
 
-
                         filename:
                             filename,
-
 
                         exportOptions: {
 
@@ -989,15 +1347,10 @@
                                     button,
                                     config
                                 );
-
                         }
-
                     }
-
                 ]
-
             });
-
         }
 
 
@@ -1029,6 +1382,7 @@
             /* -------------------------------------------------
                REMOVE DEFAULT SEARCH LABEL
             -------------------------------------------------- */
+
             $filter
                 .find('label')
                 .contents()
@@ -1042,6 +1396,7 @@
             /* -------------------------------------------------
                SEARCH PLACEHOLDER
             -------------------------------------------------- */
+
             $searchInput.attr(
                 'placeholder',
                 'Type to filter (F3)'
@@ -1051,6 +1406,7 @@
             /* -------------------------------------------------
                COLUMN OPTIONS
             -------------------------------------------------- */
+
             table.columns().every(
                 function (index) {
 
@@ -1067,6 +1423,7 @@
 
                     $columnFilter.append(
                         $('<option>', {
+
                             value:
                                 index,
 
@@ -1074,7 +1431,6 @@
                                 title
                         })
                     );
-
                 }
             );
 
@@ -1082,6 +1438,7 @@
             /* -------------------------------------------------
                ADD FILTER
             -------------------------------------------------- */
+
             $searchInput.after(
                 $columnFilter
             );
@@ -1090,6 +1447,7 @@
             /* -------------------------------------------------
                FILTER DATA
             -------------------------------------------------- */
+
             function filterData() {
 
                 const columnIndex =
@@ -1111,13 +1469,13 @@
                         $searchInput.val()
                     )
                     .draw();
-
             }
 
 
             /* -------------------------------------------------
-               EVENTS
+               FILTER EVENTS
             -------------------------------------------------- */
+
             $searchInput.on(
                 'input',
                 filterData
@@ -1133,6 +1491,7 @@
             /* -------------------------------------------------
                MOVE EXPORT BUTTON
             -------------------------------------------------- */
+
             const $buttons =
                 $(
                     `${tableId}_wrapper .dt-buttons`
@@ -1142,7 +1501,6 @@
             $columnFilter.after(
                 $buttons
             );
-
         }
 
 
@@ -1154,8 +1512,24 @@
 
 
             /* -------------------------------------------------
+               MRP EXPORT EXCEL
+            -------------------------------------------------- */
+
+            $(document).on(
+                'click',
+                '#btnExportMRPExcel',
+                function () {
+
+                    exportMRPDetailsToExcel();
+
+                }
+            );
+
+
+            /* -------------------------------------------------
                MRP ROW CLICK
             -------------------------------------------------- */
+
             $(document).on(
                 'click',
                 '#tblQA tbody tr.qa-mrp-row',
@@ -1176,7 +1550,6 @@
                     loadMRPRepairDetails(
                         itemCode
                     );
-
                 }
             );
 
@@ -1184,6 +1557,7 @@
             /* -------------------------------------------------
                REPORT DATE
             -------------------------------------------------- */
+
             const today =
                 new Date()
                     .toISOString()
@@ -1193,6 +1567,7 @@
             /* -------------------------------------------------
                INITIALIZE QA DATATABLE
             -------------------------------------------------- */
+
             const taggedTable =
                 createDataTable(
                     '#tblQA',
@@ -1203,6 +1578,7 @@
             /* -------------------------------------------------
                COLUMN FILTER
             -------------------------------------------------- */
+
             addColumnFilter(
                 taggedTable,
                 '#tblQA'
@@ -1212,6 +1588,7 @@
             /* -------------------------------------------------
                DUPLICATE COLOR LOGIC
             -------------------------------------------------- */
+
             if (
                 typeof colorDuplicateHBL ===
                 'function'
@@ -1224,13 +1601,13 @@
                     'draw',
                     colorDuplicateHBL
                 );
-
             }
 
 
             /* -------------------------------------------------
                WINDOW RESIZE
             -------------------------------------------------- */
+
             $(window).on(
                 'resize',
                 function () {
@@ -1245,7 +1622,6 @@
                         })
                         .columns
                         .adjust();
-
                 }
             );
 
