@@ -16,12 +16,12 @@
         }
     }
 
-    /* MRP clickable row */
     .qa-mrp-row {
         cursor: pointer;
-    }    
+    }
 
-    /* MRP detail total */
+    }
+
     #tblMRPDetails tfoot {
         background-color: #f8f9fa;
         font-weight: 700;
@@ -35,7 +35,6 @@
          PAGE HEADER
     ====================================================== -->
     <div class="row mb-3">
-
         <div class="col-md-12">
 
             <h3 class="fw-bold">
@@ -44,19 +43,15 @@
             </h3>
 
             <h6 class="mb-3 text-secondary">
-
                 <i class="fas fa-clipboard-check me-2 text-success"
                    style="display:inline-block; animation:pulse 2s ease-in-out infinite;">
                 </i>
-
                 Quality Monitoring & Analytics
-
             </h6>
 
             <hr />
 
         </div>
-
     </div>
 
 
@@ -67,9 +62,7 @@
 
         <!-- Defect Rate -->
         <div class="col-md-3 mb-3">
-
             <div class="card qa-card h-100">
-
                 <div class="card-body d-flex align-items-center">
 
                     <i class="bi bi-exclamation-triangle text-danger fs-1 me-3"></i>
@@ -78,7 +71,6 @@
                        class="text-decoration-none text-black">
 
                         <div class="kpi-card">
-
                             <div class="kpi-value text-danger">
                                 @Model.DefectRate%
                             </div>
@@ -86,29 +78,23 @@
                             <div class="kpi-label">
                                 Defect Rate
                             </div>
-
                         </div>
 
                     </a>
 
                 </div>
-
             </div>
-
         </div>
 
 
         <!-- Completion -->
         <div class="col-md-3 mb-3">
-
             <div class="card qa-card h-100">
-
                 <div class="card-body d-flex align-items-center">
 
                     <i class="bi bi-stopwatch text-success fs-1 me-3"></i>
 
                     <div>
-
                         <div class="kpi-value text-success">
                             @Model.Completion%
                         </div>
@@ -116,27 +102,21 @@
                         <div class="kpi-label">
                             Completion
                         </div>
-
                     </div>
 
                 </div>
-
             </div>
-
         </div>
 
 
         <!-- Quality Rating -->
         <div class="col-md-3 mb-3">
-
             <div class="card qa-card h-100">
-
                 <div class="card-body d-flex align-items-center">
 
                     <i class="bi bi-clipboard2-check text-primary fs-1 me-3"></i>
 
                     <div>
-
                         <div class="kpi-value text-primary">
                             @Model.QualityRating%
                         </div>
@@ -144,27 +124,21 @@
                         <div class="kpi-label">
                             Quality Rating
                         </div>
-
                     </div>
 
                 </div>
-
             </div>
-
         </div>
 
 
         <!-- Lead Time -->
         <div class="col-md-3 mb-3">
-
             <div class="card qa-card h-100">
-
                 <div class="card-body d-flex align-items-center">
 
                     <i class="bi bi-calendar-check text-warning fs-1 me-3"></i>
 
                     <div>
-
                         <div class="kpi-value text-warning">
                             @Model.LeadTime
                         </div>
@@ -172,13 +146,10 @@
                         <div class="kpi-label">
                             Lead Time (Days)
                         </div>
-
                     </div>
 
                 </div>
-
             </div>
-
         </div>
 
     </div>
@@ -196,49 +167,18 @@
                    style="font-size:0.75rem;">
 
                 <tr>
-
-                    <th>RR No.</th>
-
                     <th>Item Code</th>
-
                     <th>Description</th>
-
                     <th>Date Received</th>
-
                     <th>UoM</th>
-
-                    <th class="text-center">
-                        Qty Received
-                    </th>
-
-                    <th class="text-center">
-                        Status
-                    </th>
-
-                    <th class="text-center">
-                        Qty Good
-                    </th>
-
-                    <th class="text-center">
-                        Qty Reject
-                    </th>
-
-                    <th class="text-center">
-                        Qty Repair
-                    </th>
-
-                    <th class="text-center">
-                        MRP For Repair
-                    </th>
-
-                    <th class="text-center">
-                        Repair WK Required
-                    </th>
-
-                    <th class="text-center">
-                        Lead Time (Days)
-                    </th>
-
+                    <th class="text-center">Qty Received</th>
+                    <th class="text-center">Status</th>
+                    <th class="text-center">Qty Good</th>
+                    <th class="text-center">Qty Reject</th>
+                    <th class="text-center">Qty Repair</th>
+                    <th class="text-center">MRP For Repair</th>
+                    <th class="text-center">Repair WK Required</th>
+                    <th class="text-center">Lead Time (Days)</th>
                 </tr>
 
             </thead>
@@ -264,22 +204,17 @@
                         var rowClass =
                             hasMRPRepair
                                 ? "qa-mrp-row"
-                                : "";
+                                : string.Empty;
 
                         var rowTitle =
                             hasMRPRepair
                                 ? "Click to view MRP repair details"
-                                : "";
+                                : string.Empty;
 
 
                         <tr class="@rowClass"
                             data-item-code="@item.ItemCode"
                             title="@rowTitle">
-
-                            <!-- RR No. -->
-                            <td>
-                                @item.RRNo
-                            </td>
 
 
                             <!-- Item Code -->
@@ -298,12 +233,10 @@
 
                             <!-- Date Received -->
                             <td>
-
                                 @if (item.DateReceived.HasValue)
                                 {
                                     @item.DateReceived.Value.ToString("yyyy-MM-dd")
                                 }
-
                             </td>
 
 
@@ -425,7 +358,6 @@
 
         <div class="modal-content">
 
-
             <!-- =================================================
                  MODAL HEADER
             ================================================== -->
@@ -435,7 +367,6 @@
                     id="mrpRepairModalLabel">
 
                     <i class="fas fa-tools text-primary me-2"></i>
-
                     MRP Repair Requirement
 
                 </h5>
@@ -454,7 +385,6 @@
                  MODAL BODY
             ================================================== -->
             <div class="modal-body">
-
 
                 <!-- Selected Item -->
                 <div class="mb-3">
@@ -482,52 +412,29 @@
                                style="font-size:0.75rem;">
 
                             <tr>
-
-                                <th>
-                                    Sales Order No.
-                                </th>
-
-                                <th>
-                                    Customer No.
-                                </th>
-
-                                <th>
-                                    Shipment Date
-                                </th>
-
-                                <th class="text-end">
-                                    Quantity
-                                </th>
-
-                                <th>
-                                    Sales Product Code
-                                </th>
-
-                                <th>
-                                    Child Item No.
-                                </th>
-
-                                <th class="text-end">
-                                    QA Rework Allocation
-                                </th>
-
+                                <th>Sales Order No.</th>
+                                <th>Customer No.</th>
+                                <th>Shipment Date</th>
+                                <th class="text-end">Quantity</th>
+                                <th>Sales Product Code</th>
+                                <th>Child Item No.</th>
+                                <th class="text-end">QA Rework Allocation</th>
                             </tr>
 
                         </thead>
 
 
-                        <!-- =========================================
-                             MRP DETAIL DATA
-                        ========================================== -->
+                        <!-- MRP DETAILS -->
                         <tbody id="mrpDetailBody"
                                style="font-size:0.75rem;">
                         </tbody>
 
 
-                        <!-- =========================================
-                             MRP TOTALS
-                        ========================================== -->
-                        <tfoot style="font-size:0.75rem;">
+                        <!-- =================================================
+                             TOTALS
+                        ================================================== -->
+                        <tfoot class="table-light"
+                               style="font-size:0.75rem;">
 
                             <tr>
 
@@ -536,14 +443,21 @@
                                     TOTAL:
                                 </td>
 
+
+                                <!-- Total Quantity -->
                                 <td id="mrpTotalQuantity"
                                     class="text-end fw-bold">
                                     0
                                 </td>
 
-                                <td colspan="2">
+
+                                <td colspan="2"
+                                    class="text-end fw-bold">
+                                    TOTAL QA REWORK:
                                 </td>
 
+
+                                <!-- Total QA Rework Allocation -->
                                 <td id="mrpTotalAllocation"
                                     class="text-end fw-bold text-primary">
                                     0
@@ -570,7 +484,6 @@
                         data-bs-dismiss="modal">
 
                     <i class="fas fa-times me-1 text-danger"></i>
-
                     Cancel
 
                 </button>
@@ -607,15 +520,12 @@
                 return '';
             }
 
-
             const date =
                 new Date(value);
-
 
             if (isNaN(date.getTime())) {
                 return '';
             }
-
 
             return date
                 .toISOString()
@@ -628,7 +538,6 @@
 
             const number =
                 Number(value || 0);
-
 
             return number.toLocaleString(
                 undefined,
@@ -648,6 +557,43 @@
         }
 
 
+        /* =====================================================
+           RESET MRP TOTALS
+        ====================================================== */
+
+        function resetMRPTotals() {
+
+            $('#mrpTotalQuantity')
+                .text('0');
+
+            $('#mrpTotalAllocation')
+                .text('0');
+
+        }
+
+
+        /* =====================================================
+           DISPLAY MRP MESSAGE
+        ====================================================== */
+
+        function showMRPMessage(
+            message,
+            cssClass
+        ) {
+
+            $('#mrpDetailBody').html(`
+                <tr>
+                    <td colspan="7"
+                        class="text-center ${cssClass} py-4">
+
+                        ${escapeHtml(message)}
+
+                    </td>
+                </tr>
+            `);
+
+        }
+
 
         /* =====================================================
            MRP REPAIR POPUP
@@ -655,27 +601,23 @@
 
         function loadMRPRepairDetails(itemCode) {
 
-
-            /* -------------------------------------------------
-               GET MODAL
-            -------------------------------------------------- */
-
             const modalElement =
                 document.getElementById(
                     'mrpRepairModal'
                 );
-
 
             const modal =
                 bootstrap.Modal.getOrCreateInstance(
                     modalElement
                 );
 
+            const $body =
+                $('#mrpDetailBody');
+
 
             /* -------------------------------------------------
-               DISPLAY ITEM CODE
+               SELECTED ITEM
             -------------------------------------------------- */
-
             $('#mrpItemCode')
                 .text(itemCode);
 
@@ -683,27 +625,19 @@
             /* -------------------------------------------------
                RESET TOTALS
             -------------------------------------------------- */
-
-            $('#mrpTotalQuantity')
-                .text('0');
-
-
-            $('#mrpTotalAllocation')
-                .text('0');
+            resetMRPTotals();
 
 
             /* -------------------------------------------------
                LOADING MESSAGE
             -------------------------------------------------- */
-
-            $('#mrpDetailBody').html(`
+            $body.html(`
                 <tr>
 
                     <td colspan="7"
                         class="text-center text-secondary py-4">
 
-                        <span class="spinner-border spinner-border-sm me-2">
-                        </span>
+                        <span class="spinner-border spinner-border-sm me-2"></span>
 
                         Loading MRP details...
 
@@ -716,14 +650,12 @@
             /* -------------------------------------------------
                SHOW MODAL
             -------------------------------------------------- */
-
             modal.show();
 
 
             /* -------------------------------------------------
-               GET MRP DETAILS
+               LOAD DETAILS
             -------------------------------------------------- */
-
             $.ajax({
 
                 url:
@@ -738,113 +670,66 @@
 
 
                 /* =============================================
-                   AJAX SUCCESS
+                   SUCCESS
                 ============================================== */
-
                 success: function (result) {
 
-
-                    const $body =
-                        $('#mrpDetailBody');
-
-
                     $body.empty();
+
+                    resetMRPTotals();
 
 
                     /* -----------------------------------------
                        REQUEST FAILED
                     ------------------------------------------ */
-
                     if (!result.success) {
 
-
-                        $body.html(`
-                            <tr>
-
-                                <td colspan="7"
-                                    class="text-center text-danger py-4">
-
-                                    ${escapeHtml(
-                                        result.message ||
-                                        'Unable to load MRP details.'
-                                    )}
-
-                                </td>
-
-                            </tr>
-                        `);
-
-
-                        $('#mrpTotalQuantity')
-                            .text('0');
-
-
-                        $('#mrpTotalAllocation')
-                            .text('0');
-
+                        showMRPMessage(
+                            result.message ||
+                            'Unable to load MRP details.',
+                            'text-danger'
+                        );
 
                         return;
+
                     }
 
 
                     /* -----------------------------------------
-                       NO DATA
+                       NO RECORDS
                     ------------------------------------------ */
-
                     if (
                         !result.data ||
                         result.data.length === 0
                     ) {
 
-
-                        $body.html(`
-                            <tr>
-
-                                <td colspan="7"
-                                    class="text-center text-secondary py-4">
-
-                                    No MRP repair details found.
-
-                                </td>
-
-                            </tr>
-                        `);
-
-
-                        $('#mrpTotalQuantity')
-                            .text('0');
-
-
-                        $('#mrpTotalAllocation')
-                            .text('0');
-
+                        showMRPMessage(
+                            'No MRP repair details found.',
+                            'text-secondary'
+                        );
 
                         return;
+
                     }
 
 
                     /* -----------------------------------------
-                       INITIALIZE TOTALS
+                       TOTAL VARIABLES
                     ------------------------------------------ */
-
                     let totalQuantity = 0;
-
                     let totalAllocation = 0;
 
 
                     /* -----------------------------------------
                        BUILD DETAIL ROWS
                     ------------------------------------------ */
-
                     result.data.forEach(
                         function (row) {
-
 
                             const quantity =
                                 Number(
                                     row.quantity || 0
                                 );
-
 
                             const allocation =
                                 Number(
@@ -852,16 +737,17 @@
                                 );
 
 
-                            /* Add to totals */
+                            /* Add Quantity */
                             totalQuantity +=
                                 quantity;
 
 
+                            /* Add QA Rework Allocation */
                             totalAllocation +=
                                 allocation;
 
 
-                            /* Add table row */
+                            /* Add Detail Row */
                             $body.append(`
                                 <tr>
 
@@ -871,11 +757,13 @@
                                         )}
                                     </td>
 
+
                                     <td>
                                         ${escapeHtml(
                                             row.customerNo
                                         )}
                                     </td>
+
 
                                     <td>
                                         ${formatMRPDate(
@@ -883,11 +771,13 @@
                                         )}
                                     </td>
 
+
                                     <td class="text-end">
                                         ${formatMRPNumber(
                                             quantity
                                         )}
                                     </td>
+
 
                                     <td>
                                         ${escapeHtml(
@@ -895,11 +785,13 @@
                                         )}
                                     </td>
 
+
                                     <td>
                                         ${escapeHtml(
                                             row.itemCode
                                         )}
                                     </td>
+
 
                                     <td class="text-end fw-bold text-primary">
                                         ${formatMRPNumber(
@@ -917,7 +809,6 @@
                     /* -----------------------------------------
                        DISPLAY TOTAL QUANTITY
                     ------------------------------------------ */
-
                     $('#mrpTotalQuantity')
                         .text(
                             formatMRPNumber(
@@ -927,9 +818,8 @@
 
 
                     /* -----------------------------------------
-                       DISPLAY TOTAL QA REWORK ALLOCATION
+                       DISPLAY TOTAL QA REWORK
                     ------------------------------------------ */
-
                     $('#mrpTotalAllocation')
                         .text(
                             formatMRPNumber(
@@ -941,11 +831,9 @@
 
 
                 /* =============================================
-                   AJAX ERROR
+                   ERROR
                 ============================================== */
-
                 error: function (xhr) {
-
 
                     let message =
                         'Unable to load MRP repair details.';
@@ -962,35 +850,19 @@
                     }
 
 
-                    $('#mrpDetailBody').html(`
-                        <tr>
-
-                            <td colspan="7"
-                                class="text-center text-danger py-4">
-
-                                ${escapeHtml(
-                                    message
-                                )}
-
-                            </td>
-
-                        </tr>
-                    `);
+                    resetMRPTotals();
 
 
-                    $('#mrpTotalQuantity')
-                        .text('0');
-
-
-                    $('#mrpTotalAllocation')
-                        .text('0');
+                    showMRPMessage(
+                        message,
+                        'text-danger'
+                    );
 
                 }
 
             });
 
         }
-
 
 
         /* =====================================================
@@ -1002,37 +874,28 @@
             filename
         ) {
 
-
             return $(selector).DataTable({
-
 
                 pageLength:
                     25,
 
-
                 paging:
                     false,
-
 
                 scrollX:
                     true,
 
-
                 scrollY:
                     getTableHeight(),
-
 
                 scrollCollapse:
                     true,
 
-
                 autoWidth:
                     false,
 
-
                 fixedHeader:
                     false,
-
 
                 responsive:
                     false,
@@ -1076,10 +939,8 @@
 
                         exportOptions: {
 
-
                             columns:
                                 ':visible:not(.no-export)',
-
 
                             modifier: {
 
@@ -1101,7 +962,6 @@
                             config
                         ) {
 
-
                             const fileName =
                                 `${config.filename}.xlsx`;
 
@@ -1112,24 +972,23 @@
                                 `The save location is controlled by your browser settings.`;
 
 
-
-                            if (confirm(message)) {
-
-
-                                $.fn.dataTable
-                                    .ext
-                                    .buttons
-                                    .excelHtml5
-                                    .action
-                                    .call(
-                                        this,
-                                        e,
-                                        dt,
-                                        button,
-                                        config
-                                    );
-
+                            if (!confirm(message)) {
+                                return;
                             }
+
+
+                            $.fn.dataTable
+                                .ext
+                                .buttons
+                                .excelHtml5
+                                .action
+                                .call(
+                                    this,
+                                    e,
+                                    dt,
+                                    button,
+                                    config
+                                );
 
                         }
 
@@ -1142,7 +1001,6 @@
         }
 
 
-
         /* =====================================================
            COLUMN FILTER
         ====================================================== */
@@ -1151,7 +1009,6 @@
             table,
             tableId
         ) {
-
 
             const $filter =
                 $(`${tableId}_filter`);
@@ -1172,7 +1029,6 @@
             /* -------------------------------------------------
                REMOVE DEFAULT SEARCH LABEL
             -------------------------------------------------- */
-
             $filter
                 .find('label')
                 .contents()
@@ -1186,7 +1042,6 @@
             /* -------------------------------------------------
                SEARCH PLACEHOLDER
             -------------------------------------------------- */
-
             $searchInput.attr(
                 'placeholder',
                 'Type to filter (F3)'
@@ -1194,12 +1049,10 @@
 
 
             /* -------------------------------------------------
-               ADD COLUMN OPTIONS
+               COLUMN OPTIONS
             -------------------------------------------------- */
-
             table.columns().every(
                 function (index) {
-
 
                     const title =
                         $(this.header())
@@ -1207,70 +1060,69 @@
                             .trim();
 
 
-                    if (title) {
-
-
-                        $columnFilter.append(
-                            `<option value="${index}">
-                                ${title}
-                            </option>`
-                        );
-
+                    if (!title) {
+                        return;
                     }
+
+
+                    $columnFilter.append(
+                        $('<option>', {
+                            value:
+                                index,
+
+                            text:
+                                title
+                        })
+                    );
 
                 }
             );
 
 
             /* -------------------------------------------------
-               ADD COLUMN FILTER
+               ADD FILTER
             -------------------------------------------------- */
-
             $searchInput.after(
                 $columnFilter
             );
 
 
             /* -------------------------------------------------
-               FILTER FUNCTION
+               FILTER DATA
             -------------------------------------------------- */
+            function filterData() {
 
-            const filterData =
-                function () {
-
-
-                    table
-                        .columns()
-                        .search('');
+                const columnIndex =
+                    Number(
+                        $columnFilter.val()
+                    );
 
 
-                    table
-                        .column(
-                            Number(
-                                $columnFilter.val()
-                            )
-                        )
-                        .search(
-                            $searchInput.val()
-                        )
-                        .draw();
+                table
+                    .columns()
+                    .search('');
 
-                };
+
+                table
+                    .column(
+                        columnIndex
+                    )
+                    .search(
+                        $searchInput.val()
+                    )
+                    .draw();
+
+            }
 
 
             /* -------------------------------------------------
-               SEARCH EVENT
+               EVENTS
             -------------------------------------------------- */
-
             $searchInput.on(
                 'input',
                 filterData
             );
 
-
-            /* -------------------------------------------------
-               COLUMN CHANGE EVENT
-            -------------------------------------------------- */
 
             $columnFilter.on(
                 'change',
@@ -1281,7 +1133,6 @@
             /* -------------------------------------------------
                MOVE EXPORT BUTTON
             -------------------------------------------------- */
-
             const $buttons =
                 $(
                     `${tableId}_wrapper .dt-buttons`
@@ -1295,7 +1146,6 @@
         }
 
 
-
         /* =====================================================
            PAGE LOAD
         ====================================================== */
@@ -1303,15 +1153,13 @@
         $(function () {
 
 
-            /* ================================================
+            /* -------------------------------------------------
                MRP ROW CLICK
-            ================================================= */
-
+            -------------------------------------------------- */
             $(document).on(
                 'click',
                 '#tblQA tbody tr.qa-mrp-row',
                 function () {
-
 
                     const itemCode =
                         $(this)
@@ -1333,16 +1181,18 @@
             );
 
 
-            /* ================================================
-               INITIALIZE QA DATATABLE
-            ================================================= */
-
+            /* -------------------------------------------------
+               REPORT DATE
+            -------------------------------------------------- */
             const today =
                 new Date()
                     .toISOString()
                     .split('T')[0];
 
 
+            /* -------------------------------------------------
+               INITIALIZE QA DATATABLE
+            -------------------------------------------------- */
             const taggedTable =
                 createDataTable(
                     '#tblQA',
@@ -1350,25 +1200,22 @@
                 );
 
 
-            /* ================================================
+            /* -------------------------------------------------
                COLUMN FILTER
-            ================================================= */
-
+            -------------------------------------------------- */
             addColumnFilter(
                 taggedTable,
                 '#tblQA'
             );
 
 
-            /* ================================================
+            /* -------------------------------------------------
                DUPLICATE COLOR LOGIC
-            ================================================= */
-
+            -------------------------------------------------- */
             if (
                 typeof colorDuplicateHBL ===
                 'function'
             ) {
-
 
                 colorDuplicateHBL();
 
@@ -1381,14 +1228,12 @@
             }
 
 
-            /* ================================================
+            /* -------------------------------------------------
                WINDOW RESIZE
-            ================================================= */
-
+            -------------------------------------------------- */
             $(window).on(
                 'resize',
                 function () {
-
 
                     $.fn.dataTable
                         .tables({
