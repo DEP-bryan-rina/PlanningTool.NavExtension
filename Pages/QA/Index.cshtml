@@ -181,10 +181,10 @@
                     <th class="text-center">Qty Received</th>
                     <th class="text-center">Status</th>
                     <th class="text-center">Qty Good</th>
-                    <th class="text-center">Qty Reject</th>
+                    <th class="text-center">Qty Rejected</th>
                     <th class="text-center">Qty For Repair</th>
                     <th class="text-center">MRP For Repair</th>
-                    <th class="text-center">Repair WK Required</th>
+                    <th class="text-center">MRP Latest WK Required</th>
                     <th class="text-center">Lead Time (Days)</th>
                 </tr>
 
@@ -198,9 +198,10 @@
                     {
                         var statusClass = item.Status switch
                         {
-                            "OK" => "status-ok",
+                            "COMPLETED" => "status-completed",
                             "WIP" => "status-wip",
                             "NS" => "status-ns",
+                            "MRP" => "status-mrp",
                             _ => "status-na"
                         };
 
@@ -408,6 +409,7 @@
                                 <th>Sales Order No.</th>
                                 <th>Customer No.</th>
                                 <th>Shipment Date</th>
+                                <th>WK Required</th>
                                 <th class="text-end">Quantity</th>
                                 <th>Sales Product Code</th>
                                 <th>Child Item No.</th>
@@ -425,7 +427,7 @@
 
                             <tr>
 
-                                <td colspan="3"
+                                <td colspan="4"
                                     class="text-end fw-bold">
                                     TOTAL:
                                 </td>
@@ -576,7 +578,7 @@
 
             $('#mrpDetailBody').html(`
                 <tr>
-                    <td colspan="7"
+                    <td colspan="8"
                         class="text-center ${cssClass} py-4">
                         ${escapeHtml(message)}
                     </td>
@@ -742,6 +744,11 @@ function exportMRPDetailsToExcel() {
                 )
             );
 
+            $row.append(
+                $('<td>').text(
+                    row.requiredWeek ?? ''
+                )
+            );
 
             $row.append(
                 $('<td>').text(
@@ -975,7 +982,7 @@ function exportMRPDetailsToExcel() {
             $body.html(`
                 <tr>
 
-                    <td colspan="7"
+                    <td colspan="8"
                         class="text-center text-secondary py-4">
 
                         <span class="spinner-border spinner-border-sm me-2">
@@ -1140,6 +1147,12 @@ function exportMRPDetailsToExcel() {
                                     <td>
                                         ${formatMRPDate(
                                             row.shipmentDate
+                                        )}
+                                    </td>
+
+                                    <td>
+                                        ${escapeHtml(
+                                            row.requiredWeek
                                         )}
                                     </td>
 

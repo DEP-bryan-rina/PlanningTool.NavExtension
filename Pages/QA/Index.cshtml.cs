@@ -108,7 +108,7 @@ namespace PlanningTool.NavExtension.Pages.QA
                 var details = await _context
                     .Set<QARepairMRPDetail>()
                     .FromSqlRaw(
-                        "EXEC [PTNAVEX].[dbo].[_spGetQARepairMRPDetails] @ItemCode",
+                        "EXEC [PTNAVEX].[dbo].[_spGetQARepairMRPDetails_ForDev] @ItemCode",
                         itemCodeParam)
                     .AsNoTracking()
                     .ToListAsync();

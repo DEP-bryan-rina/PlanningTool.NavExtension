@@ -834,30 +834,29 @@ table th {
 
 .status-completed {
 	background-color: #28a745;
-	color: #ffffff;
+	color: white;
 	font-weight: bold;
 }
 
 .status-wip {
 	background-color: #ffc107;
-	color: #000000;
+	color: #000;
 	font-weight: bold;
 }
 
 .status-ns {
 	background-color: #dc3545;
-	color: #ffffff;
+	color: white;
 	font-weight: bold;
 }
 
 .status-mrp {
 	background-color: #17a2b8;
-	color: #ffffff;
+	color: white;
 	font-weight: bold;
 }
 
 .status-na {
 	background-color: #6c757d;
-	color: #ffffff;
-	font-weight: bold;
+	color: white;
 }

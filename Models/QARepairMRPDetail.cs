@@ -15,5 +15,7 @@
         public string? ItemCode { get; set; }
 
         public decimal AllocationForRepair { get; set; }
+
+        public string? RequiredWeek { get; set; }    // NEW
     }
 }
