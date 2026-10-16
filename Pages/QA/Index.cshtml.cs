@@ -33,7 +33,7 @@ namespace PlanningTool.NavExtension.Pages.QA
             {
                 Items = await _context
                     .Set<QADashboardItem>()
-                    .FromSqlRaw("EXEC dbo._spGetQADashboard;")
+                    .FromSqlRaw("EXEC dbo._spGetQADashboard_ForDev;")
                     .ToListAsync();
 
                 // Totals
@@ -68,11 +68,15 @@ namespace PlanningTool.NavExtension.Pages.QA
                 }
 
                 // Average QA Lead Time
-                LeadTime = Items.Any()
-                    ? decimal.Round(
-                        Items.Average(x => (decimal)x.LeadTimeDays),
-                        1)
-                    : 0m;
+                LeadTime = Items
+                 .Where(x => x.LeadTimeDays.HasValue)
+                 .Any()
+                     ? decimal.Round(
+                         Items
+                             .Where(x => x.LeadTimeDays.HasValue)
+                             .Average(x => (decimal)x.LeadTimeDays.Value),
+                         1)
+                     : 0m;
             }
             catch (Exception ex)
             {

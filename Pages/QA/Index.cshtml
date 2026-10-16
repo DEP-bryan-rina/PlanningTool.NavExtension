@@ -176,6 +176,7 @@
                     <th>Item Code</th>
                     <th>Description</th>
                     <th>Date Received</th>
+                    <th>Date QA Start</th>
                     <th>UoM</th>
                     <th class="text-center">Qty Received</th>
                     <th class="text-center">Status</th>
@@ -237,6 +238,13 @@
                                 @if (item.DateReceived.HasValue)
                                 {
                                     @item.DateReceived.Value.ToString("yyyy-MM-dd")
+                                }
+                            </td>
+                            <!-- Date QA Start -->
+                            <td>
+                                @if (item.DateQAStart.HasValue)
+                                {
+                                    @item.DateQAStart.Value.ToString("yyyy-MM-dd")
                                 }
                             </td>
 

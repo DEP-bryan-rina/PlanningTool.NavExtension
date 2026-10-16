@@ -11,6 +11,8 @@ namespace PlanningTool.NavExtension.Models
         public string Description { get; set; }
         public DateTime? DateReceived { get; set; }
 
+        public DateTime? DateQAStart { get; set; }
+
         public string UOM { get; set; }
 
         public decimal QtyReceived { get; set; }
