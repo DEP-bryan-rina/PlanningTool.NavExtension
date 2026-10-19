@@ -410,10 +410,11 @@
                                 <th>Customer No.</th>
                                 <th>Shipment Date</th>
                                 <th>WK Required</th>
-                                <th class="text-end">Quantity</th>
+                                <th style="text-align:center">Status</th>
+                                <th style="text-align:right">Quantity</th>
                                 <th>Sales Product Code</th>
                                 <th>Child Item No.</th>
-                                <th class="text-end">QA Rework Allocation</th>
+                                <th style="text-align:right">QA Rework Allocation</th>
                             </tr>
 
                         </thead>
@@ -427,7 +428,7 @@
 
                             <tr>
 
-                                <td colspan="4"
+                                <td colspan="5"
                                     class="text-end fw-bold">
                                     TOTAL:
                                 </td>
@@ -578,7 +579,7 @@
 
             $('#mrpDetailBody').html(`
                 <tr>
-                    <td colspan="8"
+                    <td colspan="9"
                         class="text-center ${cssClass} py-4">
                         ${escapeHtml(message)}
                     </td>
@@ -671,10 +672,12 @@ function exportMRPDetailsToExcel() {
         <table>
 
             <thead>
-                <tr>
+                 <tr>
                     <th>Sales Order No.</th>
                     <th>Customer No.</th>
                     <th>Shipment Date</th>
+                    <th>WK Required</th>
+                    <th>Status</th>
                     <th>Quantity</th>
                     <th>Sales Product Code</th>
                     <th>Child Item No.</th>
@@ -747,6 +750,12 @@ function exportMRPDetailsToExcel() {
             $row.append(
                 $('<td>').text(
                     row.requiredWeek ?? ''
+                )
+            );
+
+            $row.append(
+                $('<td>').text(
+                    row.status ?? ''
                 )
             );
 
@@ -982,7 +991,7 @@ function exportMRPDetailsToExcel() {
             $body.html(`
                 <tr>
 
-                    <td colspan="8"
+                    <td colspan="9"
                         class="text-center text-secondary py-4">
 
                         <span class="spinner-border spinner-border-sm me-2">
@@ -1152,8 +1161,15 @@ function exportMRPDetailsToExcel() {
 
                                     <td>
                                         ${escapeHtml(
-                                            row.requiredWeek
+                                                            row.requiredWeek
                                         )}
+                                    </td>
+
+                                    <td class="text-center">
+                                        ${row.status === 'RELEASED'
+                                            ? '<span class="badge bg-success">RELEASED</span>'
+                                            : '<span class="badge bg-warning text-dark">OPEN</span>'
+                                        }
                                     </td>
 
                                     <td class="text-end">
@@ -1267,6 +1283,8 @@ function exportMRPDetailsToExcel() {
 
                 paging:
                     false,
+
+                order: [[12, 'desc']], // Lead Time column
 
                 scrollX:
                     true,

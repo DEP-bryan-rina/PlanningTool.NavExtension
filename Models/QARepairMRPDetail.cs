@@ -17,5 +17,7 @@
         public decimal AllocationForRepair { get; set; }
 
         public string? RequiredWeek { get; set; }    // NEW
+
+        public string? Status { get; set; }          // NEW
     }
 }
