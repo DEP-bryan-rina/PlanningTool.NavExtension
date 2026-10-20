@@ -73,7 +73,25 @@
 
 		.vendor-table-scroll table {
 			margin-bottom: 0;
-		}
+        }
+
+    .card {
+        border: none;
+        border-radius: 12px;
+    }
+
+    .card-header {
+        background: #fff;
+        font-weight: 600;
+    }
+
+    #tblVendorsCalculation th {
+        white-space: nowrap;
+    }
+
+    canvas {
+        height: 600px !important;
+    }
 </style>
 <div class="container-fluid">
 	<!-- Page Header -->
@@ -132,150 +150,185 @@
                  data-bs-parent="#vendorsKPI">
 
 				<div class="accordion-body">
-					<div class="row mb-3">
-						<div class="col-md-6">
-							<div class="card shadow-sm">
-								<div class="card-header fw-bold text-center">
-									Vendor Defect Rate 2026
-								</div>
-								<div class="card-body">
-									<canvas id="chartMonth"></canvas>
-								</div>
-							</div>
-						</div>
+                    <!-- KPI SUMMARY -->
+                    <div class="row mb-4">
 
-						<div class="col-md-6">
-							<div class="table-responsive vendor-table-scroll">
+                        <div class="col-md-3">
+                            <div class="card border-start border-primary border-5 shadow-sm">
+                                <div class="card-body">
+                                    <small class="text-muted">Total Vendors</small>
+                                    <h3 class="mb-0 text-primary">
+                                        @(Model.VendorReport?.Count() ?? 0)
+                                    </h3>
+                                </div>
+                            </div>
+                        </div>
 
-								<table id="tblVendorsCalculation" class="table table-hover w-100">
-									<thead class="sticky-top bg-white table-bordered" style="font-size:0.75rem; ">
-										<tr>
-											<th>#</th>
-											<th>Vendor Name</th>
-											<th class="text-end">Qty Received</th>
-											<th class="text-end">Qty Good</th>
-											<th class="text-end">Qty Repair</th>
-											<th class="text-end">Qty Reject</th>
-											<th class="text-end">Defect Rate</th>
-										</tr>
-									</thead>
+                        <div class="col-md-3">
+                            <div class="card border-start border-success border-5 shadow-sm">
+                                <div class="card-body">
+                                    <small class="text-muted">Qty Received</small>
+                                    <h3 class="mb-0 text-success">
+                                        @(Model.VendorReport?.Sum(x => x.QtyReceived).ToString("N0"))
+                                    </h3>
+                                </div>
+                            </div>
+                        </div>
 
-									<tbody style="font-size:0.75rem;">
+                        <div class="col-md-3">
+                            <div class="card border-start border-danger border-5 shadow-sm">
+                                <div class="card-body">
+                                    <small class="text-muted">Defective Qty</small>
+                                    <h3 class="mb-0 text-danger">
+                                        @(Model.VendorReport?.Sum(x => x.QtyReject + x.QtyRepair).ToString("N0"))
+                                    </h3>
+                                </div>
+                            </div>
+                        </div>
 
-										@if (Model.VendorReport != null && Model.VendorReport.Any())
-										{
-											var i = 1;
+                        <div class="col-md-3">
+                            <div class="card border-start border-warning border-5 shadow-sm">
+                                <div class="card-body">
+                                    <small class="text-muted">Average Defect Rate</small>
+                                    <h3 class="mb-0 text-warning">
+                                        @(Model.VendorReport != null && Model.VendorReport.Any()
+                                            ? Model.VendorReport.Average(x => x.DefectRate).ToString("N2")
+                                            : "0.00")%
+                                    </h3>
+                                </div>
+                            </div>
+                        </div>
 
-											foreach (var item in Model.VendorReport)
-											{
-												<tr>
+                    </div>
 
-													<td>@i</td>
-													<td>@item.VendorName</td>
-													<td class="text-end">@item.QtyReceived.ToString("N0")</td>
-													<td class="text-end">@item.QtyGood.ToString("N0")</td>
-													<td class="text-end">@item.QtyRepair.ToString("N0")</td>
-													<td class="text-end">@item.QtyReject.ToString("N0")</td>
-													<td class="text-end">
-														<span class="badge
-															@(item.DefectRate >= 5
-																	  ? "bg-danger"
-																	  : item.DefectRate >= 2
-																		  ? "bg-warning text-dark"
-																		  : "bg-success")">
+                    <div class="row">
 
-															@item.DefectRate.ToString("N2")%
+                        <!-- CHART -->
+                        <div class="col-lg-4 mb-3">
 
-														</span>
-													</td>
-												</tr>
-												i++;
-											}
-										}
-										else
-										{
-											<tr>
-												<td colspan="7" class="text-center text-muted">
-													No Vendor QA data found.
-												</td>
-											</tr>
-										}
-									</tbody>
-								</table>
-							</div>
-						</div>
-					</div>
+                            <div class="card shadow-sm h-100">
+
+                                <div class="card-header fw-bold">
+                                    <i class="fas fa-chart-bar text-primary me-2"></i>
+                                    Vendor Defect Rate
+                                </div>
+
+                                <div class="card-body">
+                                    <canvas id="chartMonth"></canvas>
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                        <!-- KPI TABLE -->
+                        <div class="col-lg-8 mb-3">
+
+                            <div class="card shadow-sm h-100">
+
+                                <div class="card-header fw-bold d-flex justify-content-between">
+
+                                    <span>
+                                        <i class="fas fa-ranking-star text-success me-2"></i>
+                                        Vendor Performance Ranking
+                                    </span>
+
+                                    <span class="badge bg-primary">
+                                        @(Model.VendorReport?.Count() ?? 0)
+                                    </span>
+
+                                </div>
+
+                                <div class="card-body">
+
+                                    <div class="table-responsive">
+
+                                        <table id="tblVendorsCalculation"
+                                               class="table table-hover table-bordered w-100" style="font-size:0.75rem;">
+
+                                            <thead class="table-light" style="font-size:0.75rem;">
+
+                                                <tr>
+                                                    <th>#</th>
+                                                    <th>Vendor Name</th>
+                                                    <th class="text-end">Qty Received</th>
+                                                    <th class="text-end">Qty Good</th>
+                                                    <th class="text-end">Qty Repair</th>
+                                                    <th class="text-end">Qty Reject</th>
+                                                    <th class="text-end">Defect Rate</th>
+                                                </tr>
+
+                                            </thead>
+
+                                            <tbody style="font-size:0.75rem;">
+
+                                                @if (Model.VendorReport?.Any() == true)
+                                                {
+                                                    var i = 1;
+
+                                                    foreach (var item in Model.VendorReport)
+                                                    {
+                                                        <tr>
+
+                                                            <td>@i</td>
+
+                                                            <td>
+                                                                <strong>
+                                                                    @item.VendorName
+                                                                </strong>
+                                                            </td>
+
+                                                            <td class="text-end">
+                                                                @item.QtyReceived.ToString("N0")
+                                                            </td>
+
+                                                            <td class="text-end">
+                                                                @item.QtyGood.ToString("N0")
+                                                            </td>
+
+                                                            <td class="text-end">
+                                                                @item.QtyRepair.ToString("N0")
+                                                            </td>
+
+                                                            <td class="text-end">
+                                                                @item.QtyReject.ToString("N0")
+                                                            </td>
+
+                                                            <td class="text-end">
+
+                                                                <span class="badge
+                                                                    @(item.DefectRate >= 5
+                                                                    ? "bg-danger"
+                                                                    : item.DefectRate >= 2
+                                                                        ? "bg-warning text-dark"
+                                                                        : "bg-success")">
+
+                                                                    @item.DefectRate.ToString("N2")%
+
+                                                                </span>
+
+                                                            </td>
+
+                                                        </tr>
+
+                                                        i++;
+                                                    }
+                                                }
+
+                                            </tbody>
+
+                                        </table>
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
 				</div>
-			</div>
-		</div>
-	</div>
-	<div class="row mt-4">
-
-		<div class="col-12">
-			<div class="table-responsive">
-
-				<table id="tblVendors" class="table table-hover w-100">
-					<thead class="sticky-top bg-white table-bordered" style="font-size:0.75rem;">
-						<tr>
-							<th>#</th>
-							<th>Vendor Code</th>
-							<th>Vendor Name</th>
-							<th>Contact</th>
-							<th>Phone</th>
-							<th>Email</th>
-							<th>City</th>
-							<th>Country</th>
-							<th>Buyer</th>
-							<th>Payment Terms</th>
-							<th>Currency</th>
-							<th>Status</th>
-							<th>Last Modified</th>
-						</tr>
-					</thead>
-
-					<tbody style="font-size:0.75rem;">
-						@if (Model.VendorView != null && Model.VendorView.Any())
-						{
-							var i = 1;
-
-							foreach (var item in Model.VendorView)
-							{
-								<tr>
-									<td>@i</td>
-									<td>@item.VendorCode</td>
-									<td>@item.VendorName</td>
-									<td>@item.ContactPerson</td>
-									<td>@item.PhoneNo</td>
-									<td><a href="mailto:@item.Email">@item.Email</a></td>
-									<td>@item.City</td>
-									<td>@item.Country</td>
-									<td>@item.Buyer</td>
-									<td>@item.PaymentTerms</td>
-									<td>@item.Currency</td>
-									<td>
-										<span class="badge
-											@(item.Status == "Active"
-														  ? "bg-success"
-														  : "bg-danger")">
-
-											@item.Status
-										</span>
-									</td>
-									<td>@(item.LastModified?.ToString("yyyy-MM-dd") ?? "-")</td>
-								</tr>
-								i++;
-							}
-						}
-						else
-						{
-							<tr>
-								<td colspan="13" class="text-center text-muted">
-									No vendor data available.
-								</td>
-							</tr>
-						}
-					</tbody>
-				</table>
 			</div>
 		</div>
 	</div>
@@ -600,15 +653,15 @@
                Vendor Master List
             -------------------------------------------------------- */
 
-            const vendorTable = createDataTable(
-                '#tblVendors',
-                `Vendors_List_${today}`
-            );
-
+            const vendorTable =
+                createDataTable(
+                    '#tblVendorsCalculation',
+                    `Vendor_Quality_Report_${today}`
+                );
 
             addColumnFilter(
                 vendorTable,
-                '#tblVendors'
+                '#tblVendorsCalculation'
             );
 
 

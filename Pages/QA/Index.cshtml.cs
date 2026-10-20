@@ -36,6 +36,10 @@ namespace PlanningTool.NavExtension.Pages.QA
                     .FromSqlRaw("EXEC dbo._spGetQADashboard_ForDev;")
                     .ToListAsync();
 
+                // ======================================================
+                // KPI CALCULATIONS
+                // ======================================================
+
                 // Totals
                 var totalReceived = Items.Sum(x => x.QtyReceived);
                 var totalGood = Items.Sum(x => x.QtyGood);
@@ -43,22 +47,33 @@ namespace PlanningTool.NavExtension.Pages.QA
                 var totalRepair = Items.Sum(x => x.QtyRepair);
 
                 var totalDefective = totalReject + totalRepair;
-                var totalFinishedInspection = totalGood + totalReject + totalRepair;
 
-                // KPI Calculations
+                var totalInspected =
+                    totalGood +
+                    totalReject +
+                    totalRepair;
+
                 if (totalReceived > 0)
                 {
+                    // Defect Rate (%)
+                    // How many received items have quality issues
                     DefectRate = decimal.Round(
                         (totalDefective / totalReceived) * 100,
                         1);
 
+                    // Inspection Completion (%)
+                    // How much of the received quantity has been inspected
                     Completion = decimal.Round(
-                        (totalFinishedInspection / totalReceived) * 100,
+                        (totalInspected / totalReceived) * 100,
                         1);
 
-                    QualityRating = decimal.Round(
-                        100 - DefectRate,
-                        1);
+                    // Quality Yield (%)
+                    // Pass rate of inspected items only
+                    QualityRating = totalInspected > 0
+                        ? decimal.Round(
+                            (totalGood / totalInspected) * 100,
+                            1)
+                        : 0m;
                 }
                 else
                 {
@@ -67,16 +82,16 @@ namespace PlanningTool.NavExtension.Pages.QA
                     QualityRating = 0m;
                 }
 
-                // Average QA Lead Time
+                // Average QA Lead Time (Days)
                 LeadTime = Items
-                 .Where(x => x.LeadTimeDays.HasValue)
-                 .Any()
-                     ? decimal.Round(
-                         Items
-                             .Where(x => x.LeadTimeDays.HasValue)
-                             .Average(x => (decimal)x.LeadTimeDays.Value),
-                         1)
-                     : 0m;
+                    .Where(x => x.LeadTimeDays.HasValue)
+                    .Any()
+                        ? decimal.Round(
+                            Items
+                                .Where(x => x.LeadTimeDays.HasValue)
+                                .Average(x => (decimal)x.LeadTimeDays.Value),
+                            1)
+                        : 0m;
             }
             catch (Exception ex)
             {
